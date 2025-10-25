@@ -125,7 +125,7 @@ export default {
         result.push(current.format('DD/MM/YYYY'));
         current = current.add(1, 'week');
       }
-      result.push(dayjs().format('DD/MM/YYYY'));
+      // result.push(dayjs().format('DD/MM/YYYY'));
       return result;
     },
     chartOptions () {
@@ -187,52 +187,47 @@ export default {
 </script>
 
 <template>
-  <v-app class="d-flex">
-    <router-view />
-    <!-- <div class="d-flex flex-column">
-      <v-container class="d-flex flex-grow-1 ma-auto justify-center">
-        <v-checkbox
-          v-model="selected"
-          value="singles"
-          label="Singles"
-          hide-details
-        />
-        <v-checkbox
-          v-model="selected"
-          value="accessories"
-          label="Accessories"
-          hide-details
-        />
-        <v-checkbox
-          v-model="selected"
-          value="boosters"
-          label="Boosters"
-          hide-details
-        />
-        <v-checkbox
-          v-model="selected"
-          value="tournaments"
-          label="tournaments Entry"
-          hide-details
-        />
-      </v-container>
+  <v-container class="d-flex flex-grow-1 ma-auto justify-center">
+    <v-checkbox
+      v-model="selected"
+      value="singles"
+      label="Singles"
+      hide-details
+    />
+    <v-checkbox
+      v-model="selected"
+      value="accessories"
+      label="Accessories"
+      hide-details
+    />
+    <v-checkbox
+      v-model="selected"
+      value="boosters"
+      label="Boosters"
+      hide-details
+    />
+    <v-checkbox
+      v-model="selected"
+      value="tournaments"
+      label="tournaments Entry"
+      hide-details
+    />
+  </v-container>
 
-      <div class="d-flex ma-auto">
-        <apexchart
-          :options="chartOptions"
-          :series="series"
-          width="1200"
-        />
+  <div class="d-flex ma-auto">
+    <apexchart
+      :options="chartOptions"
+      :series="series"
+      width="1200"
+    />
 
-        <apexchart
-          v-if="donutData"
-          type="donut"
-          :options="donutChartOptions"
-          :series="donutData"
-          class="ma-auto"
-          width="600"
-        />
-      </div>
-    </div> -->
-  </v-app>
+    <apexchart
+      v-if="donutData"
+      type="donut"
+      :options="donutChartOptions"
+      :series="donutData"
+      class="ma-auto"
+      width="600"
+    />
+  </div>
 </template>

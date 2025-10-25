@@ -10,6 +10,10 @@ import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 
 import App from './App.vue';
+import router from './router/index.js';
+
+import FlexRow from './components/base/flex/FlexRow.vue';
+import FlexCol from './components/base/flex/FlexCol.vue';
 
 const vuetify = createVuetify({
   components,
@@ -17,7 +21,11 @@ const vuetify = createVuetify({
 });
 const app = createApp(App);
 
-
-app.use(VueApexCharts)
+app
+  .use(VueApexCharts)
   .use(vuetify)
-  .mount('#app');
+  .use(router);
+router.isReady().then(() => app.mount('#app'));
+
+app.component('FlexCol', FlexCol);
+app.component('FlexRow', FlexRow);
