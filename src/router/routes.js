@@ -6,10 +6,14 @@ const routes = [
     component: () => import('@/views/WishlistView.vue'),
   },
   {
-    name: 'overview',
-    path: '/overview',
-    meta: { title: 'Overview' },
-    component: () => import('@/views/OverviewView.vue'),
+    name: 'dashboard',
+    path: '/dashboard',
+    meta: { title: 'Dashboard' },
+    component: () => import('@/views/DashboardView.vue'),
+  },
+  {
+    path: '/',
+    redirect: 'dashboard',
   },
 ];
 
