@@ -1,42 +1,80 @@
 <script>
 export default {
-  data () {
-    return {
-      donutData: null,
-      donutChartOptions: {
-        chart: {
-          type: 'donut',
+  props: {
+    user: { type: null, required: true },
+    data: { type: null, required: true },
+  },
+
+  computed: {
+    chartOptions () {
+      const options = {
+        chart: { type: 'donut' },
+        tooltip: { enabled: false },
+        dataLabels: { enabled: false },
+        states: {
+          active: {
+            filter: {
+              type: 'none',
+            },
+          },
+          hover: {
+            filter: {
+              type: 'none',
+            },
+          },
         },
         plotOptions: {
           pie: {
+            expandOnClick: false,
             donut: {
               labels: {
                 show: true,
+                value: {
+                  formatter: function (val) {
+                    const result = Number(val).toFixed(2);
+                    return `$${result}`;
+                  },
+                },
                 total: {
                   show: true,
-                  label: 'Total Spent',
-                  formatter: (w) => w.globals.seriesTotals.reduce((a, b) => a + b, 0),
+                  formatter: function (w) {
+                    const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                    const result = Number(total).toFixed(2);
+                    return `$${result}`;
+                  },
                 },
               },
             },
           },
         },
         legend: {
-          show:false,
+          position: 'bottom',
+          onItemClick: {
+            toggleDataSeries: false,
+          },
         },
-      },
-    };
+      };
+
+      if (!this.user) {
+        options.colors = ['#e0e0e0'];
+        options.plotOptions.pie.donut.labels.value.show = false;
+        options.plotOptions.pie.donut.labels.total.label = 'Pick a degen';
+        options.plotOptions.pie.donut.labels.total.color = '#999';
+        options.legend.show = false;
+      }
+
+      return options;
+    },
   },
 };
 </script>
 
 <template>
   <apexchart
-    v-if="donutData"
+    :options="chartOptions"
+    :series="data"
+    height="600px"
+    width="600px"
     type="donut"
-    :options="donutChartOptions"
-    :series="donutData"
-    class="ma-auto"
-    width="600"
   />
 </template>

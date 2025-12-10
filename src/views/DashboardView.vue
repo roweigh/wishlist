@@ -10,6 +10,9 @@ export default {
   },
   data () {
     return {
+      user: null,
+
+      donutData: [1],
       data: [],
       selected: [
         'accessories',
@@ -19,6 +22,35 @@ export default {
       ],
     };
   },
+  watch: {
+    user (v) {
+      const found = this.data.find(el => el.name === v);
+      if (found) {
+        const { singles, accessories, boosters, tournaments } = found;
+
+        this.donutData = [{
+          data: [
+            {
+              x: 'Singles',
+              y: singles[singles.length - 1][1],
+            },
+            {
+              x: 'Accessories',
+              y: accessories[accessories.length - 1][1],
+            },
+            {
+              x: 'Boosters',
+              y: boosters[boosters.length - 1][1],
+            },
+            {
+              x: 'Tournament Entry',
+              y: tournaments[tournaments.length - 1][1],
+            },
+          ],
+        }];
+      } else this.donutData = [1];
+    },
+  },
   async mounted () {
     this.data = data;
   },
@@ -27,37 +59,17 @@ export default {
 
 <template>
   <v-container class="d-flex flex-grow-1 ma-auto justify-center">
-    <v-checkbox
-      v-model="selected"
-      value="singles"
-      label="Singles"
-      hide-details
-    />
-    <v-checkbox
-      v-model="selected"
-      value="accessories"
-      label="Accessories"
-      hide-details
-    />
-    <v-checkbox
-      v-model="selected"
-      value="boosters"
-      label="Boosters"
-      hide-details
-    />
-    <v-checkbox
-      v-model="selected"
-      value="tournaments"
-      label="tournaments Entry"
-      hide-details
-    />
+    <div class="d-flex ma-auto">
+      <line-graph
+        v-model:user="user"
+        :selected="selected"
+        :data="data"
+      />
+      <donut-graph
+        :key="donutData"
+        :user="user"
+        :data="donutData"
+      />
+    </div>
   </v-container>
-
-  <div class="d-flex ma-auto">
-    <line-graph
-      :data="data"
-      :selected="selected"
-    />
-    <donut-graph />
-  </div>
 </template>
