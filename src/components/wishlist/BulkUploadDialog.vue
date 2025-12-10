@@ -8,6 +8,10 @@ export default {
   props: {
     modelValue: { type: Boolean, required: true },
   },
+  emits: [
+    'update:model-value',
+    'upload',
+  ],
   data () {
     return {
       bulk: null,
@@ -48,26 +52,17 @@ export default {
     },
   },
 };
-
 </script>
 
 <template>
-  <v-dialog
+  <base-dialog
     :model-value="modelValue"
-    max-width="50vw"
     @update:model-value="$emit('update:model-value', $event)"
+    @submit="uploadBulk()"
   >
-    <v-card>
-      <v-file-upload
-        filter-by-type=".csv"
-        @update:model-value="handleFileChange($event)"
-      />
-      <v-btn
-        :disabled="!bulk"
-        @click="uploadBulk()"
-      >
-        Upload
-      </v-btn>
-    </v-card>
-  </v-dialog>
+    <v-file-upload
+      filter-by-type=".csv"
+      @update:model-valu="handleFileChange($event)"
+    />
+  </base-dialog>
 </template>

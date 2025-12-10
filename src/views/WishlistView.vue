@@ -1,11 +1,13 @@
 <script>
 import BulkTable from '@/components/wishlist/BulkTable.vue';
 import BulkUploadDialog from '../components/wishlist/BulkUploadDialog.vue';
+import EditBulkDialog from '../components/wishlist/EditBulkDialog.vue';
 
 export default {
   components: {
     BulkTable,
     BulkUploadDialog,
+    EditBulkDialog,
   },
   data () {
     return {
@@ -77,91 +79,16 @@ export default {
     <bulk-table
       :items="tableData"
       @add="overlayFlags.edit = true"
-      @edit="overlayFlags.edit = true"
+      @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
       @load="loadFromClipboard()"
     />
+
+    <edit-bulk-dialog v-model="overlayFlags.edit" />
 
     <bulk-upload-dialog
       v-model="overlayFlags.upload"
       @upload="tableData = $event"
     />
-
-    <v-dialog
-      v-model="overlayFlags.edit"
-      max-width="500"
-    >
-      <v-card
-        :subtitle="`${isEditing ? 'Update' : 'Create'} your favorite book`"
-        :title="`${isEditing ? 'Edit' : 'Add'} a Book`"
-      >
-        <template #text>
-          <v-row>
-            <v-col cols="12">
-              <v-text-field
-                label="Title"
-              />
-            </v-col>
-
-            <v-col
-              cols="12"
-              md="6"
-            >
-              <v-text-field
-                label="Author"
-              />
-            </v-col>
-
-            <v-col
-              cols="12"
-              md="6"
-            >
-              <v-select
-                :items="['Fiction', 'Dystopian', 'Non-Fiction', 'Sci-Fi']"
-                label="Genre"
-              />
-            </v-col>
-
-            <v-col
-              cols="12"
-              md="6"
-            >
-              <v-number-input
-                :max="currentYear"
-                :min="1"
-                label="Year"
-              />
-            </v-col>
-
-            <v-col
-              cols="12"
-              md="6"
-            >
-              <v-number-input
-                :min="1"
-                label="Pages"
-              />
-            </v-col>
-          </v-row>
-        </template>
-
-        <v-divider />
-
-        <v-card-actions class="bg-surface-light">
-          <v-btn
-            text="Cancel"
-            variant="plain"
-            @click="dialog = false"
-          />
-
-          <v-spacer />
-
-          <v-btn
-            text="Save"
-            @click="save"
-          />
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </flex-col>
 </template>

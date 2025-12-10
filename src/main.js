@@ -16,6 +16,7 @@ import router from './router/index.js';
 
 import FlexRow from './components/base/flex/FlexRow.vue';
 import FlexCol from './components/base/flex/FlexCol.vue';
+import BaseDialog from './components/base/dialog/BaseDialog.vue';
 
 const vuetify = createVuetify({
   components,
@@ -31,3 +32,4 @@ router.isReady().then(() => app.mount('#app'));
 
 app.component('FlexCol', FlexCol);
 app.component('FlexRow', FlexRow);
+app.component('BaseDialog', BaseDialog);

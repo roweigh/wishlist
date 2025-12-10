@@ -98,7 +98,7 @@ export default {
           color="medium-emphasis"
           icon="mdi-pencil"
           size="small"
-          @click="$emit('edit', item.id)"
+          @click="$emit('edit', item)"
         />
 
         <v-icon
