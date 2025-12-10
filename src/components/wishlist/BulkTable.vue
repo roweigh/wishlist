@@ -1,8 +1,57 @@
 <script>
 export default {
   props: {
-    headers: { type: null, required: true },
-    tableData: { type: null, required: true },
+    items: { type: null, required: true },
+  },
+  emits: [
+    'load',
+    'upload',
+    'add',
+    'edit',
+    'remove',
+  ],
+  data () {
+    return {
+      headers: [
+        {
+          key: 'code',
+          title: 'Code',
+        },
+        {
+          key: 'name',
+          title: 'Name',
+        },
+        {
+          key: 'deck',
+          title: 'Deck',
+        },
+        {
+          key: 'category',
+          title: 'Category',
+        },
+        {
+          key: 'qtyNeeded',
+          title: 'Quantity Needed',
+        },
+        {
+          key: 'qtyAcquired',
+          title: 'Quantity Acquired',
+        },
+        {
+          key: 'cost',
+          title: 'Cost',
+        },
+        {
+          key: 'notes',
+          title: 'Notes',
+        },
+        {
+          key: 'actions',
+          align: 'end',
+          sortable: false,
+        },
+      ],
+    };
   },
 };
 </script>
@@ -40,7 +89,7 @@ export default {
 
   <v-data-table
     :headers="headers"
-    :items="tableData"
+    :items="items"
     density="compact"
   >
     <template #item.actions="{ item }">

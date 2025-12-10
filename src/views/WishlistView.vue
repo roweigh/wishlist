@@ -1,95 +1,55 @@
 <script>
-import BaseTable from '@/components/base/table/BaseTable.vue';
+import BulkTable from '@/components/wishlist/BulkTable.vue';
 import BulkUploadDialog from '../components/wishlist/BulkUploadDialog.vue';
 
 export default {
   components: {
-    BaseTable,
+    BulkTable,
     BulkUploadDialog,
   },
   data () {
     return {
-      dialog: false,
-      uploadDialog: false,
+      overlayFlags: {
+        edit: false,
+        upload: false,
+      },
       tableData: [
         {
           code: 'OP13-120',
           name: 'Sabo',
           qtyNeeded: 4,
-
-        },
-      ],
-      headers: [
-        {
-          key: 'code',
-          title: 'Code',
-        },
-        {
-          key: 'name',
-          title: 'Name',
-        },
-        {
-          key: 'deck',
-          title: 'Deck',
-        },
-        {
-          key: 'category',
-          title: 'Category',
-        },
-        {
-          key: 'qtyNeeded',
-          title: 'Quantity Needed',
-        },
-        {
-          key: 'qtyAcquired',
-          title: 'Quantity Acquired',
-        },
-        {
-          key: 'cost',
-          title: 'Cost',
-        },
-        {
-          key: 'notes',
-          title: 'Notes',
-        },
-        {
-          key: 'actions',
-          align: 'end',
-          sortable: false,
         },
       ],
     };
   },
   methods: {
-    async loadFromClipboard()  {
+    async loadFromClipboard () {
       try {
         const text = await navigator.clipboard.readText();
-        this.tableData =  this.parseNeededList(text);
+        this.tableData =  this.parseDecklist(text);
       } catch (err) {
         console.error('Failed to read clipboard:', err);
       }
     },
 
-    parseNeededList(text) {
-      return text
-        .split(/\r?\n/)                // split into lines
-        .map(line => line.trim())
-        .filter(line => line !== '')   // ignore empty lines
-        .map(line => {
-          const match = line.match(/^(\d+)x(.+)$/);
-          if (!match) return null;
+    parseDecklist (text) {
+      return text.split(/\r?\n/).map(line => {
+        const cardQty = line.trim().match(/^(\d+)x(.+)$/);
+        const qtyNeeded = Number(cardQty?.[1]);
+        const code = cardQty?.[2].trim();
 
-          const qtyNeeded = Number(match[1]);
-          const code = match[2].trim();
-
+        if (!cardQty) {
+          return null;
+        } else {
           return {
             code,
             qtyNeeded,
-            qtyAcquired: '',
+            qtyAcquired: 0,
             cost: '',
             notes: '',
           };
-        });
+        }
+      });
     },
   },
 };
@@ -114,23 +74,21 @@ export default {
       />
     </flex-row>
 
-    <base-table
-      :headers="headers"
-      :table-data="tableData"
-      @add="dialog = true"
-      @edit="dialog = true"
-      @upload="uploadDialog = true"
+    <bulk-table
+      :items="tableData"
+      @add="overlayFlags.edit = true"
+      @edit="overlayFlags.edit = true"
+      @upload="overlayFlags.upload = true"
       @load="loadFromClipboard()"
     />
 
     <bulk-upload-dialog
-      v-model="uploadDialog"
+      v-model="overlayFlags.upload"
       @upload="tableData = $event"
     />
 
-
     <v-dialog
-      v-model="dialog"
+      v-model="overlayFlags.edit"
       max-width="500"
     >
       <v-card
