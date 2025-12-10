@@ -58,18 +58,16 @@ export default {
 </script>
 
 <template>
-  <v-container class="d-flex flex-grow-1 ma-auto justify-center">
-    <div class="d-flex ma-auto">
-      <line-graph
-        v-model:user="user"
-        :selected="selected"
-        :data="data"
-      />
-      <donut-graph
-        :key="donutData"
-        :user="user"
-        :data="donutData"
-      />
-    </div>
-  </v-container>
+  <div class="d-flex flex-row ma-auto">
+    <line-graph
+      v-model:user="user"
+      :selected="selected"
+      :data="data"
+    />
+    <donut-graph
+      :key="donutData"
+      :user="user"
+      :data="donutData"
+    />
+  </div>
 </template>

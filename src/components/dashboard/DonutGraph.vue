@@ -70,11 +70,13 @@ export default {
 </script>
 
 <template>
-  <apexchart
-    :options="chartOptions"
-    :series="data"
-    height="600px"
-    width="600px"
-    type="donut"
-  />
+  <v-card class="pa-5 ma-5">
+    <apexchart
+      :options="chartOptions"
+      :series="data"
+      height="600px"
+      width="600px"
+      type="donut"
+    />
+  </v-card>
 </template>

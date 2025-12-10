@@ -6,8 +6,12 @@
     <v-layout>
       <v-main>
         <v-navigation-drawer class="bg-blue-grey" />
-
-        <router-view />
+        <div
+          class="d-flex grow bg-grey"
+          style="height: 100vh"
+        >
+          <router-view />
+        </div>
       </v-main>
     </v-layout>
   </v-app>

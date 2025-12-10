@@ -1,13 +1,16 @@
 <script>
 import BaseTable from '@/components/base/table/BaseTable.vue';
+import BulkUploadDialog from '../components/wishlist/BulkUploadDialog.vue';
 
 export default {
   components: {
     BaseTable,
+    BulkUploadDialog,
   },
   data () {
     return {
       dialog: false,
+      uploadDialog: false,
       tableData: [
         {
           code: 'OP13-120',
@@ -42,8 +45,8 @@ export default {
           title: 'Quantity Acquired',
         },
         {
-          key: 'spent',
-          title: 'Money Spent',
+          key: 'cost',
+          title: 'Cost',
         },
         {
           key: 'notes',
@@ -57,14 +60,43 @@ export default {
       ],
     };
   },
+  methods: {
+    async loadFromClipboard()  {
+      try {
+        const text = await navigator.clipboard.readText();
+        this.tableData =  this.parseNeededList(text);
+      } catch (err) {
+        console.error('Failed to read clipboard:', err);
+      }
+    },
+
+    parseNeededList(text) {
+      return text
+        .split(/\r?\n/)                // split into lines
+        .map(line => line.trim())
+        .filter(line => line !== '')   // ignore empty lines
+        .map(line => {
+          const match = line.match(/^(\d+)x(.+)$/);
+          if (!match) return null;
+
+          const qtyNeeded = Number(match[1]);
+          const code = match[2].trim();
+
+          return {
+            code,
+            qtyNeeded,
+            qtyAcquired: '',
+            cost: '',
+            notes: '',
+          };
+        });
+    },
+  },
 };
 </script>
 
 <template>
-  <flex-col
-    class="pa-5 bg-blue-grey"
-    style="flex-grow: 1"
-  >
+  <flex-col class="pa-5 grow">
     <flex-row>
       <v-text-field
         label="Tournament Entry"
@@ -87,7 +119,15 @@ export default {
       :table-data="tableData"
       @add="dialog = true"
       @edit="dialog = true"
+      @upload="uploadDialog = true"
+      @load="loadFromClipboard()"
     />
+
+    <bulk-upload-dialog
+      v-model="uploadDialog"
+      @upload="tableData = $event"
+    />
+
 
     <v-dialog
       v-model="dialog"
