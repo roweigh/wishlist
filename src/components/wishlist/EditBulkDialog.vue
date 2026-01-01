@@ -26,6 +26,22 @@ export default {
       },
     },
   },
+  methods: {
+    submit() {
+      const payload = {
+        code: this.code,
+        name: this.name,
+        qtyNeeded: this.qtyNeeded,
+        qtyAcquired: this.qtyAcquired,
+      };
+
+      if (this.modelValue.code) {
+        this.$emit('edit', payload);
+      } else {
+        this.$emit('add', payload);
+      }
+    },
+  },
 };
 </script>
 
@@ -33,6 +49,7 @@ export default {
   <base-dialog
     :model-value="modelValue"
     title="Update Bulk"
+    @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-row>

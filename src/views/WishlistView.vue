@@ -53,6 +53,26 @@ export default {
         }
       });
     },
+
+
+    // Temp functions
+    add (payload) {
+      this.tableData.push(payload);
+      this.overlayFlags.edit = null;
+    },
+
+    update (payload) {
+      this.overlayFlags.edit.code = payload.code;
+      this.overlayFlags.edit.name = payload.name;
+      this.overlayFlags.edit.qtyNeeded = payload.qtyNeeded;
+      this.overlayFlags.edit.qtyAcquired = payload.qtyAcquired;
+
+      this.overlayFlags.edit = null;
+    },
+
+    upload (payload) {
+      this.tableData = this.tableData.concat(payload);
+    },
   },
 };
 </script>
@@ -84,11 +104,15 @@ export default {
       @load="loadFromClipboard()"
     />
 
-    <edit-bulk-dialog v-model="overlayFlags.edit" />
+    <edit-bulk-dialog
+      v-model="overlayFlags.edit"
+      @add="add($event)"
+      @edit="update($event);"
+    />
 
     <bulk-upload-dialog
       v-model="overlayFlags.upload"
-      @upload="tableData = $event"
+      @upload="upload($event)"
     />
   </flex-col>
 </template>

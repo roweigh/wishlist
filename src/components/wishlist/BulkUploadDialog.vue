@@ -38,6 +38,7 @@ export default {
         }, {});
       });
     },
+
     handleFileChange(file) {
       if (!file) return;
 
@@ -62,7 +63,7 @@ export default {
   >
     <v-file-upload
       filter-by-type=".csv"
-      @update:model-valu="handleFileChange($event)"
+      @update:model-value="handleFileChange($event)"
     />
   </base-dialog>
 </template>

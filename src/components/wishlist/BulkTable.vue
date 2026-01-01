@@ -32,14 +32,17 @@ export default {
         {
           key: 'qtyNeeded',
           title: 'Quantity Needed',
+          align: 'end',
         },
         {
           key: 'qtyAcquired',
           title: 'Quantity Acquired',
+          align: 'end',
         },
         {
           key: 'cost',
           title: 'Cost',
+          align: 'end',
         },
         {
           key: 'notes',
@@ -65,7 +68,7 @@ export default {
       <flex-row class="align-center justify-space-between">
         <h3>Singles</h3>
 
-        <flex-row class="mx-2">
+        <flex-row class="mx-3">
           <v-btn
             icon="mdi-download"
             density="compact"
