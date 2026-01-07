@@ -21,6 +21,7 @@ export default {
       <template #text>
         <slot />
       </template>
+
       <v-card-actions class="bg-surface-light">
         <v-btn
           text="Cancel"

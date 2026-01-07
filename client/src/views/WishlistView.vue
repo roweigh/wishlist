@@ -28,7 +28,8 @@ export default {
     async loadFromClipboard () {
       try {
         const text = await navigator.clipboard.readText();
-        this.tableData =  this.parseDecklist(text);
+        console.log(this.parseDecklist(text));
+        this.tableData = this.parseDecklist(text);
       } catch (err) {
         console.error('Failed to read clipboard:', err);
       }
@@ -57,11 +58,15 @@ export default {
 
     // Temp functions
     add (payload) {
+      console.log(payload);
+
       this.tableData.push(payload);
       this.overlayFlags.edit = null;
     },
 
     update (payload) {
+      console.log(payload);
+
       this.overlayFlags.edit.code = payload.code;
       this.overlayFlags.edit.name = payload.name;
       this.overlayFlags.edit.qtyNeeded = payload.qtyNeeded;
@@ -71,6 +76,8 @@ export default {
     },
 
     upload (payload) {
+      console.log(payload);
+
       this.tableData = this.tableData.concat(payload);
     },
   },

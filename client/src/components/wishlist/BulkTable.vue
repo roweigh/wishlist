@@ -70,7 +70,7 @@ export default {
 
         <flex-row class="mx-3">
           <v-btn
-            icon="mdi-download"
+            icon="mdi-content-copy"
             density="compact"
             @click="$emit('load')"
           />
