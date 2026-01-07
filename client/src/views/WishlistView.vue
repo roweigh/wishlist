@@ -3,6 +3,9 @@ import BulkTable from '@/components/wishlist/BulkTable.vue';
 import BulkUploadDialog from '../components/wishlist/BulkUploadDialog.vue';
 import EditBulkDialog from '../components/wishlist/EditBulkDialog.vue';
 
+
+import { getCards } from '../api/wishlist';
+
 export default {
   components: {
     BulkTable,
@@ -23,6 +26,10 @@ export default {
         },
       ],
     };
+  },
+  async mounted () {
+    const test =  await getCards();
+    console.log(test);
   },
   methods: {
     async loadFromClipboard () {

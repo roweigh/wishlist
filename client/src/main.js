@@ -9,6 +9,19 @@ import '@mdi/font/css/materialdesignicons.css';
 import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+const firebaseApp = initializeApp({
+  apiKey: 'AIzaSyD97hQbJMaVCWx_C4rDZFIfYqf5F4mvzSo',
+  authDomain: 'wishlist-596f5.firebaseapp.com',
+  projectId: 'wishlist-596f5',
+  storageBucket: 'wishlist-596f5.firebasestorage.app',
+  messagingSenderId: '452494338050',
+  appId: '1:452494338050:web:ab32fb6a04a86928175f1b',
+  measurementId: 'G-H7Z98SXCP2',
+});
+const db = getFirestore(firebaseApp);
+
 import '@/style.css';
 
 import App from './App.vue';
@@ -33,3 +46,5 @@ router.isReady().then(() => app.mount('#app'));
 app.component('FlexCol', FlexCol);
 app.component('FlexRow', FlexRow);
 app.component('BaseDialog', BaseDialog);
+
+export { db };
