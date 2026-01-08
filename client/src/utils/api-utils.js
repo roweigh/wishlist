@@ -11,6 +11,7 @@ import {
   runTransaction,
   serverTimestamp,
   increment,
+  where,
 } from 'firebase/firestore';
 
 export async function get (col) {
@@ -32,8 +33,27 @@ export async function get (col) {
   return result;
 }
 
+export async function getReceiptsByCode(col, code) {
+  const colRef = collection(db, col);
+  const q = query(colRef, where('code', '==', code));
+
+  const querySnapshot = await getDocs(q);
+  const receipts = [];
+  querySnapshot.forEach(doc => {
+    receipts.push({
+      ...doc.data(),
+      id: doc.id,
+      date: doc.data().date?.toDate(),
+    });
+  });
+
+  return receipts;
+}
+
 export async function add (col, payload) {
   const item = doc(collection(db, col));
+
+  console.log(payload);
   const itemCollection = doc(db, 'cards-total', payload.code);
 
   await runTransaction(db, async (tx) => {

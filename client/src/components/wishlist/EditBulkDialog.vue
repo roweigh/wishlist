@@ -1,5 +1,6 @@
 <script>
 import { Timestamp } from 'firebase/firestore';
+import { getCardHistory } from '../../api/wishlist';
 
 export default {
   props: {
@@ -20,7 +21,11 @@ export default {
     modelValue: {
       deep: true,
       immediate: true,
-      handler(v) {
+      async handler(v) {
+        if (v?.code) {
+          const test = await getCardHistory(v.code);
+          console.log(test);
+        }
         this.code = v?.code ?? null;
         this.name = v?.name ?? null;
         this.qtyNeeded = v?.qtyNeeded ?? 0;
