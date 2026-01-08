@@ -1,4 +1,6 @@
 <script>
+import { Timestamp } from 'firebase/firestore';
+
 export default {
   props: {
     modelValue: { type: null, default: false },
@@ -28,15 +30,17 @@ export default {
   },
   methods: {
     submit() {
+      const timeStamp = Timestamp.fromDate(new Date());
       const payload = {
         code: this.code,
         name: this.name,
         qtyNeeded: this.qtyNeeded,
         qtyAcquired: this.qtyAcquired,
+        date: timeStamp,
       };
 
       if (this.modelValue.code) {
-        this.$emit('edit', payload);
+        // this.$emit('edit', payload);
       } else {
         this.$emit('add', payload);
       }

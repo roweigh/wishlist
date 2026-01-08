@@ -8,6 +8,9 @@ import {
   getDocs,
   addDoc ,
   updateDoc,
+  runTransaction,
+  serverTimestamp,
+  increment,
 } from 'firebase/firestore';
 
 export async function get (col) {
@@ -19,8 +22,9 @@ export async function get (col) {
   )).then(({ docs }) => {
     docs.forEach(doc => {
       result.push({
-        id: doc.id,
         ...doc.data(),
+        id: doc.id,
+        date: doc.data().date?.toDate(),
       });
     });
   });
@@ -29,7 +33,30 @@ export async function get (col) {
 }
 
 export async function add (col, payload) {
-  await addDoc(collection(db, col), payload);
+  const item = doc(collection(db, col));
+  const itemCollection = doc(db, 'cards-total', payload.code);
+
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(itemCollection);
+    tx.set(item, {
+      ...payload,
+      date: serverTimestamp(),
+    });
+
+    if (snap.exists()) {
+      tx.update(itemCollection, {
+        qtyNeeded: increment(payload.qtyNeeded),
+        qtyAcquired: increment(payload.qtyAcquired),
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      tx.set(itemCollection, {
+        ...payload,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    }
+  });
 }
 
 export async function update (col, id, payload) {

@@ -3,8 +3,10 @@ import BulkTable from '@/components/wishlist/BulkTable.vue';
 import BulkUploadDialog from '../components/wishlist/BulkUploadDialog.vue';
 import EditBulkDialog from '../components/wishlist/EditBulkDialog.vue';
 
-
-import { getCards } from '../api/wishlist';
+import {
+  getCards,
+  addCard,
+} from '../api/wishlist';
 
 export default {
   components: {
@@ -14,22 +16,15 @@ export default {
   },
   data () {
     return {
+      tableData: [],
       overlayFlags: {
         edit: false,
         upload: false,
       },
-      tableData: [
-        {
-          code: 'OP13-120',
-          name: 'Sabo',
-          qtyNeeded: 4,
-        },
-      ],
     };
   },
   async mounted () {
-    const test =  await getCards();
-    console.log(test);
+    await this.get();
   },
   methods: {
     async loadFromClipboard () {
@@ -63,11 +58,13 @@ export default {
     },
 
 
-    // Temp functions
-    add (payload) {
-      console.log(payload);
+    async get () {
+      this.tableData = await getCards();
+    },
 
-      this.tableData.push(payload);
+    async add (payload) {
+      await addCard(payload),
+      await this.get();
       this.overlayFlags.edit = null;
     },
 
