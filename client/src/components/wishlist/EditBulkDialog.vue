@@ -1,8 +1,12 @@
 <script>
 import { Timestamp } from 'firebase/firestore';
-import { getCardHistory } from '../../api/wishlist';
+import { getCardHistory, updateHistory } from '../../api/wishlist';
+import ReceiptRow from './ReceiptRow.vue';
 
 export default {
+  components: {
+    ReceiptRow,
+  },
   props: {
     modelValue: { type: null, default: false },
   },
@@ -11,10 +15,12 @@ export default {
   ],
   data () {
     return {
+      history: [],
+      changedHistory: {},
       code: null,
       name: null,
-      qtyNeeded: null,
-      qtyAcquired: null,
+      qtyNeeded: { initial: 0, value: null },
+      qtyAcquired: { initial: 0, value: null },
     };
   },
   watch: {
@@ -23,30 +29,36 @@ export default {
       immediate: true,
       async handler(v) {
         if (v?.code) {
-          const test = await getCardHistory(v.code);
-          console.log(test);
+          this.history = await getCardHistory(v.code).then(result => result.sort((a,b) => b.date - a.date));
+          console.log(this.history);
+          this.code = v?.code ?? null;
+          this.name = v?.name ?? null;
+
+          this.qtyNeeded.initial = v?.qtyNeeded ?? 1;
+          this.qtyNeeded.value = v?.qtyNeeded ?? 1;
+          this.qtyAcquired.initial = v?.qtyAcquired ?? 0;
+          this.qtyAcquired.value = v?.qtyAcquired ?? 0;
         }
-        this.code = v?.code ?? null;
-        this.name = v?.name ?? null;
-        this.qtyNeeded = v?.qtyNeeded ?? 0;
-        this.qtyAcquired = v?.qtyAcquired ?? 0;
       },
     },
   },
   methods: {
-    submit() {
+    async submit() {
       const timeStamp = Timestamp.fromDate(new Date());
       const payload = {
         code: this.code,
         name: this.name,
-        qtyNeeded: this.qtyNeeded,
-        qtyAcquired: this.qtyAcquired,
+        qtyNeeded: this.qtyNeeded.value - this.qtyNeeded.initial,
+        qtyAcquired: this.qtyAcquired.value - this.qtyAcquired.initial,
         date: timeStamp,
       };
 
-      if (this.modelValue.code) {
-        // this.$emit('edit', payload);
-      } else {
+      const promises = Object.entries(this.changedHistory).map(([id, payload]) => {
+        updateHistory(id, payload);
+      });
+      await Promise.all(promises);
+
+      if (!this.modelValue.id) {
         this.$emit('add', payload);
       }
     },
@@ -93,7 +105,7 @@ export default {
         md="6"
       >
         <v-number-input
-          v-model="qtyNeeded"
+          v-model="qtyNeeded.value"
           :min="1"
           label="Quantity Needed"
           density="compact"
@@ -107,7 +119,7 @@ export default {
         md="6"
       >
         <v-number-input
-          v-model="qtyAcquired"
+          v-model="qtyAcquired.value"
           :min="0"
           label="Quantity Acquired"
           density="compact"
@@ -116,5 +128,24 @@ export default {
         />
       </v-col>
     </v-row>
+
+    <v-row>
+      <v-card-title>
+        History
+      </v-card-title>
+    </v-row>
+
+
+    <template
+      v-for="item in history"
+      :key="item.id"
+    >
+      <receipt-row
+        v-model="changedHistory"
+        :item="item"
+      />
+    </template>
+
+    {{ changedHistory }}
   </base-dialog>
 </template>

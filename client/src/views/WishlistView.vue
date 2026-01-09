@@ -36,7 +36,6 @@ export default {
         console.error('Failed to read clipboard:', err);
       }
     },
-
     parseDecklist (text) {
       return text.split(/\r?\n/).map(line => {
         const cardQty = line.trim().match(/^(\d+)x(.+)$/);
@@ -56,29 +55,21 @@ export default {
         }
       });
     },
-
-
     async get () {
       this.tableData = await getCards();
+      this.overlayFlags.edit = this.tableData[1];
     },
-
     async add (payload) {
       await addCard(payload),
       await this.get();
       this.overlayFlags.edit = null;
     },
-
-    update (payload) {
-      console.log(payload);
-
-      this.overlayFlags.edit.code = payload.code;
-      this.overlayFlags.edit.name = payload.name;
-      this.overlayFlags.edit.qtyNeeded = payload.qtyNeeded;
-      this.overlayFlags.edit.qtyAcquired = payload.qtyAcquired;
-
+    async update (payload) {
+      // console.log(this.overlayFlags.edit);
+      // await updateCard(payload, payload.code),
+      await this.get();
       this.overlayFlags.edit = null;
     },
-
     upload (payload) {
       console.log(payload);
 
