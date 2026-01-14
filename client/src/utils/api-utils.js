@@ -12,7 +12,25 @@ import {
   serverTimestamp,
   increment,
   where,
+  deleteDoc,
 } from 'firebase/firestore';
+
+export async function getReceiptsByCode(col, code) {
+  const colRef = collection(db, col);
+  const q = query(colRef, where('code', '==', code));
+
+  const querySnapshot = await getDocs(q);
+  const receipts = [];
+  querySnapshot.forEach(doc => {
+    receipts.push({
+      ...doc.data(),
+      id: doc.id,
+      date: doc.data().date?.toDate(),
+    });
+  });
+
+  return receipts;
+}
 
 export async function get (col) {
   const result = [];
@@ -31,23 +49,6 @@ export async function get (col) {
   });
 
   return result;
-}
-
-export async function getReceiptsByCode(col, code) {
-  const colRef = collection(db, col);
-  const q = query(colRef, where('code', '==', code));
-
-  const querySnapshot = await getDocs(q);
-  const receipts = [];
-  querySnapshot.forEach(doc => {
-    receipts.push({
-      ...doc.data(),
-      id: doc.id,
-      date: doc.data().date?.toDate(),
-    });
-  });
-
-  return receipts;
 }
 
 export async function add (col, payload) {
@@ -75,11 +76,10 @@ export async function add (col, payload) {
 }
 
 export async function update(col, id, payload) {
-  const item = doc(db, col, id);
-
-
-  const itemCollection = doc(db, 'cards-total', payload.code);
   console.log('Updating path:', `${col}/${id}`);
+  console.log(payload);
+  const item = doc(db, col, id);
+  const itemCollection = doc(db, 'cards-total', payload.code);
 
   await runTransaction(db, async (tx) => {
     // Read the existing item to compute deltas
@@ -108,6 +108,36 @@ export async function update(col, id, payload) {
       {
         qtyNeeded: increment(qtyNeededDelta),
         qtyAcquired: increment(qtyAcquiredDelta),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+  });
+}
+
+export async function del(col, id) {
+  const item = doc(db, col, id);
+
+  await runTransaction(db, async (tx) => {
+    // Read the item first
+    const snap = await tx.get(item);
+    if (!snap.exists()) return;
+
+    const payload = snap.data();
+    const totals = doc(db, 'cards-total', payload.code);
+
+    const qtyNeeded = payload.qtyNeeded ?? 0;
+    const qtyAcquired = payload.qtyAcquired ?? 0;
+
+    // Delete the item
+    tx.delete(item);
+
+    // Subtract from totals
+    tx.set(
+      totals,
+      {
+        qtyNeeded: increment(-qtyNeeded),
+        qtyAcquired: increment(-qtyAcquired),
         updatedAt: serverTimestamp(),
       },
       { merge: true },

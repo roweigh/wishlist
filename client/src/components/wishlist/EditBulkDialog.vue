@@ -1,6 +1,11 @@
 <script>
 import { Timestamp } from 'firebase/firestore';
-import { getCardHistory, updateHistory } from '../../api/wishlist';
+import {
+  getCardHistory,
+  updateHistory,
+  removeHistory,
+} from '@/api/wishlist';
+
 import ReceiptRow from './ReceiptRow.vue';
 
 export default {
@@ -29,8 +34,7 @@ export default {
       immediate: true,
       async handler(v) {
         if (v?.code) {
-          this.history = await getCardHistory(v.code).then(result => result.sort((a,b) => b.date - a.date));
-          console.log(this.history);
+          await this.getPurchaseHistory();
           this.code = v?.code ?? null;
           this.name = v?.name ?? null;
 
@@ -43,7 +47,16 @@ export default {
     },
   },
   methods: {
-    async submit() {
+    async getPurchaseHistory () {
+      this.history = await getCardHistory(this.modelValue.code).then(result => result.sort((a,b) => b.date - a.date));
+    },
+
+    async remove (id) {
+      await removeHistory(id);
+      await this.getPurchaseHistory();
+    },
+
+    async submit () {
       const timeStamp = Timestamp.fromDate(new Date());
       const payload = {
         code: this.code,
@@ -61,6 +74,7 @@ export default {
       if (!this.modelValue.id) {
         this.$emit('add', payload);
       }
+      await this.getPurchaseHistory();
     },
   },
 };
@@ -135,7 +149,6 @@ export default {
       </v-card-title>
     </v-row>
 
-
     <template
       v-for="item in history"
       :key="item.id"
@@ -143,9 +156,8 @@ export default {
       <receipt-row
         v-model="changedHistory"
         :item="item"
+        @remove="remove($event)"
       />
     </template>
-
-    {{ changedHistory }}
   </base-dialog>
 </template>

@@ -57,7 +57,6 @@ export default {
     },
     async get () {
       this.tableData = await getCards();
-      this.overlayFlags.edit = this.tableData[1];
     },
     async add (payload) {
       await addCard(payload),
