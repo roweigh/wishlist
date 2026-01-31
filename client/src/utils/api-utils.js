@@ -23,7 +23,7 @@ export async function getReceiptsByCode(col, code) {
   const querySnapshot = await getDocs(q);
   const receipts = [];
   querySnapshot.forEach(doc => {
-    console.log(doc.data().date)
+    console.log(doc.data().date);
     receipts.push({
       ...doc.data(),
       id: doc.id,
@@ -91,6 +91,7 @@ export async function add (col, payload) {
       code: payload.code,
       qtyNeeded: increment(payload.qtyNeeded),
       qtyAcquired: increment(payload.qtyAcquired),
+      amtSpent: increment(payload.amtSpent),
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     },

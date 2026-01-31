@@ -27,6 +27,7 @@ export default {
       // Form inputs
       code: null,
       name: null,
+      price: 0,
       qtyNeeded: pair(0),
       qtyAcquired: pair(0),
 
@@ -35,11 +36,11 @@ export default {
     };
   },
   computed: {
-    newEntry () { return !this.modelValue?.code },
+    newEntry () { return !this.modelValue?.code; },
     changed () { return (
       this.qtyNeeded.initial !== this.qtyNeeded.value ||
-      this.qtyAcquired.initial !== this.qtyAcquired.value 
-    )}
+      this.qtyAcquired.initial !== this.qtyAcquired.value
+    );},
   },
   watch: {
     modelValue: {
@@ -47,11 +48,11 @@ export default {
       immediate: true,
       async handler(v) {
         if (v) {
-          this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk'
+          this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk';
           this.code = v?.code ?? null;
           this.name = v?.name ?? null;
-          updatePair(this.qtyNeeded, v?.qtyNeeded ?? 1 )
-          updatePair(this.qtyAcquired, v?.qtyAcquired ?? 0 )
+          updatePair(this.qtyNeeded, v?.qtyNeeded ?? 1);
+          updatePair(this.qtyAcquired, v?.qtyAcquired ?? 0);
 
           v?.code && await this.getPurchaseHistory();
         }
@@ -82,19 +83,20 @@ export default {
      * Send difference in qty as we are logging history - so it can do math in the BE
      */
     async submit () {
-      const timeStamp = Timestamp.fromDate(new Date());
-      const qtyNeeded = this.newEntry ? this.qtyNeeded.value : this.qtyNeeded.value - this.qtyNeeded.initial
+      const date = Timestamp.fromDate(new Date());
+      const qtyNeeded = this.newEntry ? this.qtyNeeded.value : this.qtyNeeded.value - this.qtyNeeded.initial;
 
       const payload = {
         code: this.code,
         name: this.name,
-        qtyAcquired: this.qtyAcquired.value - this.qtyAcquired.initial,
+        amtSpent: this.price,
+        qtyAcquired: this.qtyAcquired.value - this.qtyAcquired.initial, // TODO This one should be BE's job
         qtyNeeded,
-        date: timeStamp,
+        date,
       };
 
-      await this.updatePurchaseHistory()
-      this.changed && this.$emit('add', payload);
+      await this.updatePurchaseHistory();
+      (this.changed || this.price) && this.$emit('add', payload);
     },
   },
 };
@@ -108,10 +110,7 @@ export default {
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-row>
-      <v-col
-        cols="12"
-        md="6"
-      >
+      <v-col cols="6">
         <v-text-field
           v-model="code"
           label="Code"
@@ -121,10 +120,7 @@ export default {
         />
       </v-col>
 
-      <v-col
-        cols="12"
-        md="6"
-      >
+      <v-col cols="6">
         <v-text-field
           v-model="name"
           label="Name"
@@ -134,10 +130,7 @@ export default {
         />
       </v-col>
 
-      <v-col
-        cols="12"
-        md="6"
-      >
+      <v-col cols="4">
         <v-number-input
           v-model="qtyNeeded.value"
           :min="1"
@@ -148,24 +141,24 @@ export default {
         />
       </v-col>
 
-      <v-col
-        cols="12"
-        md="6"
-      >
-        <v-number-input
-          v-model="qtyAcquired.value"
-          :min="0"
-          label="Quantity Acquired"
-          density="compact"
-          hide-details="auto"
-          tile
-        />
-      </v-col>
+      <paired-number-input
+        v-model="qtyAcquired.value"
+        :min="0"
+        label="Quantity Acquired"
+        cols="4"
+      />
+
+      <paired-number-input
+        v-model="price"
+        type="dollar"
+        label="Price"
+        cols="4"
+      />
     </v-row>
 
     <template v-if="!newEntry">
-      <v-row>  
-        <v-card-title>
+      <v-row>
+        <v-card-title class="mb-3">
           History
         </v-card-title>
       </v-row>

@@ -18,6 +18,7 @@ export default {
   ],
   data () {
     return {
+      price: pair(0),
       qtyAcquired: pair(0),
       qtyNeeded: pair(0),
       date: pair(null),
@@ -66,6 +67,7 @@ export default {
   // Initialize values
   mounted () {
     updatePair(this.date, this.item?.date ?? null);
+    updatePair(this.price, this.item?.price ?? 0);
     updatePair(this.qtyNeeded, this.item?.qtyNeeded ?? 0);
     updatePair(this.qtyAcquired, this.item?.qtyAcquired ?? 0);
   },
@@ -74,23 +76,21 @@ export default {
 
 <template>
   <flex-row class="grow">
-    <v-text-field
+    <paired-date-picker
       v-model="date.value"
-      density="compact"
-      hide-details
-      tile
     />
-    <v-number-input
-      v-model="qtyNeeded.value"
-      density="compact"
-      hide-details
-      tile
-    />
-    <v-number-input
+    <paired-number-input
       v-model="qtyAcquired.value"
-      density="compact"
-      hide-details
-      tile
+      label="Quanty Acquired"
+      padding="0"
+      cols="3"
+    />
+    <paired-number-input
+      v-model="price.value"
+      type="dollar"
+      label="Price"
+      padding="0"
+      cols="3"
     />
     <v-btn
       icon="mdi-delete"

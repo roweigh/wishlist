@@ -31,6 +31,10 @@ import FlexRow from './components/base/flex/FlexRow.vue';
 import FlexCol from './components/base/flex/FlexCol.vue';
 import BaseDialog from './components/base/dialog/BaseDialog.vue';
 
+import PairedDatePicker from '@/components/base/form-input/PairedDatePicker.vue';
+import PairedTextField from '@/components/base/form-input/PairedTextField.vue';
+import PairedNumberInput from '@/components/base/form-input/PairedNumberInput.vue';
+
 const vuetify = createVuetify({
   components,
   directives,
@@ -46,5 +50,9 @@ router.isReady().then(() => app.mount('#app'));
 app.component('FlexCol', FlexCol);
 app.component('FlexRow', FlexRow);
 app.component('BaseDialog', BaseDialog);
+
+app.component('PairedDatePicker', PairedDatePicker);
+app.component('PairedTextField', PairedTextField);
+app.component('PairedNumberInput', PairedNumberInput);
 
 export { db };

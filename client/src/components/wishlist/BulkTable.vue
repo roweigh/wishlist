@@ -40,8 +40,8 @@ export default {
           align: 'end',
         },
         {
-          key: 'cost',
-          title: 'Cost',
+          key: 'amtSpent',
+          title: 'Amount Spent',
           align: 'end',
         },
         {
@@ -55,6 +55,11 @@ export default {
         },
       ],
     };
+  },
+  methods: {
+    formatDollar(v) {
+      return `$${(v).toFixed(2)}`;
+    },
   },
 };
 </script>
@@ -95,6 +100,10 @@ export default {
     :items="items"
     density="compact"
   >
+    <template #item.amtSpent="{ item }">
+      {{ formatDollar(item.amtSpent) }}
+    </template>
+
     <template #item.actions="{ item }">
       <div class="d-flex ga-2 justify-end">
         <v-icon
