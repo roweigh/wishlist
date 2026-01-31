@@ -13,6 +13,7 @@ import {
   increment,
   where,
   deleteDoc,
+  writeBatch,
 } from 'firebase/firestore';
 
 export async function getReceiptsByCode(col, code) {
@@ -22,6 +23,7 @@ export async function getReceiptsByCode(col, code) {
   const querySnapshot = await getDocs(q);
   const receipts = [];
   querySnapshot.forEach(doc => {
+    console.log(doc.data().date)
     receipts.push({
       ...doc.data(),
       id: doc.id,
@@ -30,6 +32,28 @@ export async function getReceiptsByCode(col, code) {
   });
 
   return receipts;
+}
+
+export async function deleteAggregateAndReceipts(aggregateId) {
+  const batch = writeBatch(db);
+
+  // Aggregate doc
+  const aggregateRef = doc(db, 'cards-total', aggregateId);
+  batch.delete(aggregateRef);
+
+  // Receipt docs
+  const q = query(
+    collection(db, 'cards'),
+    where('code', '==', aggregateId),
+  );
+
+  const receiptsSnap = await getDocs(q);
+
+  receiptsSnap.forEach(d => {
+    batch.delete(d.ref);
+  });
+
+  await batch.commit();
 }
 
 export async function get (col) {

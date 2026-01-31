@@ -1,4 +1,6 @@
 <script>
+import { Timestamp } from 'firebase/firestore';
+
 // Editable purchase entry
 import {
   pair,
@@ -47,7 +49,7 @@ export default {
         if (v) {
           const payload = {
             ...this.item,
-            date: this.date.value,
+            date: Timestamp.fromDate(new Date(this.date.value)),
             qtyNeeded:  this.qtyNeeded.value,
             qtyAcquired:  this.qtyAcquired.value,
           };

@@ -1,5 +1,7 @@
 <script>
 import { Timestamp } from 'firebase/firestore';
+import { pair, updatePair } from '@/utils/form-utils';
+
 import {
   getCardHistory,
   updateHistory,
@@ -20,28 +22,38 @@ export default {
   ],
   data () {
     return {
-      history: [],
-      changedHistory: {},
+      title: 'Add Bulk',
+
+      // Form inputs
       code: null,
       name: null,
-      qtyNeeded: { initial: 0, value: null },
-      qtyAcquired: { initial: 0, value: null },
+      qtyNeeded: pair(0),
+      qtyAcquired: pair(0),
+
+      history: [],
+      changedHistory: {},
     };
+  },
+  computed: {
+    newEntry () { return !this.modelValue?.code },
+    changed () { return (
+      this.qtyNeeded.initial !== this.qtyNeeded.value ||
+      this.qtyAcquired.initial !== this.qtyAcquired.value 
+    )}
   },
   watch: {
     modelValue: {
       deep: true,
       immediate: true,
       async handler(v) {
-        if (v?.code) {
-          await this.getPurchaseHistory();
+        if (v) {
+          this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk'
           this.code = v?.code ?? null;
           this.name = v?.name ?? null;
+          updatePair(this.qtyNeeded, v?.qtyNeeded ?? 1 )
+          updatePair(this.qtyAcquired, v?.qtyAcquired ?? 0 )
 
-          this.qtyNeeded.initial = v?.qtyNeeded ?? 1;
-          this.qtyNeeded.value = v?.qtyNeeded ?? 1;
-          this.qtyAcquired.initial = v?.qtyAcquired ?? 0;
-          this.qtyAcquired.value = v?.qtyAcquired ?? 0;
+          v?.code && await this.getPurchaseHistory();
         }
       },
     },
@@ -56,25 +68,33 @@ export default {
       await this.getPurchaseHistory();
     },
 
-    async submit () {
-      const timeStamp = Timestamp.fromDate(new Date());
-      const payload = {
-        code: this.code,
-        name: this.name,
-        qtyNeeded: this.qtyNeeded.value - this.qtyNeeded.initial,
-        qtyAcquired: this.qtyAcquired.value - this.qtyAcquired.initial,
-        date: timeStamp,
-      };
-
+    // Update each changed row entry
+    async updatePurchaseHistory () {
       const promises = Object.entries(this.changedHistory).map(([id, payload]) => {
         updateHistory(id, payload);
       });
       await Promise.all(promises);
+    },
 
-      if (!this.modelValue.id) {
-        this.$emit('add', payload);
-      }
-      await this.getPurchaseHistory();
+    /**
+     * TODO Explain better
+     * Update any purchase history rows that have changed, then submit single card payload information
+     * Send difference in qty as we are logging history - so it can do math in the BE
+     */
+    async submit () {
+      const timeStamp = Timestamp.fromDate(new Date());
+      const qtyNeeded = this.newEntry ? this.qtyNeeded.value : this.qtyNeeded.value - this.qtyNeeded.initial
+
+      const payload = {
+        code: this.code,
+        name: this.name,
+        qtyAcquired: this.qtyAcquired.value - this.qtyAcquired.initial,
+        qtyNeeded,
+        date: timeStamp,
+      };
+
+      await this.updatePurchaseHistory()
+      this.changed && this.$emit('add', payload);
     },
   },
 };
@@ -83,7 +103,7 @@ export default {
 <template>
   <base-dialog
     :model-value="modelValue"
-    title="Update Bulk"
+    :title="title"
     @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
@@ -143,21 +163,23 @@ export default {
       </v-col>
     </v-row>
 
-    <v-row>
-      <v-card-title>
-        History
-      </v-card-title>
-    </v-row>
+    <template v-if="!newEntry">
+      <v-row>  
+        <v-card-title>
+          History
+        </v-card-title>
+      </v-row>
 
-    <template
-      v-for="item in history"
-      :key="item.id"
-    >
-      <receipt-row
-        v-model="changedHistory"
-        :item="item"
-        @remove="remove($event)"
-      />
+      <template
+        v-for="item in history"
+        :key="item.id"
+      >
+        <receipt-row
+          v-model="changedHistory"
+          :item="item"
+          @remove="remove($event)"
+        />
+      </template>
     </template>
   </base-dialog>
 </template>

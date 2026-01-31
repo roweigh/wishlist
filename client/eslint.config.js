@@ -6,7 +6,14 @@ import stylistic from '@stylistic/eslint-plugin';
 export default [
   js.configs.recommended,
   ...vue.configs['flat/recommended'],
-
+ {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node
+      }
+    }
+  },
   {
     plugins: {
       '@stylistic': stylistic,

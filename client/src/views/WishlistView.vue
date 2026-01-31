@@ -6,6 +6,7 @@ import EditBulkDialog from '../components/wishlist/EditBulkDialog.vue';
 import {
   getCards,
   addCard,
+  delAll,
 } from '../api/wishlist';
 
 export default {
@@ -59,11 +60,13 @@ export default {
       this.tableData = await getCards();
     },
     async add (payload) {
+      console.log('add', payload);
       await addCard(payload),
       await this.get();
       this.overlayFlags.edit = null;
     },
     async update (payload) {
+      console.log('edit', payload);
       // console.log(this.overlayFlags.edit);
       // await updateCard(payload, payload.code),
       await this.get();
@@ -73,6 +76,10 @@ export default {
       console.log(payload);
 
       this.tableData = this.tableData.concat(payload);
+    },
+
+    async remove(id) {
+      await delAll(id);
     },
   },
 };
@@ -102,6 +109,7 @@ export default {
       @add="overlayFlags.edit = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
+      @remove="remove($event)"
       @load="loadFromClipboard()"
     />
 

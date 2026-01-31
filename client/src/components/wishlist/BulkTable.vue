@@ -108,7 +108,7 @@ export default {
           color="medium-emphasis"
           icon="mdi-delete"
           size="small"
-          @click="$emit('remove', item.id)"
+          @click="$emit('remove', item.code)"
         />
       </div>
     </template>
