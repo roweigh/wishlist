@@ -1,7 +1,8 @@
 <script>
-import { Timestamp } from 'firebase/firestore';
 import { pair, updatePair } from '@/utils/form-utils';
-
+import {
+  Timestamp,
+} from 'firebase/firestore';
 import {
   getCardHistory,
   updateHistory,
@@ -47,13 +48,14 @@ export default {
       deep: true,
       immediate: true,
       async handler(v) {
+        updatePair(this.qtyAcquired, this.qtyAcquired.initial);
+
         if (v) {
           this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk';
           this.code = v?.code ?? null;
           this.name = v?.name ?? null;
-          updatePair(this.qtyNeeded, v?.qtyNeeded ?? 1);
-          updatePair(this.qtyAcquired, v?.qtyAcquired ?? 0);
-
+          updatePair(this.qtyNeeded, 0);
+          this.price = 0;
           v?.code && await this.getPurchaseHistory();
         }
       },
@@ -83,20 +85,27 @@ export default {
      * Send difference in qty as we are logging history - so it can do math in the BE
      */
     async submit () {
-      const date = Timestamp.fromDate(new Date());
-      const qtyNeeded = this.newEntry ? this.qtyNeeded.value : this.qtyNeeded.value - this.qtyNeeded.initial;
-
       const payload = {
-        code: this.code,
+        code: this.sanitizeCode(this.code),
         name: this.name,
         amtSpent: this.price,
-        qtyAcquired: this.qtyAcquired.value - this.qtyAcquired.initial, // TODO This one should be BE's job
-        qtyNeeded,
-        date,
+        qtyAcquired: this.qtyAcquired.value,
+        qtyNeeded:  this.qtyNeeded.value,
+        date: Timestamp.fromDate(new Date()),
       };
-
       await this.updatePurchaseHistory();
-      (this.changed || this.price) && this.$emit('add', payload);
+
+      if (this.changed) {
+        this.$emit('add', payload);
+      }
+      this.$emit('refresh');
+    },
+
+    sanitizeCode (code) {
+      // Hint: Code must match OPTCG card code structure (e.g. OP01-023)
+      const result = code.toUpperCase();
+      const regex = /^[A-Z]+(\d{2})?-\d{3}$/;
+      return result;
     },
   },
 };
@@ -130,16 +139,12 @@ export default {
         />
       </v-col>
 
-      <v-col cols="4">
-        <v-number-input
-          v-model="qtyNeeded.value"
-          :min="1"
-          label="Quantity Needed"
-          density="compact"
-          hide-details="auto"
-          tile
-        />
-      </v-col>
+      <paired-number-input
+        v-model="qtyNeeded.value"
+        :min="0"
+        label="Quantity Needed"
+        cols="4"
+      />
 
       <paired-number-input
         v-model="qtyAcquired.value"

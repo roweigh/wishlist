@@ -1,10 +1,23 @@
-import { get, add, update, getReceiptsByCode, del, deleteAggregateAndReceipts,
-} from '../utils/api-utils';
+import { add, get, getAll, update, del, delByField } from '../utils/api-utils';
 
-export const getCards = async () => get('cards-total');
-export const getCardHistory = async (code) => getReceiptsByCode('cards', code);
-export const addCard = async (payload) => add('cards', payload);
-export const updateHistory = async (id, payload) => update('cards', id, payload);
-export const removeHistory = async (id) => del('cards', id);
+import { serverTimestamp, increment } from 'firebase/firestore';
 
-export const delAll = async (id) => deleteAggregateAndReceipts(id);
+export const getCards = async () => await getAll('purchases');
+export const addCard = async (payload) => await add('purchases', payload);
+
+export const getCardHistory = async (code) => {
+  const result = await get('purchases', code);
+  return result.filter(({ qtyAcquired }) => qtyAcquired > 0);
+};
+
+
+// export const getCardHistory = async (code) => {};
+export const updateHistory = async (id, payload) => {
+  // console.log(payload);
+  await update('purchases', id, payload); };
+export const removeHistory = async (id) => {};
+export const delAll = async (id) => {
+  console.log(id);
+  await delByField('purchases', 'code', id);
+  await del('purchases', id);
+};

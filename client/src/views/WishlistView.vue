@@ -58,12 +58,17 @@ export default {
     },
     async get () {
       this.tableData = await getCards();
+      console.log(this.tableData);
     },
     async add (payload) {
       console.log('add', payload);
       await addCard(payload),
       await this.get();
       this.overlayFlags.edit = null;
+    },
+    async remove(id) {
+      await delAll(id);
+      await this.get();
     },
     async update (payload) {
       console.log('edit', payload);
@@ -76,10 +81,6 @@ export default {
       console.log(payload);
 
       this.tableData = this.tableData.concat(payload);
-    },
-
-    async remove(id) {
-      await delAll(id);
     },
   },
 };
@@ -117,6 +118,7 @@ export default {
       v-model="overlayFlags.edit"
       @add="add($event)"
       @edit="update($event);"
+      @refresh="get()"
     />
 
     <bulk-upload-dialog

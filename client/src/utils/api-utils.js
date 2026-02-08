@@ -16,156 +16,66 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 
-export async function getReceiptsByCode(col, code) {
-  const colRef = collection(db, col);
-  const q = query(colRef, where('code', '==', code));
+// Aggregated at client-side to simulate SQL GROUP BY function
+export async function getAll(colName) {
+  const col = collection(db, colName);
+  const snapshot = await getDocs(col);
 
-  const querySnapshot = await getDocs(q);
-  const receipts = [];
-  querySnapshot.forEach(doc => {
-    console.log(doc.data().date);
-    receipts.push({
-      ...doc.data(),
-      id: doc.id,
-      date: doc.data().date?.toDate(),
-    });
+  const summaryMap = {};
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    const code = data.code;
+    const qtyAcquired = data.qtyAcquired || 0;
+    const qtyNeeded = data.qtyNeeded || 0;
+    const amtSpent = data.amtSpent || 0;
+
+    if (!summaryMap[code]) {
+      summaryMap[code] = {
+        code: code,
+        qtyAcquired: 0,
+        qtyNeeded: 0,
+        amtSpent: 0,
+      };
+    }
+
+    summaryMap[code].qtyAcquired += qtyAcquired;
+    summaryMap[code].qtyNeeded += qtyNeeded;
+    summaryMap[code].amtSpent += amtSpent;
   });
 
-  return receipts;
+  // convert map → array for UI tables
+  return Object.values(summaryMap);
 }
 
-export async function deleteAggregateAndReceipts(aggregateId) {
-  const batch = writeBatch(db);
+export async function get(colName, code) {
+  const col = collection(db, colName);
+  const q = query(col, where('code', '==', code));
+  const snapshot = await getDocs(q);
 
-  // Aggregate doc
-  const aggregateRef = doc(db, 'cards-total', aggregateId);
-  batch.delete(aggregateRef);
-
-  // Receipt docs
-  const q = query(
-    collection(db, 'cards'),
-    where('code', '==', aggregateId),
-  );
-
-  const receiptsSnap = await getDocs(q);
-
-  receiptsSnap.forEach(d => {
-    batch.delete(d.ref);
-  });
-
-  await batch.commit();
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 }
 
-export async function get (col) {
-  const result = [];
-  await getDocs(query(
-    collection(db, col),
-    // orderBy('rating', 'desc'),
-    // limit(10),
-  )).then(({ docs }) => {
-    docs.forEach(doc => {
-      result.push({
-        ...doc.data(),
-        id: doc.id,
-        date: doc.data().date?.toDate(),
-      });
-    });
-  });
-
-  return result;
-}
-
-export async function add (col, payload) {
-  const item = doc(collection(db, col));
-  const itemCollection = doc(db, 'cards-total', payload.code);
-
-  await runTransaction(db, async (tx) => {
-    // Create item
-    tx.set(item, {
-      ...payload,
-      date: serverTimestamp(),
-    });
-
-    tx.set(itemCollection, {
-      ...payload,
-      code: payload.code,
-      qtyNeeded: increment(payload.qtyNeeded),
-      qtyAcquired: increment(payload.qtyAcquired),
-      amtSpent: increment(payload.amtSpent),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true },
-    );
-  });
+export async function add(col, payload) {
+  console.log('adde');
+  await addDoc(collection(db, col), payload);
 }
 
 export async function update(col, id, payload) {
-  console.log('Updating path:', `${col}/${id}`);
-  console.log(payload);
-  const item = doc(db, col, id);
-  const itemCollection = doc(db, 'cards-total', payload.code);
-
-  await runTransaction(db, async (tx) => {
-    // Read the existing item to compute deltas
-    const snap = await tx.get(item);
-    if (!snap.exists()) {
-      throw new Error('Item does not exist');
-    }
-
-    const oldPayload = snap.data();
-
-    const qtyNeededDelta =
-      (payload.qtyNeeded ?? 0) - (oldPayload.qtyNeeded ?? 0);
-
-    const qtyAcquiredDelta =
-      (payload.qtyAcquired ?? 0) - (oldPayload.qtyAcquired ?? 0);
-
-    // Update the individual item
-    tx.update(item, {
-      ...payload,
-      updatedAt: serverTimestamp(),
-    });
-
-    // Apply deltas to the totals doc
-    tx.set(
-      itemCollection,
-      {
-        qtyNeeded: increment(qtyNeededDelta),
-        qtyAcquired: increment(qtyAcquiredDelta),
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
-  });
+  await updateDoc(doc(db, col, id), payload);
 }
 
-export async function del(col, id) {
-  const item = doc(db, col, id);
+export async function del(colName, id) {
+  await deleteDoc(doc(db, colName, id));
+}
 
-  await runTransaction(db, async (tx) => {
-    // Read the item first
-    const snap = await tx.get(item);
-    if (!snap.exists()) return;
-
-    const payload = snap.data();
-    const totals = doc(db, 'cards-total', payload.code);
-
-    const qtyNeeded = payload.qtyNeeded ?? 0;
-    const qtyAcquired = payload.qtyAcquired ?? 0;
-
-    // Delete the item
-    tx.delete(item);
-
-    // Subtract from totals
-    tx.set(
-      totals,
-      {
-        qtyNeeded: increment(-qtyNeeded),
-        qtyAcquired: increment(-qtyAcquired),
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
-  });
+export async function delByField(colName, field, value) {
+  const colRef = collection(db, colName);
+  const q = query(colRef, where(field, '==', value));
+  const snapshot = await getDocs(q);
+  const batch = writeBatch(db);
+  snapshot.docs.forEach(d => { batch.delete(d.ref); });
+  await batch.commit();
 }

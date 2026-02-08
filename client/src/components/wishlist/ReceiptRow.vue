@@ -18,7 +18,7 @@ export default {
   ],
   data () {
     return {
-      price: pair(0),
+      amtSpent: pair(0),
       qtyAcquired: pair(0),
       qtyNeeded: pair(0),
       date: pair(null),
@@ -29,7 +29,8 @@ export default {
       const changed = (
         this.date.value !== this.date.initial ||
         this.qtyNeeded.value !== this.qtyNeeded.initial ||
-        this.qtyAcquired.value !== this.qtyAcquired.initial
+        this.qtyAcquired.value !== this.qtyAcquired.initial ||
+        this.amtSpent.value !== this.amtSpent.initial
       );
 
       return {
@@ -50,9 +51,10 @@ export default {
         if (v) {
           const payload = {
             ...this.item,
-            date: Timestamp.fromDate(new Date(this.date.value)),
-            qtyNeeded:  this.qtyNeeded.value,
-            qtyAcquired:  this.qtyAcquired.value,
+            // date: Timestamp.fromDate(new Date(this.date.value)),
+            qtyNeeded: this.qtyNeeded.value,
+            qtyAcquired: this.qtyAcquired.value,
+            amtSpent: this.amtSpent.value,
           };
           result[this.item.id] = payload;
         } else {
@@ -66,8 +68,11 @@ export default {
 
   // Initialize values
   mounted () {
-    updatePair(this.date, this.item?.date ?? null);
-    updatePair(this.price, this.item?.price ?? 0);
+    const ts = this.item.date;
+    const date = new Date(ts?.seconds * 1000 + ts?.nanoseconds / 1_000_000);
+
+    updatePair(this.date, date ?? null);
+    updatePair(this.amtSpent, this.item?.amtSpent ?? 0);
     updatePair(this.qtyNeeded, this.item?.qtyNeeded ?? 0);
     updatePair(this.qtyAcquired, this.item?.qtyAcquired ?? 0);
   },
@@ -86,7 +91,7 @@ export default {
       cols="3"
     />
     <paired-number-input
-      v-model="price.value"
+      v-model="amtSpent.value"
       type="dollar"
       label="Price"
       padding="0"
