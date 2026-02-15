@@ -58,7 +58,6 @@ export default {
     },
     async get () {
       this.tableData = await getCards();
-      console.log(this.tableData);
     },
     async add (payload) {
       console.log('add', payload);
@@ -66,10 +65,12 @@ export default {
       await this.get();
       this.overlayFlags.edit = null;
     },
+
     async remove(id) {
       await delAll(id);
       await this.get();
     },
+
     async update (payload) {
       console.log('edit', payload);
       // console.log(this.overlayFlags.edit);

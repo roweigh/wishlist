@@ -31,12 +31,12 @@ export default {
         },
         {
           key: 'qtyNeeded',
-          title: 'Quantity Needed',
+          title: 'Needed',
           align: 'end',
         },
         {
           key: 'qtyAcquired',
-          title: 'Quantity Acquired',
+          title: 'Stock',
           align: 'end',
         },
         {

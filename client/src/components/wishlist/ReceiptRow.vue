@@ -1,11 +1,10 @@
 <script>
-import { Timestamp } from 'firebase/firestore';
-
 // Editable purchase entry
 import {
   pair,
   updatePair,
 } from '@/utils/form-utils';
+import { Timestamp } from 'firebase/firestore';
 
 export default {
   props: {
@@ -51,7 +50,7 @@ export default {
         if (v) {
           const payload = {
             ...this.item,
-            // date: Timestamp.fromDate(new Date(this.date.value)),
+            date: Timestamp.fromDate(new Date(this.date.value)),
             qtyNeeded: this.qtyNeeded.value,
             qtyAcquired: this.qtyAcquired.value,
             amtSpent: this.amtSpent.value,
@@ -83,6 +82,7 @@ export default {
   <flex-row class="grow">
     <paired-date-picker
       v-model="date.value"
+      label="Purchase Date"
     />
     <paired-number-input
       v-model="qtyAcquired.value"
