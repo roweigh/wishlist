@@ -27,8 +27,8 @@ export default {
 
       // Form inputs
       code: null,
-      name: null,
       price: 0,
+      name: pair(null),
       qtyNeeded: pair(0),
       qtyAcquired: pair(0),
 
@@ -40,7 +40,8 @@ export default {
     newEntry () { return !this.modelValue?.code; },
     changed () { return (
       this.qtyNeeded.initial !== this.qtyNeeded.value ||
-      this.qtyAcquired.initial !== this.qtyAcquired.value
+      this.qtyAcquired.initial !== this.qtyAcquired.value ||
+      this.name.initial !== this.name.value
     );},
   },
   watch: {
@@ -49,7 +50,6 @@ export default {
       immediate: true,
       async handler(v) {
         updatePair(this.qtyAcquired, this.qtyAcquired.initial);
-
         if (v) {
           this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk';
           this.code = v?.code ?? null;
@@ -87,8 +87,8 @@ export default {
     async submit () {
       const payload = {
         code: this.sanitizeCode(this.code),
-        name: this.name,
         amtSpent: this.price,
+        name: this.name.value,
         qtyAcquired: this.qtyAcquired.value,
         qtyNeeded:  this.qtyNeeded.value,
         date: Timestamp.fromDate(new Date()),
@@ -96,8 +96,13 @@ export default {
       await this.updatePurchaseHistory();
 
       if (this.changed) {
-        this.$emit('add', payload);
+        if (this.code) {
+          this.$emit('update', payload);
+        } else {
+          this.$emit('add', payload);
+        }
       }
+
       this.$emit('refresh');
     },
 
@@ -119,25 +124,17 @@ export default {
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-row>
-      <v-col cols="6">
-        <v-text-field
-          v-model="code"
-          label="Code"
-          density="compact"
-          hide-details="auto"
-          tile
-        />
-      </v-col>
+      <paired-text-field
+        v-model="code"
+        label="Code"
+        cols="6"
+      />
 
-      <v-col cols="6">
-        <v-text-field
-          v-model="name"
-          label="Name"
-          density="compact"
-          hide-details="auto"
-          tile
-        />
-      </v-col>
+      <paired-text-field
+        v-model="name"
+        label="Name"
+        cols="6"
+      />
 
       <paired-number-input
         v-model="qtyNeeded.value"

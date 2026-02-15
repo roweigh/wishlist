@@ -25,13 +25,16 @@ export async function getAll(colName) {
   snapshot.forEach((doc) => {
     const data = doc.data();
     const code = data.code;
+    const name = data.name;
     const qtyAcquired = data.qtyAcquired || 0;
     const qtyNeeded = data.qtyNeeded || 0;
     const amtSpent = data.amtSpent || 0;
 
     if (!summaryMap[code]) {
       summaryMap[code] = {
+        id: doc.id,
         code: code,
+        name: name,
         qtyAcquired: 0,
         qtyNeeded: 0,
         amtSpent: 0,
@@ -51,7 +54,6 @@ export async function get(colName, code) {
   const col = collection(db, colName);
   const q = query(col, where('code', '==', code));
   const snapshot = await getDocs(q);
-
   return snapshot.docs.map(doc => ({
     id: doc.id,
     ...doc.data(),
@@ -59,7 +61,6 @@ export async function get(colName, code) {
 }
 
 export async function add(col, payload) {
-  console.log('adde');
   await addDoc(collection(db, col), payload);
 }
 

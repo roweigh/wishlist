@@ -6,6 +6,7 @@ import EditBulkDialog from '../components/wishlist/EditBulkDialog.vue';
 import {
   getCards,
   addCard,
+  updateCard,
   delAll,
 } from '../api/wishlist';
 
@@ -31,7 +32,6 @@ export default {
     async loadFromClipboard () {
       try {
         const text = await navigator.clipboard.readText();
-        console.log(this.parseDecklist(text));
         this.tableData = this.parseDecklist(text);
       } catch (err) {
         console.error('Failed to read clipboard:', err);
@@ -59,9 +59,16 @@ export default {
     async get () {
       this.tableData = await getCards();
     },
+
     async add (payload) {
-      console.log('add', payload);
       await addCard(payload),
+      await this.get();
+      this.overlayFlags.edit = null;
+    },
+
+    async update (payload) {
+      const id = this.overlayFlags.edit.id;
+      await updateCard(id, payload),
       await this.get();
       this.overlayFlags.edit = null;
     },
@@ -71,16 +78,7 @@ export default {
       await this.get();
     },
 
-    async update (payload) {
-      console.log('edit', payload);
-      // console.log(this.overlayFlags.edit);
-      // await updateCard(payload, payload.code),
-      await this.get();
-      this.overlayFlags.edit = null;
-    },
     upload (payload) {
-      console.log(payload);
-
       this.tableData = this.tableData.concat(payload);
     },
   },
@@ -118,6 +116,7 @@ export default {
     <edit-bulk-dialog
       v-model="overlayFlags.edit"
       @add="add($event)"
+      @update="update($event)"
       @edit="update($event);"
       @refresh="get()"
     />

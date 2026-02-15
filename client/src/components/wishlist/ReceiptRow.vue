@@ -1,10 +1,10 @@
 <script>
 // Editable purchase entry
+import { Timestamp } from 'firebase/firestore';
 import {
   pair,
   updatePair,
 } from '@/utils/form-utils';
-import { Timestamp } from 'firebase/firestore';
 
 export default {
   props: {
