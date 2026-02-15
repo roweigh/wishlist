@@ -26,6 +26,7 @@ export async function getAll(colName) {
     const data = doc.data();
     const code = data.code;
     const name = data.name;
+    const date = data.date;
     const qtyAcquired = data.qtyAcquired || 0;
     const qtyNeeded = data.qtyNeeded || 0;
     const amtSpent = data.amtSpent || 0;
@@ -38,6 +39,7 @@ export async function getAll(colName) {
         qtyAcquired: 0,
         qtyNeeded: 0,
         amtSpent: 0,
+        date: new Date(date?.seconds * 1000 + date?.nanoseconds / 1_000_000),
       };
     }
 
@@ -48,6 +50,16 @@ export async function getAll(colName) {
 
   // convert map → array for UI tables
   return Object.values(summaryMap);
+}
+
+export async function getUnconditional(colName, code) {
+  const col = collection(db, colName);
+  const q = query(col);
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
 }
 
 export async function get(colName, code) {

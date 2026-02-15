@@ -28,6 +28,7 @@ export default {
       // Form inputs
       code: null,
       price: 0,
+      date: null,
       name: pair(null),
       qtyNeeded: pair(0),
       qtyAcquired: pair(0),
@@ -53,8 +54,9 @@ export default {
         if (v) {
           this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk';
           this.code = v?.code ?? null;
-          this.name = v?.name ?? null;
+          updatePair(this.name, v?.name  ?? null);
           updatePair(this.qtyNeeded, 0);
+          this.date = new Date();
           this.price = 0;
           v?.code && await this.getPurchaseHistory();
         }
@@ -91,15 +93,14 @@ export default {
         name: this.name.value,
         qtyAcquired: this.qtyAcquired.value,
         qtyNeeded:  this.qtyNeeded.value,
-        date: Timestamp.fromDate(new Date()),
+        date: Timestamp.fromDate(new Date(this.date)),
       };
       await this.updatePurchaseHistory();
-
       if (this.changed) {
-        if (this.code) {
-          this.$emit('update', payload);
-        } else {
+        if (this.qtyAcquired) {
           this.$emit('add', payload);
+        } else {
+          this.$emit('update', payload);
         }
       }
 
@@ -127,13 +128,13 @@ export default {
       <paired-text-field
         v-model="code"
         label="Code"
-        cols="6"
+        cols="4"
       />
 
       <paired-text-field
-        v-model="name"
+        v-model="name.value"
         label="Name"
-        cols="6"
+        cols="8"
       />
 
       <paired-number-input
@@ -155,6 +156,13 @@ export default {
         type="dollar"
         label="Price"
         cols="4"
+      />
+    </v-row>
+
+    <v-row>
+      <paired-date-picker
+        v-model="date"
+        label="Purchase Date"
       />
     </v-row>
 

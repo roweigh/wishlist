@@ -1,4 +1,4 @@
-import { add, get, getAll, update, del, delByField } from '../utils/api-utils';
+import { add, get, getAll, update, del, delByField, getUnconditional } from '../utils/api-utils';
 
 import { serverTimestamp, increment } from 'firebase/firestore';
 
@@ -19,4 +19,9 @@ export const removeHistory = async (id) => {};
 export const delAll = async (id) => {
   await delByField('purchases', 'code', id);
   await del('purchases', id);
+};
+
+
+export const getPurchaseHistory = async () => {
+  return await getUnconditional('purchases');
 };

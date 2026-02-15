@@ -117,7 +117,6 @@ export default {
       v-model="overlayFlags.edit"
       @add="add($event)"
       @update="update($event)"
-      @edit="update($event);"
       @refresh="get()"
     />
 
