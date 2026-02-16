@@ -15,7 +15,7 @@ export default {
         <navigation-drawer />
         <div
           class="d-flex grow bg-grey"
-          style="height: 100vh"
+          style="height: 100vh; overflow: auto"
         >
           <router-view />
         </div>
@@ -23,3 +23,9 @@ export default {
     </v-layout>
   </v-app>
 </template>
+
+<style>
+html {
+  overflow: hidden
+}
+</style>

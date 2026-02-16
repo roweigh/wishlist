@@ -24,18 +24,28 @@ export default {
     },
 
     csvToArray(csvText) {
-      // Split rows on \n and filter out blank lines
-      // TODO clean this up so it makes sense to me lol
-      const rows = csvText.split(/\r?\n/).filter(row => row.trim() !== '');
-      const headers = rows[0].split(',').map(h => h.trim().replace(/\r$/, ''));
+      const lines = csvText.trim().split('\n');
 
-      return rows.slice(1).map(row => {
-        const cols = row.split(',').map(col => col.trim().replace(/\r$/, ''));
+      // 1. Get the headers from the first line
+      const headers = lines[0].split(',');
 
-        return headers.reduce((obj, header, i) => {
-          obj[header] = cols[i] ?? '';
-          return obj;
-        }, {});
+      // 2. Map the rest of the lines into objects
+      return lines.slice(1).map(line => {
+        // This regex handles the commas inside the quotes correctly
+        const values = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g);
+
+        const obj = {};
+        headers.forEach((header, index) => {
+          let value = values[index] ? values[index].replace(/^"|"$/g, '') : '';
+
+          // 3. Optional: Convert numbers back to numbers
+          if (!isNaN(value) && value !== '') {
+            obj[header] = Number(value);
+          } else {
+            obj[header] = value;
+          }
+        });
+        return obj;
       });
     },
 

@@ -86,6 +86,12 @@ export default {
             @click="$emit('upload')"
           />
           <v-btn
+            icon="mdi-download"
+            density="compact"
+            class="mx-2"
+            @click="$emit('download')"
+          />
+          <v-btn
             icon="mdi-plus"
             density="compact"
             @click="$emit('add')"
