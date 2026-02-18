@@ -22,7 +22,7 @@ export default {
       <v-btn
         v-bind="props"
       >
-        Tournament Entry
+        Attendance
       </v-btn>
     </template>
 

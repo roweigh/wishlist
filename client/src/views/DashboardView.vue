@@ -1,10 +1,10 @@
 <script>
 import { data } from '../api/test-api';
-import { getPurchaseHistory,
+import {
+  getPurchaseHistory,
   getTournamentEntry,
 
-
-} from '../api/wishlist';
+} from '@/api/purchases';
 
 
 import DonutGraph from '../components/dashboard/DonutGraph.vue';

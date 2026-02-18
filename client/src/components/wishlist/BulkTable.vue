@@ -1,6 +1,7 @@
 <script>
 export default {
   props: {
+    loading: { type: Boolean, default: false },
     items: { type: null, required: true },
   },
   emits: [
@@ -104,6 +105,7 @@ export default {
   <v-data-table
     :headers="headers"
     :items="items"
+    :loading="loading"
     density="compact"
   >
     <template #item.amtSpent="{ item }">

@@ -7,7 +7,7 @@ import {
   getCardHistory,
   updateHistory,
   removeHistory,
-} from '@/api/wishlist';
+} from '@/api/purchases';
 
 import ReceiptRow from './ReceiptRow.vue';
 

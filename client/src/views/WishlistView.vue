@@ -1,19 +1,18 @@
 <script>
-import BulkTable from '@/components/wishlist/BulkTable.vue';
-import BulkUploadDialog from '../components/wishlist/BulkUploadDialog.vue';
-import EditBulkDialog from '../components/wishlist/EditBulkDialog.vue';
-
 import {
   getCards,
   addCard,
   updateCard,
-  delAll,
+  removeCard,
   getPurchaseHistory,
-
   getTournamentEntry,
   updateTournamentEntry,
-} from '../api/wishlist';
-import TournamentEntryInput from '../components/wishlist/TournamentEntryInput.vue';
+} from '@/api/purchases';
+
+import BulkTable from '@/components/wishlist/BulkTable.vue';
+import BulkUploadDialog from '@/components/wishlist/BulkUploadDialog.vue';
+import EditBulkDialog from '@/components/wishlist/EditBulkDialog.vue';
+import TournamentEntryInput from '@/components/wishlist/TournamentEntryInput.vue';
 
 export default {
   components: {
@@ -24,52 +23,83 @@ export default {
   },
   data () {
     return {
-      selectedDates: [],
-      tableData: [],
+      loadingFlags: {
+        initializing: true,
+        loading: true,
+      },
       overlayFlags: {
         edit: false,
         upload: false,
       },
+
+      selectedDates: [],
+      cards: [],
     };
   },
   async mounted () {
-    await this.get();
+    await Promise.all([
+      this.getTournamentAttendance(),
+      this.getCards(),
+    ]);
   },
   methods: {
-    async loadFromClipboard () {
+    async getCards () {
+      this.loadingFlags.loading = true;
       try {
-        const text = await navigator.clipboard.readText();
-        this.tableData = this.parseDecklist(text);
-      } catch (err) {
-        console.error('Failed to read clipboard:', err);
+        this.cards = await getCards();
+      } catch {
+        // handle(error)
+      } finally {
+        this.loadingFlags.loading = false;
       }
     },
 
-    async get () {
-      this.tableData = await getCards();
-      this.selectedDates = await getTournamentEntry().then(response => {
-        return response[0].dates.map(v => {
-          return new Date(v?.seconds * 1000 + v?.nanoseconds / 1_000_000);
-        });
+    async addCard (payload) {
+      this.loadingFlags.loading = true;
+      try {
+        await addCard(payload),
+        await this.getCards();
+        this.overlayFlags.edit = false;
+      } catch {
+        // handle(error)
+      }
+    },
+
+    async updateCard (payload) {
+      const id = this.overlayFlags?.edit?.id;
+      this.loadingFlags.loading = true;
+      try {
+        await updateCard(id, payload),
+        await this.getCards();
+        this.overlayFlags.edit = false;
+      } catch {
+        // handle(error)
+      }
+    },
+
+    async removeCard(id) {
+      this.loadingFlags.loading = true;
+      try {
+        await removeCard(id);
+        await this.getCards();
+        this.overlayFlags.edit = false;
+      } catch {
+        // handle(error)
+      }
+    },
+
+    async getTournamentAttendance () {
+      try {
+        this.selectedDates = await getTournamentEntry().then(response => response[0].dates.map(v => new Date(v?.seconds * 1000 + v?.nanoseconds / 1_000_000)));
+      } catch {
+        // handle(error)
+      }
+    },
+
+    async saveTournamentEntry() {
+      await updateTournamentEntry({
+        dates: this.selectedDates,
       });
-    },
-
-    async add (payload) {
-      await addCard(payload),
-      await this.get();
-      this.overlayFlags.edit = null;
-    },
-
-    async update (payload) {
-      const id = this.overlayFlags.edit.id;
-      await updateCard(id, payload),
-      await this.get();
-      this.overlayFlags.edit = null;
-    },
-
-    async remove(id) {
-      await delAll(id);
-      await this.get();
     },
 
     async download () {
@@ -150,14 +180,13 @@ export default {
       downloadCSV(csvString);
     },
 
-    async saveTournamentEntry() {
-      await updateTournamentEntry({
-        dates: this.selectedDates,
-      });
-    },
-
-    upload (payload) {
-      this.tableData = this.tableData.concat(payload);
+    async loadFromClipboard () {
+      try {
+        const text = await navigator.clipboard.readText();
+        this.cards = this.parseDecklist(text);
+      } catch (err) {
+        console.error('Failed to read clipboard:', err);
+      }
     },
 
     parseDecklist (text) {
@@ -179,7 +208,6 @@ export default {
         }
       });
     },
-
   },
 };
 </script>
@@ -206,20 +234,21 @@ export default {
     </flex-row>
 
     <bulk-table
-      :items="tableData"
+      :loading="loadingFlags.loading"
+      :items="cards"
       @add="overlayFlags.edit = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
       @download="download()"
-      @remove="remove($event)"
+      @remove="removeCard($event)"
       @load="loadFromClipboard()"
     />
 
     <edit-bulk-dialog
       v-model="overlayFlags.edit"
-      @add="add($event)"
-      @update="update($event)"
-      @refresh="get()"
+      @add="addCard($event)"
+      @update="updateCard($event)"
+      @refresh="getCards()"
     />
 
     <bulk-upload-dialog
