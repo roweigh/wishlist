@@ -29,5 +29,5 @@ export const getTournamentEntry = async () => {
 };
 export const updateTournamentEntry = async (payload) => {
   payload.dates = payload.dates.map((v) => Timestamp.fromDate(new Date(v)));
-  return await update('tournament-entry', payload);
+  return await update('tournament-entry', 'DMfW4KQ8rOKPCwNABqHs', payload);
 };
