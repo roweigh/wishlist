@@ -14,6 +14,9 @@ import BulkUploadDialog from '@/components/wishlist/BulkUploadDialog.vue';
 import EditBulkDialog from '@/components/wishlist/EditBulkDialog.vue';
 import TournamentEntryInput from '@/components/wishlist/TournamentEntryInput.vue';
 
+import { useAlertStore } from '@/stores/alert';
+const alertStore = useAlertStore();
+
 export default {
   components: {
     BulkTable,
@@ -59,6 +62,7 @@ export default {
       try {
         await addCard(payload),
         await this.getCards();
+        alertStore.showMessage('success', 'Successfully Added!');
         this.overlayFlags.edit = false;
       } catch {
         // handle(error)
@@ -71,6 +75,7 @@ export default {
       try {
         await updateCard(id, payload),
         await this.getCards();
+        alertStore.showMessage('success', 'Successfully Updated!');
         this.overlayFlags.edit = false;
       } catch {
         // handle(error)
@@ -83,6 +88,7 @@ export default {
         await removeCard(id);
         await this.getCards();
         this.overlayFlags.edit = false;
+        alertStore.showMessage('success', 'Successfully Removed!');
       } catch {
         // handle(error)
       }

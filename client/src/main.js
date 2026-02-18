@@ -1,5 +1,6 @@
 
 import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 import VueApexCharts from 'vue3-apexcharts';
 
 // Vuetify
@@ -40,11 +41,13 @@ const vuetify = createVuetify({
   directives,
 });
 const app = createApp(App);
+const pinia = createPinia();
 
 app
   .use(VueApexCharts)
   .use(vuetify)
-  .use(router);
+  .use(router)
+  .use(pinia);
 router.isReady().then(() => app.mount('#app'));
 
 app.component('FlexCol', FlexCol);

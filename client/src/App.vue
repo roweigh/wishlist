@@ -1,8 +1,10 @@
 <script>
-import NavigationDrawer from './components/base/NavigationDrawer.vue';
+import AlertPopup from '@/components/base/AlertPopup.vue';
+import NavigationDrawer from '@/components/base/NavigationDrawer.vue';
 
 export default {
   components: {
+    AlertPopup,
     NavigationDrawer,
   },
 };
@@ -10,6 +12,7 @@ export default {
 
 <template>
   <v-app class="d-flex">
+    <alert-popup />
     <v-layout>
       <v-main>
         <navigation-drawer />
