@@ -58,6 +58,34 @@ export default {
     };
   },
   methods: {
+    async loadFromClipboard () {
+      try {
+        const text = await navigator.clipboard.readText();
+        this.cards = this.parseDecklist(text);
+      } catch (err) {
+        console.error('Failed to read clipboard:', err);
+      }
+    },
+
+    parseDecklist (text) {
+      return text.split(/\r?\n/).map(line => {
+        const cardQty = line.trim().match(/^(\d+)x(.+)$/);
+        const qtyNeeded = Number(cardQty?.[1]);
+        const code = cardQty?.[2].trim();
+
+        if (!cardQty) {
+          return null;
+        } else {
+          return {
+            code,
+            qtyNeeded,
+            qtyAcquired: 0,
+            cost: 0,
+          };
+        }
+      });
+    },
+
     formatDollar(v) {
       return `$${(v).toFixed(2)}`;
     },
@@ -78,7 +106,7 @@ export default {
           <v-btn
             icon="mdi-content-copy"
             density="compact"
-            @click="$emit('load')"
+            @click="loadFromClipboard()"
           />
           <v-btn
             icon="mdi-upload"
@@ -106,6 +134,7 @@ export default {
     :headers="headers"
     :items="items"
     :loading="loading"
+    :items-per-page="-1"
     density="compact"
   >
     <template #item.amtSpent="{ item }">

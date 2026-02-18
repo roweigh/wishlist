@@ -15,38 +15,65 @@ export default {
 <template>
   <v-menu
     v-model="menu"
+    offset="8px"
     :close-on-content-click="false"
-    transition="scale-transition"
   >
     <template #activator="{ props }">
       <v-btn
         v-bind="props"
       >
-        Attendance
+        Other purchases
       </v-btn>
     </template>
 
     <v-date-picker
       :model-value="modelValue"
+      width="450"
+      show-adjacent-months
       multiple
+      hide-title
       @update:model-value="$emit('update:model-value', $event)"
     >
-      <template #actions>
-        <v-spacer /> <v-btn
-          variant="text"
-          color="error"
-          @click="cancelSelection"
-        >
-          Cancel
-        </v-btn>
+      <template #header>
+        <v-date-picker-header>Select Hobby Attendance</v-date-picker-header>
+      </template>
 
-        <v-btn
-          variant="elevated"
-          color="success"
-          @click="$emit('save')"
-        >
-          Save
-        </v-btn>
+      <template #actions>
+        <v-col>
+          <v-row>
+            <v-date-picker-header style="padding: 12px">
+              Others
+            </v-date-picker-header>
+          </v-row>
+          <v-row>
+            <paired-number-input
+              label="Boosters"
+            />
+          </v-row>
+          <v-row>
+            <paired-number-input
+              label="Accessories"
+            />
+          </v-row>
+
+          <v-row>
+            <v-btn
+              variant="text"
+              color="error"
+              @click="cancelSelection"
+            >
+              Cancel
+            </v-btn>
+
+            <v-btn
+              variant="elevated"
+              color="success"
+              @click="$emit('save')"
+            >
+              Save
+            </v-btn>
+          </v-row>
+        </v-col>
       </template>
     </v-date-picker>
   </v-menu>

@@ -3,10 +3,10 @@ import { data } from '../api/test-api';
 import {
   getPurchaseHistory,
   getTournamentEntry,
-
+  updateTournamentEntry,
 } from '@/api/purchases';
 
-
+import TournamentEntryInput from '@/components/wishlist/TournamentEntryInput.vue';
 import DonutGraph from '../components/dashboard/DonutGraph.vue';
 import LineGraph from '../components/dashboard/LineGraph.vue';
 
@@ -14,11 +14,13 @@ export default {
   components: {
     LineGraph,
     DonutGraph,
+    TournamentEntryInput,
   },
   data () {
     return {
       user: null,
 
+      selectedDates: [],
       donutData: [1],
       data: [],
       selected: [
@@ -59,6 +61,9 @@ export default {
     },
   },
   async mounted () {
+    await Promise.all([
+      this.getTournamentAttendance(),
+    ]);
     const selectedDates = await getTournamentEntry();
 
     const result = await getPurchaseHistory();
@@ -106,20 +111,44 @@ export default {
     this.data = data;
     this.data[0].singles = chartData;
   },
+  methods: {
+    async getTournamentAttendance () {
+      try {
+        this.selectedDates = await getTournamentEntry().then(response => response[0].dates.map(v => new Date(v?.seconds * 1000 + v?.nanoseconds / 1_000_000)));
+      } catch {
+        // handle(error)
+      }
+    },
+
+    async saveTournamentEntry() {
+      await updateTournamentEntry({
+        dates: this.selectedDates,
+      });
+    },
+
+  },
 };
 </script>
 
 <template>
-  <div class="d-flex flex-row ma-auto">
-    <line-graph
-      v-model:user="user"
-      :selected="selected"
-      :data="data"
-    />
-    <donut-graph
-      :key="donutData"
-      :user="user"
-      :data="donutData"
-    />
-  </div>
+  <v-col>
+    <flex-row class="justify-end mb-3">
+      <tournament-entry-input
+        v-model="selectedDates"
+        @save="saveTournamentEntry()"
+      />
+    </flex-row>
+    <div class="d-flex flex-row ma-auto">
+      <line-graph
+        v-model:user="user"
+        :selected="selected"
+        :data="data"
+      />
+      <donut-graph
+        :key="donutData"
+        :user="user"
+        :data="donutData"
+      />
+    </div>
+  </v-col>
 </template>

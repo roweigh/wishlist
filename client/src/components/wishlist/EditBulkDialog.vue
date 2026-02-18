@@ -1,8 +1,10 @@
 <script>
-import { pair, updatePair } from '@/utils/form-utils';
+import { Timestamp } from 'firebase/firestore';
 import {
-  Timestamp,
-} from 'firebase/firestore';
+  pair,
+  updatePair,
+} from '@/utils/form-utils';
+
 import {
   getCardHistory,
   updateHistory,
@@ -20,10 +22,21 @@ export default {
   },
   emits: [
     'update:model-value',
+    'add',
+    'update',
+    'refresh',
   ],
   data () {
     return {
       title: 'Add Bulk',
+      loadingFlags: {
+        initialising: true,
+        loading: false,
+      },
+
+      showHistory: false,
+      history: [],
+      changedHistory: {},
 
       // Form inputs
       code: null,
@@ -32,9 +45,6 @@ export default {
       name: pair(null),
       qtyNeeded: pair(0),
       qtyAcquired: pair(0),
-
-      history: [],
-      changedHistory: {},
     };
   },
   computed: {
@@ -51,15 +61,21 @@ export default {
       immediate: true,
       async handler(v) {
         updatePair(this.qtyAcquired, this.qtyAcquired.initial);
+
         if (v) {
           this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk';
+          this.loadingFlags.initialising = true;
+          this.showHistory = false;
+
           this.code = v?.code ?? null;
           updatePair(this.name, v?.name  ?? null);
           updatePair(this.qtyNeeded, 0);
           this.date = new Date();
           this.price = 0;
-          v?.code && await this.getPurchaseHistory();
+          v?.code && await this.getPurchaseHistory().then(() => { this.showHistory = true; });
         }
+
+        this.loadingFlags.initialising = false;
       },
     },
   },
@@ -124,64 +140,74 @@ export default {
     @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
-    <v-row>
-      <paired-text-field
-        v-model="code"
-        label="Code"
-        cols="4"
-      />
-
-      <paired-text-field
-        v-model="name.value"
-        label="Name"
-        cols="8"
-      />
-
-      <paired-number-input
-        v-model="qtyNeeded.value"
-        :min="0"
-        label="Quantity Needed"
-        cols="4"
-      />
-
-      <paired-number-input
-        v-model="qtyAcquired.value"
-        :min="0"
-        label="Quantity Acquired"
-        cols="4"
-      />
-
-      <paired-number-input
-        v-model="price"
-        type="dollar"
-        label="Price"
-        cols="4"
+    <v-row v-if="loadingFlags.initialising">
+      <v-progress-circular
+        class="mx-auto my-12"
+        size="200"
+        indeterminate
       />
     </v-row>
 
-    <v-row>
-      <paired-date-picker
-        v-model="date"
-        label="Purchase Date"
-      />
-    </v-row>
-
-    <template v-if="!newEntry">
+    <template v-else>
       <v-row>
-        <v-card-title class="mb-3">
-          History
-        </v-card-title>
+        <paired-text-field
+          v-model="code"
+          label="Code"
+          cols="4"
+        />
+
+        <paired-text-field
+          v-model="name.value"
+          label="Name"
+          cols="8"
+        />
+
+        <paired-number-input
+          v-model="qtyNeeded.value"
+          :min="0"
+          label="Quantity Needed"
+          cols="4"
+        />
+
+        <paired-number-input
+          v-model="qtyAcquired.value"
+          :min="0"
+          label="Quantity Acquired"
+          cols="4"
+        />
+
+        <paired-number-input
+          v-model="price"
+          type="dollar"
+          label="Price"
+          cols="4"
+        />
       </v-row>
 
-      <template
-        v-for="item in history"
-        :key="item.id"
-      >
-        <receipt-row
-          v-model="changedHistory"
-          :item="item"
-          @remove="remove($event)"
+      <v-row>
+        <paired-date-picker
+          v-model="date"
+          label="Purchase Date"
         />
+      </v-row>
+
+      <template v-if="showHistory">
+        <v-row>
+          <v-card-title class="mb-3">
+            History
+          </v-card-title>
+        </v-row>
+
+        <template
+          v-for="item in history"
+          :key="item.id"
+        >
+          <receipt-row
+            v-model="changedHistory"
+            :item="item"
+            @remove="remove($event)"
+          />
+        </template>
       </template>
     </template>
   </base-dialog>

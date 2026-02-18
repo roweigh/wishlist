@@ -18,7 +18,6 @@ import {
 } from 'firebase/firestore';
 
 export async function get(colName, id = undefined) {
-  const col = collection(db, colName);
   const transformData = (snapshot) => {
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -26,6 +25,7 @@ export async function get(colName, id = undefined) {
     }));
   };
 
+  const col = collection(db, colName);
   if (id) { // Fetch by id
     const q = query(col, where('code', '==', id));
     return await getDocs(q).then((snapshot) => transformData(snapshot));

@@ -5,14 +5,11 @@ import {
   updateCard,
   removeCard,
   getPurchaseHistory,
-  getTournamentEntry,
-  updateTournamentEntry,
 } from '@/api/purchases';
 
 import BulkTable from '@/components/wishlist/BulkTable.vue';
 import BulkUploadDialog from '@/components/wishlist/BulkUploadDialog.vue';
 import EditBulkDialog from '@/components/wishlist/EditBulkDialog.vue';
-import TournamentEntryInput from '@/components/wishlist/TournamentEntryInput.vue';
 
 import { useAlertStore } from '@/stores/alert';
 const alertStore = useAlertStore();
@@ -22,7 +19,6 @@ export default {
     BulkTable,
     BulkUploadDialog,
     EditBulkDialog,
-    TournamentEntryInput,
   },
   data () {
     return {
@@ -35,15 +31,11 @@ export default {
         upload: false,
       },
 
-      selectedDates: [],
       cards: [],
     };
   },
   async mounted () {
-    await Promise.all([
-      this.getTournamentAttendance(),
-      this.getCards(),
-    ]);
+    await this.getCards();
   },
   methods: {
     async getCards () {
@@ -92,20 +84,6 @@ export default {
       } catch {
         // handle(error)
       }
-    },
-
-    async getTournamentAttendance () {
-      try {
-        this.selectedDates = await getTournamentEntry().then(response => response[0].dates.map(v => new Date(v?.seconds * 1000 + v?.nanoseconds / 1_000_000)));
-      } catch {
-        // handle(error)
-      }
-    },
-
-    async saveTournamentEntry() {
-      await updateTournamentEntry({
-        dates: this.selectedDates,
-      });
     },
 
     async download () {
@@ -186,33 +164,8 @@ export default {
       downloadCSV(csvString);
     },
 
-    async loadFromClipboard () {
-      try {
-        const text = await navigator.clipboard.readText();
-        this.cards = this.parseDecklist(text);
-      } catch (err) {
-        console.error('Failed to read clipboard:', err);
-      }
-    },
+    bulkUpload () {
 
-    parseDecklist (text) {
-      return text.split(/\r?\n/).map(line => {
-        const cardQty = line.trim().match(/^(\d+)x(.+)$/);
-        const qtyNeeded = Number(cardQty?.[1]);
-        const code = cardQty?.[2].trim();
-
-        if (!cardQty) {
-          return null;
-        } else {
-          return {
-            code,
-            qtyNeeded,
-            qtyAcquired: 0,
-            cost: '',
-            notes: '',
-          };
-        }
-      });
     },
   },
 };
@@ -220,34 +173,15 @@ export default {
 
 <template>
   <flex-col class="pa-5 grow">
-    <flex-row>
-      <v-text-field
-        label="Boosters"
-        density="compact"
-      />
-      <v-text-field
-        label="Accessories"
-        density="compact"
-        class="ml-5"
-      />
-    </flex-row>
-
-    <flex-row class="justify-end">
-      <tournament-entry-input
-        v-model="selectedDates"
-        @save="saveTournamentEntry()"
-      />
-    </flex-row>
-
     <bulk-table
       :loading="loadingFlags.loading"
       :items="cards"
       @add="overlayFlags.edit = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
-      @download="download()"
       @remove="removeCard($event)"
-      @load="loadFromClipboard()"
+      @download="download()"
+      @load="bulkUpload($event)"
     />
 
     <edit-bulk-dialog
@@ -259,7 +193,7 @@ export default {
 
     <bulk-upload-dialog
       v-model="overlayFlags.upload"
-      @upload="upload($event)"
+      @upload="bulkUpload($event)"
     />
   </flex-col>
 </template>
