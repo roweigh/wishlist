@@ -1,4 +1,5 @@
-import { add, get, getAll, update, del, delByField, getUnconditional } from '../utils/api-utils';
+import { add, get, getAll, update, del, delByField, getUnconditional, getTournaments } from '../utils/api-utils';
+import { Timestamp } from 'firebase/firestore';
 
 import { serverTimestamp, increment } from 'firebase/firestore';
 
@@ -22,6 +23,11 @@ export const delAll = async (id) => {
 };
 
 
-export const getPurchaseHistory = async () => {
-  return await getUnconditional('purchases');
+export const getPurchaseHistory = async () => await getUnconditional('purchases');
+export const getTournamentEntry = async () => {
+  return await getTournaments();
+};
+export const updateTournamentEntry = async (payload) => {
+  payload.dates = payload.dates.map((v) => Timestamp.fromDate(new Date(v)));
+  return await update('tournament-entry', payload);
 };

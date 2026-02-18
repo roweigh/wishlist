@@ -9,16 +9,22 @@ import {
   updateCard,
   delAll,
   getPurchaseHistory,
+
+  getTournamentEntry,
+  updateTournamentEntry,
 } from '../api/wishlist';
+import TournamentEntryInput from '../components/wishlist/TournamentEntryInput.vue';
 
 export default {
   components: {
     BulkTable,
     BulkUploadDialog,
     EditBulkDialog,
+    TournamentEntryInput,
   },
   data () {
     return {
+      selectedDates: [],
       tableData: [],
       overlayFlags: {
         edit: false,
@@ -41,6 +47,11 @@ export default {
 
     async get () {
       this.tableData = await getCards();
+      this.selectedDates = await getTournamentEntry().then(response => {
+        return response[0].dates.map(v => {
+          return new Date(v?.seconds * 1000 + v?.nanoseconds / 1_000_000);
+        });
+      });
     },
 
     async add (payload) {
@@ -139,6 +150,12 @@ export default {
       downloadCSV(csvString);
     },
 
+    async saveTournamentEntry() {
+      await updateTournamentEntry({
+        dates: this.selectedDates,
+      });
+    },
+
     upload (payload) {
       this.tableData = this.tableData.concat(payload);
     },
@@ -171,11 +188,6 @@ export default {
   <flex-col class="pa-5 grow">
     <flex-row>
       <v-text-field
-        label="Tournament Entry"
-        density="compact"
-        class="mr-5"
-      />
-      <v-text-field
         label="Boosters"
         density="compact"
       />
@@ -183,6 +195,13 @@ export default {
         label="Accessories"
         density="compact"
         class="ml-5"
+      />
+    </flex-row>
+
+    <flex-row class="justify-end">
+      <tournament-entry-input
+        v-model="selectedDates"
+        @save="saveTournamentEntry()"
       />
     </flex-row>
 

@@ -72,6 +72,17 @@ export async function get(colName, code) {
   }));
 }
 
+export async function getTournaments(colName = 'tournament-entry') {
+  const col = collection(db, colName);
+  const snapshot = await getDocs(col);
+  return snapshot.docs.map(doc => {
+    return {
+      id: doc.id,
+      ...doc.data(),
+    };
+  });
+}
+
 export async function add(col, payload) {
   await addDoc(collection(db, col), payload);
 }

@@ -1,6 +1,11 @@
 <script>
 import { data } from '../api/test-api';
-import { getPurchaseHistory } from '../api/wishlist';
+import { getPurchaseHistory,
+  getTournamentEntry,
+
+
+} from '../api/wishlist';
+
 
 import DonutGraph from '../components/dashboard/DonutGraph.vue';
 import LineGraph from '../components/dashboard/LineGraph.vue';
@@ -54,8 +59,12 @@ export default {
     },
   },
   async mounted () {
+    const selectedDates = await getTournamentEntry();
+
     const result = await getPurchaseHistory();
-    const sortedAscending = result.sort((a, b) => {
+    const selectedDatesWResult = [...selectedDates[0].dates.map(v => ({ date: v, amtSpent: 12 })), ...result];
+    console.log(selectedDatesWResult);
+    const sortedAscending = selectedDatesWResult.sort((a, b) => {
       const aDate = new Date(a?.date?.seconds * 1000 + a?.date?.nanoseconds / 1_000_000);
       const bDate = new Date(b?.date?.seconds * 1000 + b?.date?.nanoseconds / 1_000_000);
       return new Date(aDate) - new Date(bDate);
