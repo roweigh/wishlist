@@ -4,6 +4,7 @@ export default {
     modelValue: { type: null, required: true },
     label: { type: String, default: undefined },
     cols: { type: null, default: null },
+    padding: { type: [Number, String], default: undefined },
   },
   emits: [
     'update:model-value',
@@ -17,6 +18,9 @@ export default {
     displayValue () {
       const date = new Date(this.modelValue);
       return date.toLocaleDateString();
+    },
+    styleComputed () {
+      return this.padding ? `padding: ${this.padding}px` : undefined;
     },
   },
   methods: {
@@ -37,7 +41,7 @@ export default {
   >
     <template #activator="{ props }">
       <v-col
-        style="padding: 0px"
+        :style="styleComputed"
         :cols="cols"
       >
         <v-text-field

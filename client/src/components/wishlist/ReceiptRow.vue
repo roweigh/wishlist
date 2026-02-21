@@ -83,6 +83,7 @@ export default {
     <paired-date-picker
       v-model="date.value"
       label="Purchase Date"
+      padding="0"
     />
     <paired-number-input
       v-model="qtyAcquired.value"

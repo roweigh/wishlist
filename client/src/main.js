@@ -35,6 +35,7 @@ import BaseDialog from './components/base/dialog/BaseDialog.vue';
 import PairedDatePicker from '@/components/base/form-input/PairedDatePicker.vue';
 import PairedTextField from '@/components/base/form-input/PairedTextField.vue';
 import PairedNumberInput from '@/components/base/form-input/PairedNumberInput.vue';
+import PairedSelect from '@/components/base/form-input/PairedSelect.vue';
 
 const vuetify = createVuetify({
   components,
@@ -57,5 +58,6 @@ app.component('BaseDialog', BaseDialog);
 app.component('PairedDatePicker', PairedDatePicker);
 app.component('PairedTextField', PairedTextField);
 app.component('PairedNumberInput', PairedNumberInput);
+app.component('PairedSelect', PairedSelect);
 
 export { db };

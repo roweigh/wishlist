@@ -12,10 +12,12 @@ import {
 } from '@/api/purchases';
 
 import ReceiptRow from './ReceiptRow.vue';
+import AddDeckDialog from './AddDeckDialog.vue';
 
 export default {
   components: {
     ReceiptRow,
+    AddDeckDialog,
   },
   props: {
     modelValue: { type: null, default: false },
@@ -32,6 +34,9 @@ export default {
       loadingFlags: {
         initialising: true,
         loading: false,
+      },
+      overlayFlags: {
+        types: false,
       },
 
       showHistory: false,
@@ -134,6 +139,8 @@ export default {
 </script>
 
 <template>
+  <add-deck-dialog v-model="overlayFlags.types" />
+
   <base-dialog
     :model-value="modelValue"
     :title="title"
@@ -162,34 +169,47 @@ export default {
           cols="8"
         />
 
+        <paired-select
+          label="Deck"
+          cols="12"
+        >
+          <template #append>
+            <v-btn
+              icon="mdi-plus"
+              density="compact"
+              variant="text"
+              @click="overlayFlags.types = true"
+            />
+          </template>
+        </paired-select>
+
         <paired-number-input
           v-model="qtyNeeded.value"
           :min="0"
           label="Quantity Needed"
-          cols="4"
+          cols="6"
         />
 
         <paired-number-input
           v-model="qtyAcquired.value"
           :min="0"
           label="Quantity Acquired"
-          cols="4"
+          cols="6"
         />
-
         <paired-number-input
           v-model="price"
           type="dollar"
           label="Price"
-          cols="4"
+          cols="6"
         />
-      </v-row>
-
-      <v-row>
         <paired-date-picker
           v-model="date"
           label="Purchase Date"
+          cols="6"
         />
       </v-row>
+
+      <v-row />
 
       <template v-if="showHistory">
         <v-row>

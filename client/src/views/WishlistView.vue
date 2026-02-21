@@ -172,6 +172,18 @@ export default {
 </script>
 
 <template>
+  <edit-bulk-dialog
+    v-model="overlayFlags.edit"
+    @add="addCard($event)"
+    @update="updateCard($event)"
+    @refresh="getCards()"
+  />
+
+  <bulk-upload-dialog
+    v-model="overlayFlags.upload"
+    @upload="bulkUpload($event)"
+  />
+
   <flex-col class="pa-5 grow">
     <bulk-table
       :loading="loadingFlags.loading"
@@ -182,18 +194,6 @@ export default {
       @remove="removeCard($event)"
       @download="download()"
       @load="bulkUpload($event)"
-    />
-
-    <edit-bulk-dialog
-      v-model="overlayFlags.edit"
-      @add="addCard($event)"
-      @update="updateCard($event)"
-      @refresh="getCards()"
-    />
-
-    <bulk-upload-dialog
-      v-model="overlayFlags.upload"
-      @upload="bulkUpload($event)"
     />
   </flex-col>
 </template>

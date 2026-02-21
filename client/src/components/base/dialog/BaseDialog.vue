@@ -3,6 +3,7 @@ export default {
   props: {
     title: { type: String, default: null },
     modelValue: { type: null, required: true },
+    width: { type: null, default: '50vw' },
   },
   emits: [
     'update:model-value',
@@ -14,7 +15,7 @@ export default {
 <template>
   <v-dialog
     :model-value="!!modelValue"
-    max-width="50vw"
+    :width="width"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-card>
