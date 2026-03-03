@@ -1,10 +1,17 @@
 <script>
+import GradientChip from '@/components/base/GradientChip.vue';
 export default {
+  components: {
+    GradientChip,
+  },
   props: {
     modelValue: { type: null, required: true },
     items: { type: Array, default: () => [] },
     label: { type: String, default: undefined },
     cols: { type: null, default: null },
+    chips: { type: Boolean, default: false },
+    itemTitle: { type: String, default: undefined },
+    itemValaue: { type: String, default: undefined },
     padding: { type: [Number, String], default: undefined },
   },
   emits: [
@@ -27,6 +34,9 @@ export default {
       :model-value="modelValue"
       :label="label"
       :items="items"
+      :item-title="itemTitle"
+      :item-value="itemValue"
+      :chips="chips"
       hide-details="auto"
       density="compact"
       tile
@@ -34,6 +44,12 @@ export default {
     >
       <template #append>
         <slot name="append" />
+      </template>
+
+      <template #chip="{item}">
+        <gradient-chip :value="item.title">
+          {{ item.title }}
+        </gradient-chip>
       </template>
     </v-select>
   </v-col>

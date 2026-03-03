@@ -9,6 +9,7 @@ import {
   getCardHistory,
   updateHistory,
   removeHistory,
+  getDeckList,
 } from '@/api/purchases';
 
 import ReceiptRow from './ReceiptRow.vue';
@@ -42,6 +43,9 @@ export default {
       showHistory: false,
       history: [],
       changedHistory: {},
+
+      deck: null,
+      deckList: [],
 
       // Form inputs
       code: null,
@@ -78,6 +82,7 @@ export default {
           this.date = new Date();
           this.price = 0;
           v?.code && await this.getPurchaseHistory().then(() => { this.showHistory = true; });
+          await getDeckList().then((response) => this.deckList = response);
         }
 
         this.loadingFlags.initialising = false;
@@ -112,6 +117,7 @@ export default {
         code: this.sanitizeCode(this.code),
         amtSpent: this.price,
         name: this.name.value,
+        deck: this.deck,
         qtyAcquired: this.qtyAcquired.value,
         qtyNeeded:  this.qtyNeeded.value,
         date: Timestamp.fromDate(new Date(this.date)),
@@ -168,10 +174,14 @@ export default {
           label="Name"
           cols="8"
         />
-
         <paired-select
+          v-model="deck"
+          :items="deckList"
+          item-title="name"
+          item-value="id"
           label="Deck"
           cols="12"
+          chips
         >
           <template #append>
             <v-btn

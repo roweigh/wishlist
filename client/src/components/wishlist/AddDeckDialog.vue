@@ -1,5 +1,11 @@
 <script>
+import GradientChip from '@/components/base/GradientChip.vue';
+import { addDeck } from '@/api/purchases';
+
 export default {
+  components: {
+    GradientChip,
+  },
   props: {
     modelValue: { type: null, default: false },
   },
@@ -9,56 +15,32 @@ export default {
       name: null,
       colors: [],
       colorOptions: [
-        { id: 0, name: 'Red', value: 'red-darken-3', hex: '#C62828' },
-        { id: 1, name: 'Green', value: 'green-darken-3', hex: '#2E7D32' },
-        { id: 2, name: 'Blue', value: 'blue-darken-3', hex: '#1565C0' },
-        { id: 3, name: 'Purple', value: 'purple-darken-3', hex: '#6A1B9A' },
-        { id: 4, name: 'Black', value: 'gray-darken-4', hex: '#212121' },
-        { id: 5, name: 'Yellow', value: 'yellow-darken-3', hex: '#F9A825' },
+        { id: 0, code: 'R', name: 'Red', value: 'red-darken-3', hex: '#C62828' },
+        { id: 1, code: 'G', name: 'Green', value: 'green-darken-3', hex: '#2E7D32' },
+        { id: 2, code: 'U', name: 'Blue', value: 'blue-darken-3', hex: '#1565C0' },
+        { id: 3, code: 'P', name: 'Purple', value: 'purple-darken-3', hex: '#6A1B9A' },
+        { id: 4, code: 'B', name: 'Black', value: 'gray-darken-4', hex: '#212121' },
+        { id: 5, code: 'Y', name: 'Yellow', value: 'yellow-darken-3', hex: '#F9A825' },
       ],
     };
   },
   computed: {
-    chipBackgroundStyle() {
-      const selectedHexes = [...this.colors];
-      selectedHexes.sort((a, b) => {
-        const colorA = this.colorOptions.find(opt => opt.hex === a);
-        const colorB = this.colorOptions.find(opt => opt.hex === b);
-        return (colorA?.id || 0) - (colorB?.id || 0);
-      });
-
-      // Default state
-      if (selectedHexes.length === 0) {
-        return {
-          backgroundColor: '#757575', // grey-darken-2
-          height: '56px',
-          overflow: 'hidden',
-          width: '100%',
-        };
+    colorsComputed () {
+      return [...this.colors].sort((a, b) => a.id - b.id);
+    },
+    deckColor () {
+      return this.colorsComputed.map(({ code }) => code).join('/');
+    },
+  },
+  methods: {
+    async submit() {
+      try {
+        const payload = { name: `${this.deckColor} ${this.name}` };
+        await addDeck(payload);
+        this.$emit('update:model-value', false);
+      } catch (error) {
+        //
       }
-
-      // Single color state
-      if (selectedHexes.length === 1) {
-        return {
-          backgroundColor: selectedHexes[0],
-          height: '56px',
-          overflow: 'hidden',
-          width: '100%',
-        };
-      }
-
-      return {
-        background: `linear-gradient(90deg, 
-          ${selectedHexes[0]} 0%, 
-          ${selectedHexes[0]} 35%, 
-          ${selectedHexes[1]} 65%, 
-          ${selectedHexes[1]} 100%
-        )`,
-        height: '56px',
-        overflow: 'hidden',
-        border: 'none',
-        width: '100%',
-      };
     },
   },
 };
@@ -69,21 +51,24 @@ export default {
     :model-value="modelValue"
     title="Add New Deck"
     width="30vw"
+    @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
-    <v-chip :style="chipBackgroundStyle">
+    <gradient-chip
+      :colors="colors"
+      :color-options="colorOptions"
+    >
       <v-text-field
         v-model="name"
         placeholder="Enter Deck Name"
-        variant="solo"
+        class="name-input-field"
         density="comfortable"
         bg-color="transparent"
-        class="name-input-field"
-        flat
+        variant="solo"
         hide-details
+        flat
       />
-    </v-chip>
-
+    </gradient-chip>
     <v-input
       :error-messages="colors.length > 2 ? 'Please select a maximum of 2 colors' : ''"
       class="mt-3"
@@ -100,7 +85,7 @@ export default {
             v-model="colors"
             :color="color.hex"
             :label="color.name"
-            :value="color.hex"
+            :value="color"
             density="compact"
             hide-details
           />
@@ -111,11 +96,6 @@ export default {
 </template>
 
 <style scoped>
-:deep(.v-chip__content) {
-  width: 100%
-}
-
-
 .name-input-field :deep(input),
 .name-input-field :deep(input::placeholder) {
   color: white !important;

@@ -1,6 +1,9 @@
 import { add, get, update, del, delByField } from '../utils/api-utils';
 import { Timestamp } from 'firebase/firestore';
 
+export const addDeck = async (payload) => await add('deck', payload);
+export const getDeckList = async () => await get('deck');
+
 // Cards CRUD
 export const getCards = async () => {
   const response = await get('purchases');
@@ -20,6 +23,7 @@ export const getCards = async () => {
       result[code] = {
         code,
         name: item.name,
+        deck: item.deck,
         qtyAcquired: 0,
         qtyNeeded: 0,
         amtSpent: 0,

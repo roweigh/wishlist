@@ -1,5 +1,10 @@
 <script>
+import GradientChip from '@/components/base/GradientChip.vue';
+import { useDataIteratorItems } from 'vuetify/lib/components/VDataIterator/composables/items.mjs';
 export default {
+  components: {
+    GradientChip,
+  },
   props: {
     loading: { type: Boolean, default: false },
     items: { type: null, required: true },
@@ -137,6 +142,15 @@ export default {
     :items-per-page="-1"
     density="compact"
   >
+    <template #item.deck="{ item }">
+      <gradient-chip
+        v-if="item.deck"
+        :value="item.deck"
+      >
+        {{ item.deck }}
+      </gradient-chip>
+    </template>
+
     <template #item.amtSpent="{ item }">
       {{ formatDollar(item.amtSpent) }}
     </template>

@@ -101,7 +101,7 @@ export default {
     <v-btn
       icon="mdi-delete"
       density="comfortable"
-      class="ma-auto"
+      class="my-auto ml-4"
       variant="text"
       @click="$emit('remove', item.id)"
     />
