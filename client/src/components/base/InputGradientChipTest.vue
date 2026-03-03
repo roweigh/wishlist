@@ -2,6 +2,7 @@
 export default {
   props: {
     value: { type: null, default: null },
+    colors: { type: null, required: true },
   },
   data () {
     return {
@@ -28,6 +29,9 @@ export default {
       if (selectedHexes.length === 0) {
         return {
           backgroundColor: '#757575', // grey-darken-2
+          height: '56px',
+          overflow: 'hidden',
+          width: '100%',
         };
       }
 
@@ -35,16 +39,23 @@ export default {
       if (selectedHexes.length === 1) {
         return {
           backgroundColor: selectedHexes[0],
+          height: '56px',
+          overflow: 'hidden',
+          width: '100%',
         };
       }
 
       return {
         background: `linear-gradient(90deg, 
           ${selectedHexes[0]} 0%, 
-          ${selectedHexes[0]} 15%, 
-          ${selectedHexes[1]} 85%, 
+          ${selectedHexes[0]} 25%, 
+          ${selectedHexes[1]} 75%, 
           ${selectedHexes[1]} 100%
         )`,
+        height: '56px',
+        overflow: 'hidden',
+        border: 'none',
+        width: '100%',
       };
     },
   },
@@ -54,7 +65,6 @@ export default {
 <template>
   <v-chip
     :style="chipBackgroundStyle"
-    density="compact"
   >
     <slot />
   </v-chip>
@@ -62,7 +72,7 @@ export default {
 
 <style scoped>
 :deep(.v-chip__content) {
+  width: 100%;
   color: white;
-  font-weight: semi-bold;
 }
 </style>
