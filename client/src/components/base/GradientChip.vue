@@ -1,41 +1,29 @@
 <script>
+import { getColor } from '@/utils/color-utils';
 export default {
   props: {
     value: { type: null, default: null },
   },
   data () {
     return {
-      colorOptions: [
-        { id: 0, code: 'R', name: 'Red', value: 'red-darken-3', hex: '#C62828' },
-        { id: 1, code: 'G', name: 'Green', value: 'green-darken-3', hex: '#2E7D32' },
-        { id: 2, code: 'U', name: 'Blue', value: 'blue-darken-3', hex: '#1565C0' },
-        { id: 3, code: 'P', name: 'Purple', value: 'purple-darken-3', hex: '#6A1B9A' },
-        { id: 4, code: 'B', name: 'Black', value: 'gray-darken-4', hex: '#212121' },
-        { id: 5, code: 'Y', name: 'Yellow', value: 'yellow-darken-3', hex: '#F9A825' },
-      ],
+      getColor,
     };
   },
   computed: {
-    chipBackgroundStyle() {
-      if (!this.value) {return null;}
-      const colors = this.value.match(/[A-Z](?=[/ ]|(?<=\/)[A-Z])/g);
-      const selectedHexes = colors.map(code => {
-        const match = this.colorOptions.find(opt => opt.code === code);
-        return match ? match.hex : null; // Returns hex or null if not found
-      }).filter(hex => hex); // Remove any nulls just in case
+    gradientStyle() {
+      if (!this.value) { return null; }
+
+      const colorCode = this.value.trim().split(' ')[0];
+      const selectedHexes = (colorCode.match(/[A-Z]/g) || []).map(code => getColor(code));
 
       // Default state
       if (selectedHexes.length === 0) {
-        return {
-          backgroundColor: '#757575', // grey-darken-2
-        };
+        return { backgroundColor: '#757575' }; // grey-darken-2
       }
 
       // Single color state
       if (selectedHexes.length === 1) {
-        return {
-          backgroundColor: selectedHexes[0],
-        };
+        return { backgroundColor: selectedHexes[0]  };
       }
 
       return {
@@ -53,7 +41,7 @@ export default {
 
 <template>
   <v-chip
-    :style="chipBackgroundStyle"
+    :style="gradientStyle"
     density="compact"
   >
     <slot />

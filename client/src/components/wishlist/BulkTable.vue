@@ -31,10 +31,10 @@ export default {
           key: 'deck',
           title: 'Deck',
         },
-        {
-          key: 'category',
-          title: 'Category',
-        },
+        // {
+        //   key: 'category',
+        //   title: 'Category',
+        // },
         {
           key: 'qtyNeeded',
           title: 'Needed',

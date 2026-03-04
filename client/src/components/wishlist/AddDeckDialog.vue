@@ -1,6 +1,8 @@
 <script>
-import GradientChip from '@/components/base/GradientChip.vue';
+import { getColorOptions } from '@/utils/color-utils';
 import { addDeck } from '@/api/purchases';
+
+import GradientChip from '@/components/base/GradientChip.vue';
 
 export default {
   components: {
@@ -14,14 +16,7 @@ export default {
     return {
       name: null,
       colors: [],
-      colorOptions: [
-        { id: 0, code: 'R', name: 'Red', value: 'red-darken-3', hex: '#C62828' },
-        { id: 1, code: 'G', name: 'Green', value: 'green-darken-3', hex: '#2E7D32' },
-        { id: 2, code: 'U', name: 'Blue', value: 'blue-darken-3', hex: '#1565C0' },
-        { id: 3, code: 'P', name: 'Purple', value: 'purple-darken-3', hex: '#6A1B9A' },
-        { id: 4, code: 'B', name: 'Black', value: 'gray-darken-4', hex: '#212121' },
-        { id: 5, code: 'Y', name: 'Yellow', value: 'yellow-darken-3', hex: '#F9A825' },
-      ],
+      colorOptions: getColorOptions(),
     };
   },
   computed: {
