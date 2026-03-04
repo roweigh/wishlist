@@ -1,6 +1,6 @@
 <script>
 import GradientChip from '@/components/base/GradientChip.vue';
-import { useDataIteratorItems } from 'vuetify/lib/components/VDataIterator/composables/items.mjs';
+
 export default {
   components: {
     GradientChip,

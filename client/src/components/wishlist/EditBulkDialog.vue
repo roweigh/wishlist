@@ -10,6 +10,7 @@ import {
   updateHistory,
   removeHistory,
   getDeckList,
+  addDeck,
 } from '@/api/purchases';
 
 import ReceiptRow from './ReceiptRow.vue';
@@ -37,14 +38,14 @@ export default {
         loading: false,
       },
       overlayFlags: {
-        types: false,
+        deck: false,
       },
 
       showHistory: false,
       history: [],
       changedHistory: {},
 
-      deck: null,
+      deck: pair(null),
       deckList: [],
 
       // Form inputs
@@ -61,6 +62,7 @@ export default {
     changed () { return (
       this.qtyNeeded.initial !== this.qtyNeeded.value ||
       this.qtyAcquired.initial !== this.qtyAcquired.value ||
+      this.deck.initial !== this.deck.value ||
       this.name.initial !== this.name.value
     );},
   },
@@ -77,12 +79,13 @@ export default {
           this.showHistory = false;
 
           this.code = v?.code ?? null;
+          updatePair(this.deck, v?.deck ?? null);
           updatePair(this.name, v?.name  ?? null);
           updatePair(this.qtyNeeded, 0);
           this.date = new Date();
           this.price = 0;
           v?.code && await this.getPurchaseHistory().then(() => { this.showHistory = true; });
-          await getDeckList().then((response) => this.deckList = response);
+          await this.getDeckList();
         }
 
         this.loadingFlags.initialising = false;
@@ -117,11 +120,12 @@ export default {
         code: this.sanitizeCode(this.code),
         amtSpent: this.price,
         name: this.name.value,
-        deck: this.deck,
+        deck: this.deck.value,
         qtyAcquired: this.qtyAcquired.value,
         qtyNeeded:  this.qtyNeeded.value,
         date: Timestamp.fromDate(new Date(this.date)),
       };
+
       await this.updatePurchaseHistory();
       if (this.changed) {
         if (this.qtyAcquired) {
@@ -132,6 +136,24 @@ export default {
       }
 
       this.$emit('refresh');
+    },
+
+    async getDeckList () {
+      try {
+        this.deckList = await getDeckList();
+      } catch (error) {
+        //
+      }
+    },
+
+    async addDeck (payload) {
+      try {
+        await addDeck(payload);
+        await this.getDeckList();
+        this.overlayFlags.deck = false;
+      } catch (error) {
+        //
+      }
     },
 
     sanitizeCode (code) {
@@ -145,7 +167,10 @@ export default {
 </script>
 
 <template>
-  <add-deck-dialog v-model="overlayFlags.types" />
+  <add-deck-dialog
+    v-model="overlayFlags.deck"
+    @add="addDeck($event)"
+  />
 
   <base-dialog
     :model-value="modelValue"
@@ -175,7 +200,7 @@ export default {
           cols="8"
         />
         <paired-select
-          v-model="deck"
+          v-model="deck.value"
           :items="deckList"
           item-title="name"
           item-value="id"
@@ -188,7 +213,7 @@ export default {
               icon="mdi-plus"
               density="compact"
               variant="text"
-              @click="overlayFlags.types = true"
+              @click="overlayFlags.deck = true"
             />
           </template>
         </paired-select>

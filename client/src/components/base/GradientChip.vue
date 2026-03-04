@@ -1,8 +1,10 @@
 <script>
 import { getColor } from '@/utils/color-utils';
+
 export default {
   props: {
-    value: { type: null, default: null },
+    value: { type: String, default: null },
+    density: { type: String, default: 'compact' },
   },
   data () {
     return {
@@ -11,29 +13,24 @@ export default {
   },
   computed: {
     gradientStyle() {
-      if (!this.value) { return null; }
+      if (!this.value) { return undefined; }
 
+      const style = {};
       const colorCode = this.value.trim().split(' ')[0];
-      const selectedHexes = (colorCode.match(/[A-Z]/g) || []).map(code => getColor(code));
+      const colorsArr = (colorCode.match(/[A-Z]/g) || []).map(code => getColor(code));
 
-      // Default state
-      if (selectedHexes.length === 0) {
-        return { backgroundColor: '#757575' }; // grey-darken-2
+      if (colorsArr.length < 2) {
+        style.backgroundColor = colorsArr[0] ?? '#757575'; //grey-darken-2
+      } else {
+        style.background = `
+          linear-gradient(90deg, 
+            ${colorsArr[0]} 0%, 
+            ${colorsArr[0]} 15%, 
+            ${colorsArr[1]} 85%, 
+            ${colorsArr[1]} 100%
+          )`;
       }
-
-      // Single color state
-      if (selectedHexes.length === 1) {
-        return { backgroundColor: selectedHexes[0]  };
-      }
-
-      return {
-        background: `linear-gradient(90deg, 
-          ${selectedHexes[0]} 0%, 
-          ${selectedHexes[0]} 15%, 
-          ${selectedHexes[1]} 85%, 
-          ${selectedHexes[1]} 100%
-        )`,
-      };
+      return style;
     },
   },
 };
@@ -42,7 +39,7 @@ export default {
 <template>
   <v-chip
     :style="gradientStyle"
-    density="compact"
+    :density="density"
   >
     <slot />
   </v-chip>

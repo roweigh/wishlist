@@ -1,6 +1,5 @@
 <script>
 import { getColorOptions } from '@/utils/color-utils';
-import { addDeck } from '@/api/purchases';
 
 import GradientChip from '@/components/base/GradientChip.vue';
 
@@ -20,22 +19,25 @@ export default {
     };
   },
   computed: {
-    colorsComputed () {
-      return [...this.colors].sort((a, b) => a.id - b.id);
-    },
     deckColor () {
-      return this.colorsComputed.map(({ code }) => code).join('/');
+      const colors = [...this.colors].sort((a, b) => a.id - b.id);
+      return colors.map(({ code }) => code).join('');
+    },
+    deckName ()  {
+      return `${this.deckColor} ${this.name}`;
+    },
+  },
+  watch: {
+    modelValue (v) {
+      if (v) {
+        this.name = null;
+        this.colors = [];
+      }
     },
   },
   methods: {
-    async submit() {
-      try {
-        const payload = { name: `${this.deckColor} ${this.name}` };
-        await addDeck(payload);
-        this.$emit('update:model-value', false);
-      } catch (error) {
-        //
-      }
+    submit() {
+      this.$emit('add', { name: this.deckName });
     },
   },
 };
@@ -50,20 +52,27 @@ export default {
     @update:model-value="$emit('update:model-value', $event)"
   >
     <gradient-chip
-      :colors="colors"
-      :color-options="colorOptions"
+      :value="deckName"
+      density="default"
     >
       <v-text-field
         v-model="name"
-        placeholder="Enter Deck Name"
+        placeholder="Name"
         class="name-input-field"
-        density="comfortable"
         bg-color="transparent"
         variant="solo"
         hide-details
         flat
-      />
+      >
+        <template
+          v-if="deckColor"
+          #prepend-inner
+        >
+          <span>{{ deckColor }}</span>
+        </template>
+      </v-text-field>
     </gradient-chip>
+
     <v-input
       :error-messages="colors.length > 2 ? 'Please select a maximum of 2 colors' : ''"
       class="mt-3"

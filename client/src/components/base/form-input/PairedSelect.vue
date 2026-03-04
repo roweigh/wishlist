@@ -51,6 +51,20 @@ export default {
           {{ item.title }}
         </gradient-chip>
       </template>
+
+      <template
+        v-if="chips"
+        #item="{ props: itemProps, item }"
+      >
+        <v-list-item
+          v-bind="itemProps"
+          :title="undefined"
+        >
+          <gradient-chip :value="item.title">
+            {{ item.title }}
+          </gradient-chip>
+        </v-list-item>
+      </template>
     </v-select>
   </v-col>
 </template>
