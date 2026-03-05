@@ -18,6 +18,8 @@ export default {
   ],
   data () {
     return {
+      sortBy: [{ key: 'deck', order: 'asc' }],
+      itemsPerPage: -1,
       headers: [
         {
           key: 'code',
@@ -136,10 +138,13 @@ export default {
   </v-toolbar>
 
   <v-data-table
+    v-model:sort-by="sortBy"
+    v-model:items-per-page="itemsPerPage"
     :headers="headers"
     :items="items"
     :loading="loading"
-    :items-per-page="-1"
+    sort-asc-icon="mdi-chevron-up"
+    sort-desc-icon="mdi-chevron-down"
     density="compact"
   >
     <template #item.deck="{ item }">
