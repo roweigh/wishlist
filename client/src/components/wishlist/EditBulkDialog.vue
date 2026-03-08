@@ -13,13 +13,15 @@ import {
   addDeck,
 } from '@/api/purchases';
 
-import ReceiptRow from './ReceiptRow.vue';
+import ReceiptRow from './purchases/ReceiptRow.vue';
 import AddDeckDialog from './AddDeckDialog.vue';
+import PurchaseHistory from './purchases/PurchaseHistory.vue';
 
 export default {
   components: {
     ReceiptRow,
     AddDeckDialog,
+    PurchaseHistory,
   },
   props: {
     modelValue: { type: null, default: false },
@@ -34,7 +36,7 @@ export default {
     return {
       title: 'Add Bulk',
       loadingFlags: {
-        initialising: true,
+        initializing: true,
         loading: false,
       },
       overlayFlags: {
@@ -75,7 +77,7 @@ export default {
 
         if (v) {
           this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk';
-          this.loadingFlags.initialising = true;
+          this.loadingFlags.initializing = true;
           this.showHistory = false;
 
           this.code = v?.code ?? null;
@@ -88,7 +90,7 @@ export default {
           await this.getDeckList();
         }
 
-        this.loadingFlags.initialising = false;
+        this.loadingFlags.initializing = false;
       },
     },
   },
@@ -174,96 +176,96 @@ export default {
 
   <base-dialog
     :model-value="modelValue"
+    :initializing="loadingFlags.initializing"
     :title="title"
+    width="60vw"
     @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
-    <v-row v-if="loadingFlags.initialising">
-      <v-progress-circular
-        class="mx-auto my-12"
-        size="200"
-        indeterminate
-      />
-    </v-row>
-
-    <template v-else>
-      <v-row>
-        <paired-text-field
-          v-model="code"
-          label="Code"
-          cols="4"
-        />
-
-        <paired-text-field
-          v-model="name.value"
-          label="Name"
-          cols="8"
-        />
-        <paired-select
-          v-model="deck.value"
-          :items="deckList"
-          item-title="name"
-          item-value="id"
-          label="Deck"
-          cols="12"
-          chips
-        >
-          <template #append>
-            <v-btn
-              icon="mdi-plus"
-              density="compact"
-              variant="text"
-              @click="overlayFlags.deck = true"
+    <v-col :cols="6">
+      <v-card
+        variant="outlined"
+        title="Card Details"
+        class="mb-4"
+      >
+        <v-card-text>
+          <v-row>
+            <paired-text-field
+              v-model="code"
+              label="Code"
+              cols="4"
             />
-          </template>
-        </paired-select>
+            <paired-text-field
+              v-model="name.value"
+              label="Name"
+              cols="8"
+            />
+            <paired-select
+              v-model="deck.value"
+              :items="deckList"
+              item-title="name"
+              item-value="id"
+              label="Deck"
+              chips
+            >
+              <template #append>
+                <v-btn
+                  icon="mdi-plus"
+                  density="compact"
+                  variant="text"
+                  @click="overlayFlags.deck = true"
+                />
+              </template>
+            </paired-select>
+          </v-row>
+        </v-card-text>
+      </v-card>
 
-        <paired-number-input
-          v-model="qtyNeeded.value"
-          :min="0"
-          label="Quantity Needed"
-          cols="6"
-        />
+      <v-card
+        variant="outlined"
+        title="Purchase Details"
+      >
+        <v-card-text>
+          <v-row>
+            <paired-date-picker
+              v-model="date"
+              label="Purchase Date"
+            />
+            <paired-number-input
+              v-model="qtyNeeded.value"
+              :min="0"
+              label="Quantity Needed"
+              cols="6"
+            />
+            <paired-number-input
+              v-model="qtyAcquired.value"
+              :min="0"
+              label="Quantity Acquired"
+              cols="6"
+            />
+            <paired-number-input
+              v-model="price"
+              label="Unit Cost"
+              type="dollar"
+              cols="6"
+            />
+            <paired-number-input
+              v-model="price"
+              label="Total Cost"
+              type="dollar"
+              cols="6"
+            />
+          </v-row>
+        </v-card-text>
+      </v-card>
+    </v-col>
 
-        <paired-number-input
-          v-model="qtyAcquired.value"
-          :min="0"
-          label="Quantity Acquired"
-          cols="6"
-        />
-        <paired-number-input
-          v-model="price"
-          type="dollar"
-          label="Price"
-          cols="6"
-        />
-        <paired-date-picker
-          v-model="date"
-          label="Purchase Date"
-          cols="6"
-        />
-      </v-row>
-
-      <v-row />
-
-      <template v-if="showHistory">
-        <v-row>
-          <v-card-title class="mb-3">
-            History
-          </v-card-title>
-        </v-row>
-
-        <template
-          v-for="item in history"
-          :key="item.id"
-        >
-          <receipt-row
-            v-model="changedHistory"
-            :item="item"
-            @remove="remove($event)"
-          />
-        </template>
-      </template>
-    </template>
+    <v-col :cols="6">
+      <purchase-history
+        v-model="changedHistory"
+        :history="history"
+        @remove="remove($event)"
+      />
+    </v-col>
   </base-dialog>
 </template>

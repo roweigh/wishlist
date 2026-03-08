@@ -3,7 +3,7 @@ export default {
   props: {
     modelValue: { type: null, required: true },
     label: { type: String, default: undefined },
-    cols: { type: null, default: null },
+    cols: { type: null, default: 12 },
     min: { type: Number, default: undefined },
     padding: { type: [Number, String], default: 0 },
     type: { type: String, default: undefined },

@@ -24,6 +24,7 @@ export default {
         {
           key: 'code',
           title: 'Code',
+          width: '8%',
         },
         {
           key: 'name',
@@ -41,25 +42,29 @@ export default {
           key: 'qtyNeeded',
           title: 'Needed',
           align: 'end',
+          width: '5%',
         },
         {
           key: 'qtyAcquired',
           title: 'Stock',
           align: 'end',
+          width: '5%',
         },
         {
           key: 'amtSpent',
           title: 'Amount Spent',
           align: 'end',
+          width: '8%',
         },
-        {
-          key: 'notes',
-          title: 'Notes',
-        },
+        // {
+        //   key: 'notes',
+        //   title: 'Notes',
+        // },
         {
           key: 'actions',
           align: 'end',
           sortable: false,
+          width: '5%',
         },
       ],
     };

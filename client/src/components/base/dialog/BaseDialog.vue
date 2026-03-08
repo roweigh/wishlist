@@ -1,9 +1,10 @@
 <script>
 export default {
   props: {
-    title: { type: String, default: null },
     modelValue: { type: null, required: true },
-    width: { type: null, default: '50vw' },
+    initializing: { type: Boolean, default: false },
+    title: { type: String, default: null },
+    width: { type: String, default: '50vw' },
   },
   emits: [
     'update:model-value',
@@ -33,7 +34,15 @@ export default {
       </v-card-item>
 
       <v-card-text class="pt-6">
-        <slot />
+        <v-row>
+          <v-progress-circular
+            v-if="initializing"
+            class="mx-auto my-12"
+            size="200"
+            indeterminate
+          />
+          <slot v-else />
+        </v-row>
       </v-card-text>
 
       <v-btn

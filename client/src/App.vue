@@ -1,34 +1,23 @@
 <script>
 import AlertPopup from '@/components/base/AlertPopup.vue';
-import NavigationDrawer from '@/components/base/NavigationDrawer.vue';
+import NavigationHeader from '@/components/base/NavigationHeader.vue';
 
 export default {
   components: {
     AlertPopup,
-    NavigationDrawer,
+    NavigationHeader,
   },
 };
 </script>
 
 <template>
-  <v-app class="d-flex">
+  <v-app>
     <alert-popup />
     <v-layout>
-      <v-main>
-        <navigation-drawer />
-        <div
-          class="d-flex grow bg-grey"
-          style="height: 100vh; overflow: auto"
-        >
-          <router-view />
-        </div>
+      <navigation-header />
+      <v-main class="d-flex grow bg-grey">
+        <router-view />
       </v-main>
     </v-layout>
   </v-app>
 </template>
-
-<style>
-html {
-  overflow: hidden
-}
-</style>

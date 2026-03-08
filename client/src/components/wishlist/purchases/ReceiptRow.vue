@@ -84,24 +84,25 @@ export default {
       v-model="date.value"
       label="Purchase Date"
       padding="0"
+      cols="3"
     />
     <paired-number-input
       v-model="qtyAcquired.value"
       label="Quanty Acquired"
       padding="0"
-      cols="3"
+      cols="4"
     />
     <paired-number-input
       v-model="amtSpent.value"
       type="dollar"
       label="Price"
       padding="0"
-      cols="3"
+      cols="4"
     />
     <v-btn
       icon="mdi-delete"
       density="comfortable"
-      class="my-auto ml-4"
+      class="ma-auto ml-2"
       variant="text"
       @click="$emit('remove', item.id)"
     />

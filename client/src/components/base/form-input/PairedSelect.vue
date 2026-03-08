@@ -8,7 +8,7 @@ export default {
     modelValue: { type: null, required: true },
     items: { type: Array, default: () => [] },
     label: { type: String, default: undefined },
-    cols: { type: null, default: null },
+    cols: { type: null, default: 12 },
     chips: { type: Boolean, default: false },
     itemTitle: { type: String, default: undefined },
     itemValaue: { type: String, default: undefined },
