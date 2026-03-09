@@ -13,12 +13,12 @@ import {
   addDeck,
 } from '@/api/purchases';
 
-import AddDeckDialog from './AddDeckDialog.vue';
 import PurchaseHistory from './purchases/PurchaseHistory.vue';
+import DeckInput from './purchases/DeckInput.vue';
 
 export default {
   components: {
-    AddDeckDialog,
+    DeckInput,
     PurchaseHistory,
   },
   props: {
@@ -41,6 +41,7 @@ export default {
         deck: false,
       },
 
+      addNewDeck: false,
       showHistory: false,
       history: [],
       changedHistory: {},
@@ -120,6 +121,10 @@ export default {
      * Send difference in qty as we are logging history - so it can do math in the BE
      */
     async submit () {
+      if (this.addNewDeck) {
+        await this.addDeck(this.deck.value);
+      }
+
       const payload = {
         code: this.sanitizeCode(this.code),
         amtSpent: this.totalCost,
@@ -203,29 +208,11 @@ export default {
               cols="8"
             />
 
-            <paired-select
+            <deck-input
               v-model="deck.value"
-              :items="deckList"
-              item-title="name"
-              item-value="id"
-              label="Deck"
-              chips
-            >
-              <template #append>
-                <v-btn
-                  :icon="overlayFlags.deck ? 'mdi-chevron-up' : 'mdi-plus'"
-                  density="compact"
-                  variant="text"
-                  @click="overlayFlags.deck = !overlayFlags.deck"
-                />
-              </template>
-            </paired-select>
-
-            <v-expand-transition>
-              <div v-show="overlayFlags.deck">
-                <add-deck-dialog @add="addDeck($event)" />
-              </div>
-            </v-expand-transition>
+              v-model:add-deck="addNewDeck"
+              :deck-list="deckList"
+            />
           </v-row>
         </v-card-text>
       </v-card>
