@@ -5,6 +5,7 @@ export default {
     label: { type: String, default: undefined },
     cols: { type: null, default: 12 },
     padding: { type: [Number, String], default: undefined },
+    variant: { type: String, default: 'outlined' },
   },
   emits: [
     'update:model-value',
@@ -25,6 +26,7 @@ export default {
     <v-text-field
       :model-value="modelValue"
       :label="label"
+      :variant="variant"
       hide-details="auto"
       density="compact"
       tile

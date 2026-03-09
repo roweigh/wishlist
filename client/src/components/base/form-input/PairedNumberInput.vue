@@ -7,6 +7,8 @@ export default {
     min: { type: Number, default: undefined },
     padding: { type: [Number, String], default: 0 },
     type: { type: String, default: undefined },
+    variant: { type: String, default: 'outlined' },
+    density: { type: String, default: 'compact' },
   },
   emits: [
     'update:model-value',
@@ -30,8 +32,9 @@ export default {
       :prefix="prefix"
       :precision="precision"
       :min="min"
+      :variant="variant"
+      :density="density"
       control-variant="stacked"
-      density="compact"
       hide-details="auto"
       tile
       @update:model-value="$emit('update:model-value', $event)"

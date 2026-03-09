@@ -4,7 +4,6 @@ import { getColor } from '@/utils/color-utils';
 export default {
   props: {
     value: { type: String, default: null },
-    density: { type: String, default: 'compact' },
   },
   data () {
     return {
@@ -37,10 +36,7 @@ export default {
 </script>
 
 <template>
-  <v-chip
-    :style="gradientStyle"
-    :density="density"
-  >
+  <v-chip :style="gradientStyle">
     <slot />
   </v-chip>
 </template>

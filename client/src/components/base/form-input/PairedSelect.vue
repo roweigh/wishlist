@@ -12,6 +12,7 @@ export default {
     chips: { type: Boolean, default: false },
     itemTitle: { type: String, default: undefined },
     itemValaue: { type: String, default: undefined },
+    variant: { type: String, default: 'outlined' },
     padding: { type: [Number, String], default: undefined },
   },
   emits: [
@@ -37,6 +38,7 @@ export default {
       :item-title="itemTitle"
       :item-value="itemValue"
       :chips="chips"
+      :variant="variant"
       hide-details="auto"
       density="compact"
       tile

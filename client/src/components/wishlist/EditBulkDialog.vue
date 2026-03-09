@@ -13,13 +13,11 @@ import {
   addDeck,
 } from '@/api/purchases';
 
-import ReceiptRow from './purchases/ReceiptRow.vue';
 import AddDeckDialog from './AddDeckDialog.vue';
 import PurchaseHistory from './purchases/PurchaseHistory.vue';
 
 export default {
   components: {
-    ReceiptRow,
     AddDeckDialog,
     PurchaseHistory,
   },
@@ -52,7 +50,8 @@ export default {
 
       // Form inputs
       code: null,
-      price: 0,
+      unitCost: 0,
+      totalCost: 0,
       date: null,
       name: pair(null),
       qtyNeeded: pair(0),
@@ -61,12 +60,14 @@ export default {
   },
   computed: {
     newEntry () { return !this.modelValue?.code; },
-    changed () { return (
-      this.qtyNeeded.initial !== this.qtyNeeded.value ||
-      this.qtyAcquired.initial !== this.qtyAcquired.value ||
-      this.deck.initial !== this.deck.value ||
-      this.name.initial !== this.name.value
-    );},
+    changed () {
+      return (
+        this.qtyNeeded.initial !== this.qtyNeeded.value ||
+        this.qtyAcquired.initial !== this.qtyAcquired.value ||
+        this.deck.initial !== this.deck.value ||
+        this.name.initial !== this.name.value
+      );
+    },
   },
   watch: {
     modelValue: {
@@ -85,7 +86,8 @@ export default {
           updatePair(this.name, v?.name  ?? null);
           updatePair(this.qtyNeeded, 0);
           this.date = new Date();
-          this.price = 0;
+          this.unitCost = 0;
+          this.totalCost = 0;
           v?.code && await this.getPurchaseHistory().then(() => { this.showHistory = true; });
           await this.getDeckList();
         }
@@ -120,7 +122,7 @@ export default {
     async submit () {
       const payload = {
         code: this.sanitizeCode(this.code),
-        amtSpent: this.price,
+        amtSpent: this.totalCost,
         name: this.name.value,
         deck: this.deck.value,
         qtyAcquired: this.qtyAcquired.value,
@@ -164,16 +166,15 @@ export default {
       const regex = /^[A-Z]+(\d{2})?-\d{3}$/;
       return result;
     },
+
+    updateTotal () {
+      this.totalCost = this.unitCost * this.qtyAcquired.value;
+    },
   },
 };
 </script>
 
 <template>
-  <add-deck-dialog
-    v-model="overlayFlags.deck"
-    @add="addDeck($event)"
-  />
-
   <base-dialog
     :model-value="modelValue"
     :initializing="loadingFlags.initializing"
@@ -195,11 +196,13 @@ export default {
               label="Code"
               cols="4"
             />
+
             <paired-text-field
               v-model="name.value"
               label="Name"
               cols="8"
             />
+
             <paired-select
               v-model="deck.value"
               :items="deckList"
@@ -210,20 +213,26 @@ export default {
             >
               <template #append>
                 <v-btn
-                  icon="mdi-plus"
+                  :icon="overlayFlags.deck ? 'mdi-chevron-up' : 'mdi-plus'"
                   density="compact"
                   variant="text"
-                  @click="overlayFlags.deck = true"
+                  @click="overlayFlags.deck = !overlayFlags.deck"
                 />
               </template>
             </paired-select>
+
+            <v-expand-transition>
+              <div v-show="overlayFlags.deck">
+                <add-deck-dialog @add="addDeck($event)" />
+              </div>
+            </v-expand-transition>
           </v-row>
         </v-card-text>
       </v-card>
 
       <v-card
         variant="outlined"
-        title="Purchase Details"
+        title="Order Details"
       >
         <v-card-text>
           <v-row>
@@ -242,18 +251,21 @@ export default {
               :min="0"
               label="Quantity Acquired"
               cols="6"
+              @update:model-value="updateTotal()"
             />
             <paired-number-input
-              v-model="price"
+              v-model="unitCost"
               label="Unit Cost"
               type="dollar"
               cols="6"
+              @update:model-value="updateTotal()"
             />
             <paired-number-input
-              v-model="price"
+              v-model="totalCost"
               label="Total Cost"
               type="dollar"
               cols="6"
+              @update:model-value="unitCost = 0"
             />
           </v-row>
         </v-card-text>

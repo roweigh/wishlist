@@ -44,17 +44,8 @@ export default {
 </script>
 
 <template>
-  <base-dialog
-    :model-value="modelValue"
-    title="Add New Deck"
-    width="30vw"
-    @submit="submit()"
-    @update:model-value="$emit('update:model-value', $event)"
-  >
-    <gradient-chip
-      :value="deckName"
-      density="default"
-    >
+  <v-col style="height: 0%">
+    <gradient-chip :value="deckName">
       <v-text-field
         v-model="name"
         placeholder="Name"
@@ -96,7 +87,7 @@ export default {
         </v-col>
       </v-row>
     </v-input>
-  </base-dialog>
+  </v-col>
 </template>
 
 <style scoped>

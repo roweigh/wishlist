@@ -85,12 +85,16 @@ export default {
       label="Purchase Date"
       padding="0"
       cols="3"
+      variant="underlined"
+      density="default"
     />
     <paired-number-input
       v-model="qtyAcquired.value"
       label="Quanty Acquired"
       padding="0"
       cols="4"
+      variant="underlined"
+      density="default"
     />
     <paired-number-input
       v-model="amtSpent.value"
@@ -98,6 +102,8 @@ export default {
       label="Price"
       padding="0"
       cols="4"
+      variant="underlined"
+      density="default"
     />
     <v-btn
       icon="mdi-delete"

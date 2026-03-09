@@ -5,6 +5,8 @@ export default {
     label: { type: String, default: undefined },
     cols: { type: null, default: 12 },
     padding: { type: [Number, String], default: undefined },
+    variant: { type: String, default: 'outlined' },
+    density: { type: String, default: 'compact' },
   },
   emits: [
     'update:model-value',
@@ -48,7 +50,8 @@ export default {
           v-bind="props"
           :model-value="displayValue"
           :label="label"
-          density="compact"
+          :variant="variant"
+          :density="density"
           hide-details
           tile
           readonly
