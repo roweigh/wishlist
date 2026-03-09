@@ -82,6 +82,7 @@ export default {
           this.loadingFlags.initializing = true;
           this.showHistory = false;
 
+          this.history = [];
           this.code = v?.code ?? null;
           updatePair(this.deck, v?.deck ?? null);
           updatePair(this.name, v?.name  ?? null);
