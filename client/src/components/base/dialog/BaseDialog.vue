@@ -3,7 +3,8 @@ export default {
   props: {
     modelValue: { type: null, required: true },
     initializing: { type: Boolean, default: false },
-    title: { type: String, default: null },
+    loading: { type: Boolean, default: false },
+    title: { type: String, default: '' },
     width: { type: String, default: '50vw' },
   },
   emits: [
@@ -20,6 +21,7 @@ export default {
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-card>
+      <!-- Title -->
       <v-card-item class="bg-blue-grey">
         <v-card-title class="d-flex">
           <span>{{ title }}</span>
@@ -33,6 +35,7 @@ export default {
         </v-card-title>
       </v-card-item>
 
+      <!-- Content -->
       <v-card-text class="pt-6">
         <v-row>
           <v-progress-circular
@@ -45,7 +48,9 @@ export default {
         </v-row>
       </v-card-text>
 
+      <!-- Confirm Action -->
       <v-btn
+        :loading="loading"
         text="Save"
         color="success"
         rounded="0"

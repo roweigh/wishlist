@@ -11,7 +11,7 @@ export default {
     cols: { type: null, default: 12 },
     chips: { type: Boolean, default: false },
     itemTitle: { type: String, default: undefined },
-    itemValaue: { type: String, default: undefined },
+    itemValue: { type: String, default: undefined },
     variant: { type: String, default: 'outlined' },
     padding: { type: [Number, String], default: undefined },
   },

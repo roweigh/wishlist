@@ -17,37 +17,55 @@ export default {
   ],
   data () {
     return {
-      value: null,
-      colors: [],
       colorOptions: getColorOptions(),
+      colors: [],
+      value: null,
     };
   },
   computed: {
-    displayDeckName () {
-      return this.deckName || this.modelValue;
+    expandIcon () {
+      return this.addDeck ? 'mdi-chevron-up' : 'mdi-plus';
     },
+
     deckColor () {
-      const colors = [...this.colors].sort((a, b) => a.id - b.id);
-      return colors.map(({ code }) => code).join('');
+      return [...this.colors]
+        .sort((a, b) => a.id - b.id)
+        .slice(0, 2)
+        .map(({ code }) => code)
+        .join('');
     },
+
     deckName ()  {
-      if (this.value || this.deckColor) {
+      if (this.deckColor || this.value) {
         return `${this.deckColor} ${this.value ?? ''}`;
       } else {
         return '';
       }
     },
+
+    selectedDeck () {
+      return this.deckName || this.modelValue;
+    },
+
+    errorMessage () {
+      return this.colors.length > 2 ? 'Please select a maximum of 2 colors' : '';
+    },
   },
   watch: {
+    /**
+     * Selecting an existing deck should collapse the 'Add Deck' section
+     * Otherwise, repeated decks may be entered if the UI detects the 'Add Deck' section is open
+     */
     modelValue: {
       immediate: true,
       handler (v) {
-        if (v) {
-          this.colors = [];
-        }
+        v && this.$emit('update:add-deck', false);
       },
     },
 
+    /**
+     * Reset the 'Add Deck' section inputs if collapsed
+     */
     addDeck (v) {
       if (!v) {
         this.colors = [];
@@ -60,17 +78,16 @@ export default {
 
 <template>
   <paired-select
-    :model-value="displayDeckName"
+    :model-value="selectedDeck"
     :items="deckList"
-    item-title="name"
-    item-value="id"
     label="Deck"
+    item-title="name"
     chips
     @update:model-value="$emit('update:model-value', $event)"
   >
     <template #append>
       <v-btn
-        :icon="addDeck ? 'mdi-chevron-up' : 'mdi-plus'"
+        :icon="expandIcon"
         density="compact"
         variant="text"
         @click="$emit('update:add-deck', !addDeck)"
@@ -108,8 +125,9 @@ export default {
           </gradient-chip>
         </v-row>
 
+        <!-- Color Checkboxes -->
         <v-input
-          :error-messages="colors.length > 2 ? 'Please select a maximum of 2 colors' : ''"
+          :error-messages="errorMessage"
           class="mt-4"
           hide-details="auto"
         >

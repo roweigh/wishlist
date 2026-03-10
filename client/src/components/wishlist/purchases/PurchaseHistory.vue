@@ -27,7 +27,7 @@ export default {
       <receipt-row
         v-for="item in history"
         :key="item.id"
-        :model-value="changedHistory"
+        :model-value="modelValue"
         :item="item"
         @update:model-value="$emit('update:model-value', $event)"
         @remove="$emit('remove', $event)"
