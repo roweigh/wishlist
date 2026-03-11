@@ -15,6 +15,7 @@ export default {
     'add',
     'edit',
     'remove',
+    'download',
   ],
   data () {
     return {

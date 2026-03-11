@@ -8,8 +8,10 @@ import {
 } from '@/api/purchases';
 
 import BulkTable from '@/components/wishlist/BulkTable.vue';
+import AddBulkDialog from '@/components/wishlist/dialog/AddBulkDialog.vue';
+import EditBulkDialog from '@/components/wishlist/dialog/EditBulkDialog.vue';
+
 import BulkUploadDialog from '@/components/wishlist/BulkUploadDialog.vue';
-import EditBulkDialog from '@/components/wishlist/EditBulkDialog.vue';
 
 import { useAlertStore } from '@/stores/alert';
 const alertStore = useAlertStore();
@@ -18,6 +20,7 @@ export default {
   components: {
     BulkTable,
     BulkUploadDialog,
+    AddBulkDialog,
     EditBulkDialog,
   },
   data () {
@@ -27,6 +30,7 @@ export default {
         loading: true,
       },
       overlayFlags: {
+        add: false,
         edit: false,
         upload: false,
       },
@@ -55,7 +59,7 @@ export default {
         await addCard(payload),
         await this.getCards();
         alertStore.showMessage('success', 'Successfully Added!');
-        this.overlayFlags.edit = false;
+        this.overlayFlags.add = false;
       } catch {
         // handle(error)
       }
@@ -113,7 +117,6 @@ export default {
         // 3. If the codes are identical, sort by qtyAcquired (ascending)
         return a.qtyAcquired - b.qtyAcquired;
       });
-      console.log(cards);
 
       function convertToCSV(objArray) {
         if (objArray.length === 0) return '';
@@ -172,9 +175,27 @@ export default {
 </script>
 
 <template>
+  <flex-col class="pa-5 grow">
+    <bulk-table
+      :loading="loadingFlags.loading"
+      :items="cards"
+      @add="overlayFlags.add = true"
+      @edit="overlayFlags.edit = $event"
+      @upload="overlayFlags.upload = true"
+      @remove="removeCard($event)"
+      @download="download()"
+      @load="bulkUpload($event)"
+    />
+  </flex-col>
+
+  <add-bulk-dialog
+    v-model="overlayFlags.add"
+    @add="addCard($event)"
+    @refresh="getCards()"
+  />
+
   <edit-bulk-dialog
     v-model="overlayFlags.edit"
-    @add="addCard($event)"
     @update="updateCard($event)"
     @refresh="getCards()"
   />
@@ -183,17 +204,4 @@ export default {
     v-model="overlayFlags.upload"
     @upload="bulkUpload($event)"
   />
-
-  <flex-col class="pa-5 grow">
-    <bulk-table
-      :loading="loadingFlags.loading"
-      :items="cards"
-      @add="overlayFlags.edit = true"
-      @edit="overlayFlags.edit = $event"
-      @upload="overlayFlags.upload = true"
-      @remove="removeCard($event)"
-      @download="download()"
-      @load="bulkUpload($event)"
-    />
-  </flex-col>
 </template>

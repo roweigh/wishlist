@@ -59,7 +59,9 @@ export default {
     modelValue: {
       immediate: true,
       handler (v) {
-        v && this.$emit('update:add-deck', false);
+        if (v && !this.deckName) {
+          this.$emit('update:add-deck', false);
+        }
       },
     },
 
@@ -71,6 +73,10 @@ export default {
         this.colors = [];
         this.value = '';
       }
+    },
+
+    selectedDeck (v) {
+      v && this.$emit('update:model-value', v);
     },
   },
 };

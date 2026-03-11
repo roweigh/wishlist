@@ -1,26 +1,23 @@
 <script>
-import { Timestamp } from 'firebase/firestore';
-import {
-  pair,
-  updatePair,
-} from '@/utils/form-utils';
+import BulkDialogMixin from '@/mixins/BulkDialogMixin';
 
 import {
   getCardHistory,
   updateHistory,
   removeHistory,
-  getDeckList,
-  addDeck,
 } from '@/api/purchases';
 
-import PurchaseHistory from './purchases/PurchaseHistory.vue';
-import DeckInput from './purchases/DeckInput.vue';
+import PurchaseHistory from '../purchases/PurchaseHistory.vue';
+import DeckInput from '../purchases/DeckInput.vue';
 
 export default {
   components: {
     DeckInput,
     PurchaseHistory,
   },
+  mixins: [
+    BulkDialogMixin(),
+  ],
   props: {
     modelValue: { type: null, default: false },
   },
@@ -32,80 +29,28 @@ export default {
   ],
   data () {
     return {
-      title: 'Add Bulk',
-      loadingFlags: {
-        initializing: true,
-        loading: false,
-      },
-      overlayFlags: {
-        deck: false,
-      },
-
-      addNewDeck: false,
-      showHistory: false,
       history: [],
       changedHistory: {},
-
-      deck: pair(null),
-      deckList: [],
-
-      // Form inputs
-      code: null,
-      unitCost: 0,
-      totalCost: 0,
-      date: null,
-      name: pair(null),
-      qtyNeeded: pair(0),
-      qtyAcquired: pair(0),
     };
-  },
-  computed: {
-    newEntry () { return !this.modelValue?.code; },
-    changed () {
-      return (
-        this.qtyNeeded.initial !== this.qtyNeeded.value ||
-        this.qtyAcquired.initial !== this.qtyAcquired.value ||
-        this.deck.initial !== this.deck.value ||
-        this.name.initial !== this.name.value
-      );
-    },
   },
   watch: {
     modelValue: {
       deep: true,
       immediate: true,
       async handler(v) {
-        updatePair(this.qtyAcquired, this.qtyAcquired.initial);
-
         if (v) {
-          this.title = this.newEntry ? 'Add Bulk' : 'Update Bulk';
           this.loadingFlags.initializing = true;
-          this.showHistory = false;
-
           this.history = [];
-          this.code = v?.code ?? null;
-          updatePair(this.deck, v?.deck ?? null);
-          updatePair(this.name, v?.name  ?? null);
-          updatePair(this.qtyNeeded, 0);
-          this.date = new Date();
-          this.unitCost = 0;
-          this.totalCost = 0;
-          v?.code && await this.getPurchaseHistory().then(() => { this.showHistory = true; });
-          await this.getDeckList();
+          await this.initialize(v);
+          await this.getPurchaseHistory();
+          this.loadingFlags.initializing = false;
         }
-
-        this.loadingFlags.initializing = false;
       },
     },
   },
   methods: {
     async getPurchaseHistory () {
       this.history = await getCardHistory(this.modelValue.code).then(result => result.sort((a,b) => b.date - a.date));
-    },
-
-    async remove (id) {
-      await removeHistory(id);
-      await this.getPurchaseHistory();
     },
 
     // Update each changed row entry
@@ -116,27 +61,23 @@ export default {
       await Promise.all(promises);
     },
 
+    async remove (id) {
+      await removeHistory(id);
+      await this.getPurchaseHistory();
+    },
+
     /**
      * TODO Explain better
      * Update any purchase history rows that have changed, then submit single card payload information
      * Send difference in qty as we are logging history - so it can do math in the BE
      */
     async submit () {
-      if (this.addNewDeck) {
-        await this.addDeck(this.deck.value);
+      await this.updatePurchaseHistory();
+      if (this.newDeck) {
+        await this.addDeck({ name: this.deck.value });
       }
 
-      const payload = {
-        code: this.sanitizeCode(this.code),
-        amtSpent: this.totalCost,
-        name: this.name.value,
-        deck: this.deck.value,
-        qtyAcquired: this.qtyAcquired.value,
-        qtyNeeded:  this.qtyNeeded.value,
-        date: Timestamp.fromDate(new Date(this.date)),
-      };
-
-      await this.updatePurchaseHistory();
+      const payload = this.generatePayload();
       if (this.changed) {
         if (this.qtyAcquired) {
           this.$emit('add', payload);
@@ -147,35 +88,6 @@ export default {
 
       this.$emit('refresh');
     },
-
-    async getDeckList () {
-      try {
-        this.deckList = await getDeckList();
-      } catch (error) {
-        //
-      }
-    },
-
-    async addDeck (payload) {
-      try {
-        await addDeck(payload);
-        await this.getDeckList();
-        this.overlayFlags.deck = false;
-      } catch (error) {
-        //
-      }
-    },
-
-    sanitizeCode (code) {
-      // Hint: Code must match OPTCG card code structure (e.g. OP01-023)
-      const result = code.toUpperCase();
-      const regex = /^[A-Z]+(\d{2})?-\d{3}$/;
-      return result;
-    },
-
-    updateTotal () {
-      this.totalCost = this.unitCost * this.qtyAcquired.value;
-    },
   },
 };
 </script>
@@ -184,7 +96,7 @@ export default {
   <base-dialog
     :model-value="modelValue"
     :initializing="loadingFlags.initializing"
-    :title="title"
+    title="Update Bulk"
     width="60vw"
     @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
@@ -211,7 +123,7 @@ export default {
 
             <deck-input
               v-model="deck.value"
-              v-model:add-deck="addNewDeck"
+              v-model:add-deck="newDeck"
               :deck-list="deckList"
             />
           </v-row>
