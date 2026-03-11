@@ -27,18 +27,16 @@ export default {
           this.loadingFlags.initializing = true;
           await this.initialize(v);
           this.loadingFlags.initializing = false;
+          this.loadingFlags.loading = false;
         }
       },
     },
   },
   methods: {
     async submit () {
-      if (this.newDeck) {
-        await this.addDeck({ name: this.deck.value });
-      }
-      const payload = this.generatePayload();
-      this.$emit('add', payload);
-      this.$emit('refresh');
+      this.loadingFlags.loading = true;
+      this.newDeck && await this.addDeck({ name: this.deck.value });
+      this.$emit('add', this.payload);
     },
   },
 };
@@ -48,6 +46,7 @@ export default {
   <base-dialog
     :model-value="modelValue"
     :initializing="loadingFlags.initializing"
+    :loading="loadingFlags.loading"
     title="Add Bulk"
     width="40vw"
     @submit="submit()"

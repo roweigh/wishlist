@@ -1,14 +1,13 @@
 <script>
-import BulkDialogMixin from '@/mixins/BulkDialogMixin';
-
 import {
   getCardHistory,
   updateHistory,
   removeHistory,
 } from '@/api/purchases';
 
-import PurchaseHistory from '../purchases/PurchaseHistory.vue';
 import DeckInput from '../purchases/DeckInput.vue';
+import PurchaseHistory from '../purchases/PurchaseHistory.vue';
+import BulkDialogMixin from '@/mixins/BulkDialogMixin';
 
 export default {
   components: {
@@ -41,8 +40,10 @@ export default {
         if (v) {
           this.loadingFlags.initializing = true;
           this.history = [];
-          await this.initialize(v);
-          await this.getPurchaseHistory();
+          await Promise.all([
+            this.initialize(v),
+            this.getPurchaseHistory(),
+          ]);
           this.loadingFlags.initializing = false;
         }
       },
@@ -72,20 +73,11 @@ export default {
      * Send difference in qty as we are logging history - so it can do math in the BE
      */
     async submit () {
-      await this.updatePurchaseHistory();
-      if (this.newDeck) {
-        await this.addDeck({ name: this.deck.value });
-      }
-
-      const payload = this.generatePayload();
-      if (this.changed) {
-        if (this.qtyAcquired) {
-          this.$emit('add', payload);
-        } else {
-          this.$emit('update', payload);
-        }
-      }
-
+      await Promise.all([
+        this.updatePurchaseHistory(),
+        this.newDeck && this.addDeck({ name: this.deck.value }),
+      ]);
+      this.$emit('update', this.payload);
       this.$emit('refresh');
     },
   },

@@ -12,7 +12,7 @@ export default () => {
       return {
         loadingFlags: {
           initializing: true,
-          loading: false,
+          loading: true,
         },
         newDeck: false,
         deckList: [],
@@ -31,13 +31,16 @@ export default () => {
       };
     },
     computed: {
-      changed () {
-        return (
-          this.qtyNeeded.initial !== this.qtyNeeded.value ||
-          this.qtyAcquired.initial !== this.qtyAcquired.value ||
-          this.deck.initial !== this.deck.value ||
-          this.name.initial !== this.name.value
-        );
+      payload () {
+        return {
+          code: this.sanitizeCode(this.code),
+          name: this.name.value,
+          deck: this.deck.value,
+          date: Timestamp.fromDate(new Date(this.date)),
+          qtyNeeded:  this.qtyNeeded,
+          qtyAcquired: this.qtyAcquired,
+          amtSpent: this.totalCost,
+        };
       },
     },
     methods: {
@@ -47,10 +50,10 @@ export default () => {
         updatePair(this.deck, v?.deck ?? null);
         updatePair(this.name, v?.name  ?? null);
         this.date = new Date();
-        this.unitCost = 0;
-        this.totalCost = 0;
         this.qtyNeeded = 0;
         this.qtyAcquired = 0;
+        this.unitCost = 0;
+        this.totalCost = 0;
       },
 
       async getDeckList () {
@@ -70,18 +73,6 @@ export default () => {
         }
       },
 
-      generatePayload () {
-        return {
-          code: this.sanitizeCode(this.code),
-          amtSpent: this.totalCost,
-          name: this.name.value,
-          deck: this.deck.value,
-          qtyAcquired: this.qtyAcquired,
-          qtyNeeded:  this.qtyNeeded,
-          date: Timestamp.fromDate(new Date(this.date)),
-        };
-      },
-
       sanitizeCode (code) {
       // Hint: Code must match OPTCG card code structure (e.g. OP01-023)
         const result = code.toUpperCase();
@@ -91,7 +82,7 @@ export default () => {
       },
 
       updateTotal () {
-        this.totalCost = this.unitCost * this.qtyAcquired.value;
+        this.totalCost = this.unitCost * this.qtyAcquired;
       },
     },
   };

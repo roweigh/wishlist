@@ -60,6 +60,7 @@ export default {
         await this.getCards();
         alertStore.showMessage('success', 'Successfully Added!');
         this.overlayFlags.add = false;
+        this.loadingFlags.loading = false;
       } catch {
         // handle(error)
       }
@@ -72,7 +73,7 @@ export default {
         await updateCard(id, payload),
         await this.getCards();
         alertStore.showMessage('success', 'Successfully Updated!');
-        this.overlayFlags.edit = false;
+        this.loadingFlags.loading = false;
       } catch {
         // handle(error)
       }
