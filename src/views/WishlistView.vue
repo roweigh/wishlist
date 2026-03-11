@@ -54,38 +54,36 @@ export default {
     },
 
     async addCard (payload) {
-      this.loadingFlags.loading = true;
       try {
-        await addCard(payload),
+        await addCard(payload).then(() => {
+          alertStore.showMessage('success', 'Successfully Added!');
+          this.overlayFlags.add = false;
+          this.overlayFlags.edit = false;
+        }),
         await this.getCards();
-        alertStore.showMessage('success', 'Successfully Added!');
-        this.overlayFlags.add = false;
-        this.loadingFlags.loading = false;
       } catch {
         // handle(error)
       }
     },
 
     async updateCard (payload) {
-      const id = this.overlayFlags?.edit?.id;
-      this.loadingFlags.loading = true;
       try {
-        await updateCard(id, payload),
+        const id = this.overlayFlags?.edit?.id;
+        await updateCard(id, payload).then(() => {
+          alertStore.showMessage('success', 'Successfully Updated!');
+        }),
         await this.getCards();
-        alertStore.showMessage('success', 'Successfully Updated!');
-        this.loadingFlags.loading = false;
       } catch {
         // handle(error)
       }
     },
 
     async removeCard(id) {
-      this.loadingFlags.loading = true;
       try {
-        await removeCard(id);
+        await removeCard(id).then(() => {
+          alertStore.showMessage('success', 'Successfully Removed!');
+        });
         await this.getCards();
-        this.overlayFlags.edit = false;
-        alertStore.showMessage('success', 'Successfully Removed!');
       } catch {
         // handle(error)
       }
@@ -197,6 +195,7 @@ export default {
 
   <edit-bulk-dialog
     v-model="overlayFlags.edit"
+    @add="addCard($event)"
     @update="updateCard($event)"
     @refresh="getCards()"
   />

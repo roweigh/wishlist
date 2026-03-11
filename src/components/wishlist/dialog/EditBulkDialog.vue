@@ -39,12 +39,12 @@ export default {
       async handler(v) {
         if (v) {
           this.loadingFlags.initializing = true;
-          this.history = [];
           await Promise.all([
             this.initialize(v),
             this.getPurchaseHistory(),
           ]);
           this.loadingFlags.initializing = false;
+          this.loadingFlags.loading = false;
         }
       },
     },
@@ -73,12 +73,19 @@ export default {
      * Send difference in qty as we are logging history - so it can do math in the BE
      */
     async submit () {
+      this.loadingFlags.loading = true;
       await Promise.all([
         this.updatePurchaseHistory(),
         this.newDeck && this.addDeck({ name: this.deck.value }),
       ]);
-      this.$emit('update', this.payload);
-      this.$emit('refresh');
+
+      if (this.payload.qtyAcquired || this.payload.qtyNeeded) {
+        this.$emit('add', this.payload);
+      } else {
+        this.$emit('update', this.payload);
+        this.$emit('refresh');
+        this.loadingFlags.loading = false;
+      }
     },
   },
 };
@@ -88,6 +95,7 @@ export default {
   <base-dialog
     :model-value="modelValue"
     :initializing="loadingFlags.initializing"
+    :loading="loadingFlags.loading"
     title="Update Bulk"
     width="60vw"
     @submit="submit()"
