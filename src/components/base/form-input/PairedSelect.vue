@@ -6,6 +6,7 @@ export default {
   },
   props: {
     modelValue: { type: null, required: true },
+    initial: { type: null, default: undefined },
     items: { type: Array, default: () => [] },
     label: { type: String, default: undefined },
     cols: { type: null, default: 12 },
@@ -21,6 +22,14 @@ export default {
   computed: {
     styleComputed () {
       return this.padding ? `padding: ${this.padding}px` : undefined;
+    },
+    classComputed () {
+      const changed = this.initial && (this.modelValue !== this.initial);
+      if (changed) {
+        return 'changed';
+      } else {
+        return undefined;
+      }
     },
   },
 };
@@ -39,6 +48,7 @@ export default {
       :item-value="itemValue"
       :chips="chips"
       :variant="variant"
+      :class="classComputed"
       hide-details="auto"
       density="compact"
       tile
@@ -70,3 +80,17 @@ export default {
     </v-select>
   </v-col>
 </template>
+
+<style lang="scss" scoped>
+.changed {
+  :deep(.v-field-label) {
+    opacity: 1;
+    color: #00C853; // green-accent-4
+  }
+  :deep(.v-field__outline) {
+    --v-field-border-width: 2px;
+    --v-field-border-opacity: 1;
+    color: #00C853; // green-accent-4
+  }
+}
+</style>

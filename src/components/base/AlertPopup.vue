@@ -6,7 +6,6 @@ export default {
   computed: {
     ...mapState(useAlertStore, ['shown', 'message', 'alertType']),
     alertIcon () {
-      console.log(this.alertType);
       switch(this.alertType) {
         case 'success':
           return 'mdi-check-circle';

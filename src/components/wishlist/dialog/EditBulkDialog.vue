@@ -113,10 +113,12 @@ export default {
               v-model="code"
               label="Code"
               cols="4"
+              readonly
             />
 
             <paired-text-field
               v-model="name.value"
+              :initial="name.initial"
               label="Name"
               cols="8"
             />
@@ -124,6 +126,7 @@ export default {
             <deck-input
               v-model="deck.value"
               v-model:add-deck="newDeck"
+              :initial="deck.initial"
               :deck-list="deckList"
             />
           </v-row>
@@ -141,13 +144,13 @@ export default {
               label="Purchase Date"
             />
             <paired-number-input
-              v-model="qtyNeeded.value"
+              v-model="qtyNeeded"
               :min="0"
               label="Quantity Needed"
               cols="6"
             />
             <paired-number-input
-              v-model="qtyAcquired.value"
+              v-model="qtyAcquired"
               :min="0"
               label="Quantity Acquired"
               cols="6"

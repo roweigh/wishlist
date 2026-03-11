@@ -2,6 +2,7 @@
 export default {
   props: {
     modelValue: { type: null, required: true },
+    initial: { type: null, default: undefined },
     label: { type: String, default: undefined },
     cols: { type: null, default: 12 },
     min: { type: Number, default: undefined },
@@ -14,9 +15,17 @@ export default {
     'update:model-value',
   ],
   computed: {
-    styleComputed () { return this.padding ? `padding: ${this.padding}px` : undefined; },
     prefix () { return this.type === 'dollar' ? '$' : undefined; },
     precision () { return this.type === 'dollar' ? 2 : undefined; },
+    styleComputed () { return this.padding ? `padding: ${this.padding}px` : undefined; },
+    classComputed () {
+      const changed = (this.initial !== undefined) && (this.modelValue !== this.initial);
+      if (changed) {
+        return 'changed';
+      } else {
+        return undefined;
+      }
+    },
   },
 };
 </script>
@@ -34,6 +43,7 @@ export default {
       :min="min"
       :variant="variant"
       :density="density"
+      :class="classComputed"
       control-variant="stacked"
       hide-details="auto"
       tile
@@ -41,3 +51,17 @@ export default {
     />
   </v-col>
 </template>
+
+<style lang="scss" scoped>
+.changed {
+  :deep(.v-field-label) {
+    opacity: 1;
+    color: #00C853; // green-accent-4
+  }
+  :deep(.v-field__outline) {
+    --v-field-border-width: 2px;
+    --v-field-border-opacity: 1;
+    color: #00C853; // green-accent-4
+  }
+}
+</style>

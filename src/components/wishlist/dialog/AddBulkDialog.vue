@@ -75,7 +75,7 @@ export default {
 
             <deck-input
               v-model="deck.value"
-              v-model:add-deck="addNewDeck"
+              v-model:add-deck="newDeck"
               :deck-list="deckList"
             />
           </v-row>
@@ -93,13 +93,13 @@ export default {
               label="Purchase Date"
             />
             <paired-number-input
-              v-model="qtyNeeded.value"
+              v-model="qtyNeeded"
               :min="0"
               label="Quantity Needed"
               cols="6"
             />
             <paired-number-input
-              v-model="qtyAcquired.value"
+              v-model="qtyAcquired"
               :min="0"
               label="Quantity Acquired"
               cols="6"

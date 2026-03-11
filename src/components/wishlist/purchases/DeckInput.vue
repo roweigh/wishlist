@@ -8,6 +8,7 @@ export default {
   },
   props: {
     modelValue: { type: null, default: false },
+    initial: { type: null, default: undefined },
     addDeck: { type: null, default: false },
     deckList: { type: null, default: () => [] },
   },
@@ -85,6 +86,7 @@ export default {
 <template>
   <paired-select
     :model-value="selectedDeck"
+    :initial="initial"
     :items="deckList"
     label="Deck"
     item-title="name"

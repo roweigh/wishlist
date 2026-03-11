@@ -24,8 +24,8 @@ export default () => {
 
         // Purchase Details
         date: null,
-        qtyNeeded: pair(0),
-        qtyAcquired: pair(0),
+        qtyNeeded: 0,
+        qtyAcquired: 0,
         unitCost: 0,
         totalCost: 0,
       };
@@ -44,13 +44,13 @@ export default () => {
       async initialize (v) {
         await this.getDeckList();
         this.code = v?.code ?? null;
-        updatePair(this.qtyAcquired, this.qtyAcquired.initial);
         updatePair(this.deck, v?.deck ?? null);
         updatePair(this.name, v?.name  ?? null);
-        updatePair(this.qtyNeeded, 0);
         this.date = new Date();
         this.unitCost = 0;
         this.totalCost = 0;
+        this.qtyNeeded = 0;
+        this.qtyAcquired = 0;
       },
 
       async getDeckList () {
@@ -76,8 +76,8 @@ export default () => {
           amtSpent: this.totalCost,
           name: this.name.value,
           deck: this.deck.value,
-          qtyAcquired: this.qtyAcquired.value,
-          qtyNeeded:  this.qtyNeeded.value,
+          qtyAcquired: this.qtyAcquired,
+          qtyNeeded:  this.qtyNeeded,
           date: Timestamp.fromDate(new Date(this.date)),
         };
       },
