@@ -7,13 +7,13 @@ import globals from 'globals';
 export default [
   js.configs.recommended,
   ...vue.configs['flat/recommended'],
- {
+  {
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.node
-      }
-    }
+        ...globals.node,
+      },
+    },
   },
   {
     plugins: {

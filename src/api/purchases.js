@@ -50,7 +50,8 @@ export const removeCard = async (id) => {
 // Card receipts CRUD
 export const getCardHistory = async (code) => {
   const response = await get('purchases', code);
-  return response.filter(({ qtyAcquired }) => qtyAcquired > 0);
+  // return response.filter(({ qtyAcquired }) => qtyAcquired > 0);
+  return response;
 };
 export const updateHistory = async (id, payload) => await update('purchases', id, payload); // ??
 export const removeHistory = async (id) => {}; // ??

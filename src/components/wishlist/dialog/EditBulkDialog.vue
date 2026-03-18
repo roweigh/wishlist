@@ -151,7 +151,6 @@ export default {
             />
             <paired-number-input
               v-model="qtyAcquired"
-              :min="0"
               label="Quantity Acquired"
               cols="6"
               @update:model-value="updateTotal()"
