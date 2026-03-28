@@ -15,6 +15,7 @@ import {
   where,
   deleteDoc,
   writeBatch,
+  Timestamp,
 } from 'firebase/firestore';
 
 export async function get(colName, id = undefined) {
@@ -36,6 +37,29 @@ export async function get(colName, id = undefined) {
 
 export async function add(col, payload) {
   await addDoc(collection(db, col), payload);
+}
+
+export async function batchAdd(col, arr) {
+  const batch = writeBatch(db);
+
+  arr.forEach((item) => {
+    // Everything goes into one top-level collection
+    const historyColRef = collection(db, `${col}-history`);
+    const newDocRef = doc(historyColRef);
+    console.log(item.date);
+
+    batch.set(newDocRef, {
+      code: item.code, // We store the code as a field instead of a parent
+      name: item.name,
+      // deck: item.deck, // oops lost it
+      qtyAcquired: Number(item.qtyAcquired) || 0,
+      qtyNeeded: Number(item.qtyNeeded) || 0,
+      amtSpent: Number(item.amtSpent) || 0,
+      date: Timestamp.fromDate(new Date(item.date)),
+    });
+  });
+
+  await batch.commit();
 }
 
 export async function update(col, id, payload) {

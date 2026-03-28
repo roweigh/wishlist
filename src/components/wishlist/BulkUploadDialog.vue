@@ -53,7 +53,6 @@ export default {
       if (!file) return;
 
       const reader = new FileReader();
-
       reader.onload = (e) => {
         const csv = e.target.result;
         this.bulk = this.csvToArray(csv);

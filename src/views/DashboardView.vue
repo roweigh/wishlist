@@ -4,6 +4,8 @@ import {
   getPurchaseHistory,
   getTournamentEntry,
   updateTournamentEntry,
+
+  getCards,
 } from '@/api/purchases';
 
 import TournamentEntryInput from '@/components/wishlist/TournamentEntryInput.vue';
@@ -66,7 +68,22 @@ export default {
     ]);
     const selectedDates = await getTournamentEntry();
 
-    const result = await getPurchaseHistory();
+    const result = await Promise.all([
+      getCards('singles'),
+      getCards('sales'),
+      getCards('tournament'),
+      getCards('others'),
+    ]).then((responses) => {
+      console.log(responses);
+      return [
+        ...responses[0],
+        ...responses[1],
+        ...responses[2],
+        ...responses[3],
+      ];
+    });
+
+
     const selectedDatesWResult = [...selectedDates[0].dates.map(v => ({ date: v, amtSpent: 12 })), ...result];
     console.log(selectedDatesWResult);
     const sortedAscending = selectedDatesWResult.sort((a, b) => {

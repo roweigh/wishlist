@@ -5,20 +5,29 @@ import {
   updateCard,
   removeCard,
   getPurchaseHistory,
+
+  bulkImport,
 } from '@/api/purchases';
 
-import BulkTable from '@/components/wishlist/BulkTable.vue';
+import SinglesTable from '@/components/wishlist/SinglesTable.vue';
+import SalesTable from '@/components/wishlist/SalesTable.vue';
+import EntriesTable from '@/components/wishlist/EntriesTable.vue';
+import OtherPurchasesTable from '@/components/wishlist/OtherPurchasesTable.vue';
+import BulkUploadDialog from '@/components/wishlist/BulkUploadDialog.vue';
+
 import AddBulkDialog from '@/components/wishlist/dialog/AddBulkDialog.vue';
 import EditBulkDialog from '@/components/wishlist/dialog/EditBulkDialog.vue';
-
-import BulkUploadDialog from '@/components/wishlist/BulkUploadDialog.vue';
 
 import { useAlertStore } from '@/stores/alert';
 const alertStore = useAlertStore();
 
 export default {
   components: {
-    BulkTable,
+    SinglesTable,
+    SalesTable,
+    EntriesTable,
+    OtherPurchasesTable,
+
     BulkUploadDialog,
     AddBulkDialog,
     EditBulkDialog,
@@ -35,17 +44,32 @@ export default {
         upload: false,
       },
 
-      cards: [],
+      tab: 'singles',
+      tabs: [
+        { value: 'singles', title: 'Singles', icon: 'mdi-cards-outline' },
+        { value: 'sales', title: 'Sales', icon: 'mdi-finance' },
+        { value: 'tournament', title: 'Entry Fees', icon: 'mdi-trophy-outline'  },
+        { value: 'others', title: 'Other Purchases', icon: 'mdi-view-grid-outline'  },
+      ],
+      singles: [],
+      sales: [],
+      tournament: [],
+      others: [],
     };
   },
+
   async mounted () {
-    await this.getCards();
+    this.singles = await this.get('singles');
+    this.sales = await this.get('sales');
+    this.tournament = await this.get('tournament');
+    this.others = await this.get('others');
   },
+
   methods: {
-    async getCards () {
+    async get (col) {
       this.loadingFlags.loading = true;
       try {
-        this.cards = await getCards();
+        return await getCards(col);
       } catch {
         // handle(error)
       } finally {
@@ -140,9 +164,8 @@ export default {
       }
 
       const csvString = convertToCSV(cards);
-      console.log(csvString);
-
       function downloadCSV(csvString, filename = 'purchase_history.csv') {
+
         // 1. Create a Blob from the CSV string
         const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
 
@@ -166,8 +189,11 @@ export default {
       downloadCSV(csvString);
     },
 
-    bulkUpload () {
-
+    async bulkUpload (arr) {
+      await bulkImport(this.tab, arr);
+      console.log('done');
+      // console.log(path);
+      // console.log(arr);
     },
   },
 };
@@ -175,17 +201,80 @@ export default {
 
 <template>
   <flex-col class="pa-5 grow">
-    <bulk-table
-      :loading="loadingFlags.loading"
-      :items="cards"
-      @add="overlayFlags.add = true"
-      @edit="overlayFlags.edit = $event"
-      @upload="overlayFlags.upload = true"
-      @remove="removeCard($event)"
-      @download="download()"
-      @load="bulkUpload($event)"
-    />
+    <flex-row>
+      <v-tabs
+        v-model="tab"
+        color="teal-accent-3"
+        grow
+      >
+        <v-tab
+          v-for="{value, title, icon} in tabs"
+          :key="value"
+          :value="value"
+          icon="mdi-finance"
+        >
+          <v-icon
+            :icon="icon"
+            class="mx-2"
+          />
+          {{ title }}
+        </v-tab>
+      </v-tabs>
+    </flex-row>
+
+    <v-card class="mt-5">
+      <v-tabs-window v-model="tab">
+        <singles-table
+          :items="singles"
+          :loading="loadingFlags.loading"
+          @add="overlayFlags.add = true"
+          @edit="overlayFlags.edit = $event"
+          @upload="overlayFlags.upload = true"
+          @remove="removeCard($event)"
+          @download="download()"
+          @load="bulkUpload($event)"
+        />
+
+        <sales-table
+          :items="sales"
+          :loading="loadingFlags.loading"
+          @add="overlayFlags.add = true"
+          @edit="overlayFlags.edit = $event"
+          @upload="overlayFlags.upload = true"
+          @remove="removeCard($event)"
+          @download="download()"
+          @load="bulkUpload($event)"
+        />
+
+        <entries-table
+          :items="tournament"
+          :loading="loadingFlags.loading"
+          @add="overlayFlags.add = true"
+          @edit="overlayFlags.edit = $event"
+          @upload="overlayFlags.upload = true"
+          @remove="removeCard($event)"
+          @download="download()"
+          @load="bulkUpload($event)"
+        />
+
+        <other-purchases-table
+          :items="others"
+          :loading="loadingFlags.loading"
+          @add="overlayFlags.add = true"
+          @edit="overlayFlags.edit = $event"
+          @upload="overlayFlags.upload = true"
+          @remove="removeCard($event)"
+          @download="download()"
+          @load="bulkUpload($event)"
+        />
+      </v-tabs-window>
+    </v-card>
   </flex-col>
+
+  <bulk-upload-dialog
+    v-model="overlayFlags.upload"
+    @upload="bulkUpload($event)"
+  />
 
   <add-bulk-dialog
     v-model="overlayFlags.add"
@@ -198,10 +287,5 @@ export default {
     @add="addCard($event)"
     @update="updateCard($event)"
     @refresh="getCards()"
-  />
-
-  <bulk-upload-dialog
-    v-model="overlayFlags.upload"
-    @upload="bulkUpload($event)"
   />
 </template>

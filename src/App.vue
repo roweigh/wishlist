@@ -15,7 +15,7 @@ export default {
     <alert-popup />
     <v-layout>
       <navigation-header />
-      <v-main class="d-flex grow bg-grey">
+      <v-main class="d-flex grow bg-grey-darken-3">
         <router-view />
       </v-main>
     </v-layout>
