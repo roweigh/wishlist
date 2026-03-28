@@ -11,7 +11,9 @@ import * as components from 'vuetify/components';
 import * as directives from 'vuetify/directives';
 
 import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+
 const firebaseApp = initializeApp({
   apiKey: 'AIzaSyD97hQbJMaVCWx_C4rDZFIfYqf5F4mvzSo',
   authDomain: 'wishlist-596f5.firebaseapp.com',
@@ -21,6 +23,9 @@ const firebaseApp = initializeApp({
   appId: '1:452494338050:web:ab32fb6a04a86928175f1b',
   measurementId: 'G-H7Z98SXCP2',
 });
+
+export const auth = getAuth(firebaseApp);
+export const googleProvider = new GoogleAuthProvider();
 const db = getFirestore(firebaseApp);
 
 import '@/style.css';
