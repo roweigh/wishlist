@@ -7,6 +7,7 @@ export default {
   },
   props: {
     modelValue: { type: Boolean, required: true },
+    csvHeaders: { type: String, default: null },
   },
   emits: [
     'update:model-value',
@@ -15,9 +16,16 @@ export default {
   data () {
     return {
       uploadMode: 'file',
-      csvInput: 'code,name,qtyAcquired,qtyNeeded,amtSpent,date',
+      csvInput: null,
       bulk: null,
     };
+  },
+  watch: {
+    modelValue (v) {
+      if (v) {
+        this.csvInput = this.csvHeaders;
+      }
+    },
   },
   methods: {
     uploadBulk() {

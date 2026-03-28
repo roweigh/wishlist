@@ -1,8 +1,23 @@
 <script>
+import {
+  addCard,
+  updateCard,
+  removeCard,
+} from '@/api/purchases';
+
+import AddSinglesDialog from './AddSinglesDialog.vue';
+import EditSinglesDialog from './EditSinglesDialog.vue';
+import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
 import GradientChip from '@/components/base/GradientChip.vue';
+
+import { useAlertStore } from '@/stores/alert';
+const alertStore = useAlertStore();
 
 export default {
   components: {
+    AddSinglesDialog,
+    EditSinglesDialog,
+    BulkUploadDialog,
     GradientChip,
   },
   props: {
@@ -16,6 +31,7 @@ export default {
     'edit',
     'remove',
     'download',
+    'refresh',
   ],
   data () {
     return {
@@ -27,6 +43,8 @@ export default {
 
       sortBy: [{ key: 'deck', order: 'asc' }],
       itemsPerPage: -1,
+
+      csvHeaders: 'code,name,qtyAcquired,qtyNeeded,amtSpent,date', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
         {
           key: 'code',
@@ -73,32 +91,68 @@ export default {
     };
   },
   methods: {
-    async loadFromClipboard () {
+    async addCard (payload) {
       try {
-        const text = await navigator.clipboard.readText();
-        this.cards = this.parseDecklist(text);
-      } catch (err) {
-        console.error('Failed to read clipboard:', err);
+        await addCard(payload).then(() => {
+          alertStore.showMessage('success', 'Successfully Added!');
+          this.overlayFlags.add = false;
+          this.overlayFlags.edit = false;
+        }),
+        this.$emit('refresh');
+      } catch {
+        // handle(error)
       }
     },
 
-    parseDecklist (text) {
-      return text.split(/\r?\n/).map(line => {
-        const cardQty = line.trim().match(/^(\d+)x(.+)$/);
-        const qtyNeeded = Number(cardQty?.[1]);
-        const code = cardQty?.[2].trim();
+    async updateCard (payload) {
+      try {
+        const id = this.overlayFlags?.edit?.id;
+        await updateCard(id, payload).then(() => {
+          alertStore.showMessage('success', 'Successfully Updated!');
+        }),
+        this.$emit('refresh');
+      } catch {
+        // handle(error)
+      }
+    },
 
-        if (!cardQty) {
-          return null;
-        } else {
-          return {
-            code,
-            qtyNeeded,
-            qtyAcquired: 0,
-            cost: 0,
-          };
-        }
-      });
+    async removeCard(id) {
+      try {
+        await removeCard(id).then(() => {
+          alertStore.showMessage('success', 'Successfully Removed!');
+        });
+        this.$emit('refresh');
+      } catch {
+        // handle(error)
+      }
+    },
+
+    async loadFromClipboard () {
+      const parseDecklist = (text) => {
+        return text.split(/\r?\n/).map(line => {
+          const cardQty = line.trim().match(/^(\d+)x(.+)$/);
+          const qtyNeeded = Number(cardQty?.[1]);
+          const code = cardQty?.[2].trim();
+
+          if (!cardQty) {
+            return null;
+          } else {
+            return {
+              code,
+              qtyNeeded,
+              qtyAcquired: 0,
+              cost: 0,
+            };
+          }
+        });
+      };
+
+      try {
+        const text = await navigator.clipboard.readText();
+        this.cards = parseDecklist(text);
+      } catch (err) {
+        console.error('Failed to read clipboard:', err);
+      }
     },
 
     formatDollar(v) {
@@ -111,7 +165,19 @@ export default {
 <template>
   <bulk-upload-dialog
     v-model="overlayFlags.upload"
-    @upload="bulkUpload($event)"
+    :csv-headers="csvHeaders"
+    @upload="$emit('upload', $event)"
+  />
+
+  <add-singles-dialog
+    v-model="overlayFlags.add"
+    @add="addCard($event)"
+  />
+
+  <edit-singles-dialog
+    v-model="overlayFlags.edit"
+    @update="updateCard($event)"
+    @refresh="getCards()"
   />
 
   <v-tabs-window-item value="singles">
@@ -120,10 +186,10 @@ export default {
       :headers="headers"
       :items="items"
       :loading="loading"
-      @add="$emit('add')"
-      @edit="$emit('edit', $event)"
-      @remove="$emit('remove', $event)"
-      @upload="$emit('upload')"
+      @add="overlayFlags.add = true"
+      @edit="overlayFlags.edit = $event"
+      @upload="overlayFlags.upload = true"
+      @remove="removeCard($event)"
       @download="$emit('download')"
     >
       <template #actions>

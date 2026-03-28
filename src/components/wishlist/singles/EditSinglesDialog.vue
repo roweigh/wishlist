@@ -101,85 +101,87 @@ export default {
     @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
-    <v-col :cols="6">
-      <v-card
-        variant="outlined"
-        title="Card Details"
-        class="mb-4"
-      >
-        <v-card-text>
-          <v-row>
-            <paired-text-field
-              v-model="code"
-              label="Code"
-              cols="4"
-              readonly
-            />
+    <v-row>
+      <v-col :cols="6">
+        <v-card
+          variant="outlined"
+          title="Card Details"
+          class="mb-4"
+        >
+          <v-card-text>
+            <v-row>
+              <paired-text-field
+                v-model="code"
+                label="Code"
+                cols="4"
+                readonly
+              />
 
-            <paired-text-field
-              v-model="name.value"
-              :initial="name.initial"
-              label="Name"
-              cols="8"
-            />
+              <paired-text-field
+                v-model="name.value"
+                :initial="name.initial"
+                label="Name"
+                cols="8"
+              />
 
-            <deck-input
-              v-model="deck.value"
-              v-model:add-deck="newDeck"
-              :initial="deck.initial"
-              :deck-list="deckList"
-            />
-          </v-row>
-        </v-card-text>
-      </v-card>
+              <deck-input
+                v-model="deck.value"
+                v-model:add-deck="newDeck"
+                :initial="deck.initial"
+                :deck-list="deckList"
+              />
+            </v-row>
+          </v-card-text>
+        </v-card>
 
-      <v-card
-        variant="outlined"
-        title="Order Details"
-      >
-        <v-card-text>
-          <v-row>
-            <paired-date-picker
-              v-model="date"
-              label="Purchase Date"
-            />
-            <paired-number-input
-              v-model="qtyNeeded"
-              :min="0"
-              label="Quantity Needed"
-              cols="6"
-            />
-            <paired-number-input
-              v-model="qtyAcquired"
-              label="Quantity Acquired"
-              cols="6"
-              @update:model-value="updateTotal()"
-            />
-            <paired-number-input
-              v-model="unitCost"
-              label="Unit Cost"
-              type="dollar"
-              cols="6"
-              @update:model-value="updateTotal()"
-            />
-            <paired-number-input
-              v-model="totalCost"
-              label="Total Cost"
-              type="dollar"
-              cols="6"
-              @update:model-value="unitCost = 0"
-            />
-          </v-row>
-        </v-card-text>
-      </v-card>
-    </v-col>
+        <v-card
+          variant="outlined"
+          title="Order Details"
+        >
+          <v-card-text>
+            <v-row>
+              <paired-date-picker
+                v-model="date"
+                label="Purchase Date"
+              />
+              <paired-number-input
+                v-model="qtyNeeded"
+                :min="0"
+                label="Quantity Needed"
+                cols="6"
+              />
+              <paired-number-input
+                v-model="qtyAcquired"
+                label="Quantity Acquired"
+                cols="6"
+                @update:model-value="updateTotal()"
+              />
+              <paired-number-input
+                v-model="unitCost"
+                label="Unit Cost"
+                type="dollar"
+                cols="6"
+                @update:model-value="updateTotal()"
+              />
+              <paired-number-input
+                v-model="totalCost"
+                label="Total Cost"
+                type="dollar"
+                cols="6"
+                @update:model-value="unitCost = 0"
+              />
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
 
-    <v-col :cols="6">
-      <purchase-history
-        v-model="changedHistory"
-        :history="history"
-        @remove="remove($event)"
-      />
-    </v-col>
+      <v-col :cols="6">
+        <purchase-history
+          v-model="changedHistory"
+          :history="history"
+          @remove="remove($event)"
+        />
+      </v-col>
+    </v-row>
   </base-dialog>
 </template>

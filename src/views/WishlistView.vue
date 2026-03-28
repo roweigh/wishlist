@@ -1,22 +1,15 @@
 <script>
 import {
   getCards,
-  addCard,
-  updateCard,
-  removeCard,
   getPurchaseHistory,
 
   bulkImport,
 } from '@/api/purchases';
 
-import SinglesTable from '@/components/wishlist/SinglesTable.vue';
+import SinglesTable from '@/components/wishlist/singles/SinglesTable.vue';
 import SalesTable from '@/components/wishlist/SalesTable.vue';
 import EntriesTable from '@/components/wishlist/EntriesTable.vue';
 import OtherPurchasesTable from '@/components/wishlist/OtherPurchasesTable.vue';
-import BulkUploadDialog from '@/components/wishlist/BulkUploadDialog.vue';
-
-import AddBulkDialog from '@/components/wishlist/dialog/AddBulkDialog.vue';
-import EditBulkDialog from '@/components/wishlist/dialog/EditBulkDialog.vue';
 
 import { useAlertStore } from '@/stores/alert';
 const alertStore = useAlertStore();
@@ -27,20 +20,14 @@ export default {
     SalesTable,
     EntriesTable,
     OtherPurchasesTable,
-
-    BulkUploadDialog,
-    AddBulkDialog,
-    EditBulkDialog,
   },
   data () {
     return {
       loadingFlags: {
         initializing: true,
-        loading: true,
+        singles: true,
       },
       overlayFlags: {
-        add: false,
-        edit: false,
         upload: false,
       },
 
@@ -59,58 +46,56 @@ export default {
   },
 
   async mounted () {
-    this.singles = await this.get('singles');
-    this.sales = await this.get('sales');
-    this.tournament = await this.get('tournament');
-    this.others = await this.get('others');
+    await this.getSingles();
+    await this.getSales();
+    await this.getEntryFees();
+    await this.getOthers();
   },
 
   methods: {
-    async get (col) {
-      this.loadingFlags.loading = true;
+    async getSingles () {
+      this.loadingFlags.singles = true;
       try {
-        return await getCards(col);
+        this.singles = await getCards('singles');
       } catch {
         // handle(error)
       } finally {
-        this.loadingFlags.loading = false;
+        this.loadingFlags.singles = false;
       }
     },
 
-    async addCard (payload) {
+    async getSales () {
+      this.loadingFlags.loading = true;
       try {
-        await addCard(payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Added!');
-          this.overlayFlags.add = false;
-          this.overlayFlags.edit = false;
-        }),
-        await this.getCards();
+        this.sales = await getCards('sales');
       } catch {
         // handle(error)
       }
     },
 
-    async updateCard (payload) {
+    async getEntryFees () {
+      this.loadingFlags.loading = true;
       try {
-        const id = this.overlayFlags?.edit?.id;
-        await updateCard(id, payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Updated!');
-        }),
-        await this.getCards();
+        this.tournament = await getCards('tournament');
       } catch {
         // handle(error)
       }
     },
 
-    async removeCard(id) {
+    async getOthers () {
+      this.loadingFlags.loading = true;
       try {
-        await removeCard(id).then(() => {
-          alertStore.showMessage('success', 'Successfully Removed!');
-        });
-        await this.getCards();
+        this.others = await getCards('others');
       } catch {
         // handle(error)
       }
+    },
+
+    async bulkUpload (arr) {
+      await bulkImport(this.tab, arr).then(() => {
+        alertStore.showMessage('success', `Successfully imported ${arr.length} items!`);
+      });
+      this[this.tab] = await getCards(this.tab);
     },
 
     async download () {
@@ -188,13 +173,6 @@ export default {
       }
       downloadCSV(csvString);
     },
-
-    async bulkUpload (arr) {
-      await bulkImport(this.tab, arr);
-      console.log('done');
-      // console.log(path);
-      // console.log(arr);
-    },
   },
 };
 </script>
@@ -226,13 +204,10 @@ export default {
       <v-tabs-window v-model="tab">
         <singles-table
           :items="singles"
-          :loading="loadingFlags.loading"
-          @add="overlayFlags.add = true"
-          @edit="overlayFlags.edit = $event"
-          @upload="overlayFlags.upload = true"
-          @remove="removeCard($event)"
+          :loading="loadingFlags.singles"
+          @upload="bulkUpload($event)"
           @download="download()"
-          @load="bulkUpload($event)"
+          @refresh="getSingles()"
         />
 
         <sales-table
@@ -270,22 +245,4 @@ export default {
       </v-tabs-window>
     </v-card>
   </flex-col>
-
-  <bulk-upload-dialog
-    v-model="overlayFlags.upload"
-    @upload="bulkUpload($event)"
-  />
-
-  <add-bulk-dialog
-    v-model="overlayFlags.add"
-    @add="addCard($event)"
-    @refresh="getCards()"
-  />
-
-  <edit-bulk-dialog
-    v-model="overlayFlags.edit"
-    @add="addCard($event)"
-    @update="updateCard($event)"
-    @refresh="getCards()"
-  />
 </template>

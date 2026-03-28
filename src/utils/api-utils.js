@@ -46,7 +46,6 @@ export async function batchAdd(col, arr) {
     // Everything goes into one top-level collection
     const historyColRef = collection(db, `${col}-history`);
     const newDocRef = doc(historyColRef);
-    console.log(item.date);
 
     batch.set(newDocRef, {
       code: item.code, // We store the code as a field instead of a parent
