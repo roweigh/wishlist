@@ -38,13 +38,15 @@ export default {
       <!-- Content -->
       <v-card-text class="pt-6">
         <v-row>
-          <v-progress-circular
-            v-if="initializing"
-            class="mx-auto my-12"
-            size="200"
-            indeterminate
-          />
-          <slot v-else />
+          <flex-col class="grow">
+            <v-progress-circular
+              v-if="initializing"
+              class="mx-auto my-12"
+              size="200"
+              indeterminate
+            />
+            <slot v-else />
+          </flex-col>
         </v-row>
       </v-card-text>
 

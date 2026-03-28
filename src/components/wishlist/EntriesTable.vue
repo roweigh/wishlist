@@ -49,10 +49,7 @@ export default {
 </script>
 
 <template>
-  <v-tabs-window-item
-    key="tournament"
-    value="tournament"
-  >
+  <v-tabs-window-item value="tournament">
     <v-toolbar
       density="compact"
       flat

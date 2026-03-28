@@ -54,10 +54,7 @@ export default {
 </script>
 
 <template>
-  <v-tabs-window-item
-    key="sales"
-    value="sales"
-  >
+  <v-tabs-window-item value="sales">
     <v-toolbar
       density="compact"
       flat
@@ -93,11 +90,11 @@ export default {
       sort-desc-icon="mdi-chevron-down"
       density="compact"
     >
-      <template #item.amtSpent="{ item }">
+      <template #[`item.amtSpent`]="{ item }">
         {{ formatDollar(item.amtSpent * -1) }}
       </template>
 
-      <template #item.actions="{ item }">
+      <template #[`item.actions`]="{ item }">
         <div class="d-flex ga-2 justify-end">
           <v-icon
             color="medium-emphasis"

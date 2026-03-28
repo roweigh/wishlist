@@ -49,10 +49,7 @@ export default {
 </script>
 
 <template>
-  <v-tabs-window-item
-    key="others"
-    value="others"
-  >
+  <v-tabs-window-item value="others">
     <v-toolbar
       density="compact"
       flat
