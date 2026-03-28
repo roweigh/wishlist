@@ -52,7 +52,7 @@ export default {
 
       <!-- Confirm Action -->
       <v-btn
-        :loading="loading"
+        :disabled="loading"
         text="Save"
         color="success"
         rounded="0"

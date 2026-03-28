@@ -32,6 +32,18 @@ export default {
       changedHistory: {},
     };
   },
+  computed: {
+    alternateArt () {
+      return this.modelValue.code.endsWith('*');
+    },
+    codeComputed () {
+      let code = this.modelValue.code;
+      if (code.endsWith('*')) {
+        code = code.slice(0, -1);
+      }
+      return code;
+    },
+  },
   watch: {
     modelValue: {
       deep: true,
@@ -111,7 +123,7 @@ export default {
           <v-card-text>
             <v-row>
               <paired-text-field
-                v-model="code"
+                v-model="codeComputed"
                 label="Code"
                 cols="4"
                 readonly
@@ -122,6 +134,15 @@ export default {
                 :initial="name.initial"
                 label="Name"
                 cols="8"
+              />
+
+              <v-checkbox
+                :model-value="alternateArt"
+                label="Alternate Art"
+                density="compact"
+                class="mx-3"
+                hide-details
+                readonly
               />
 
               <deck-input

@@ -48,7 +48,7 @@ export default {
     :initializing="loadingFlags.initializing"
     :loading="loadingFlags.loading"
     title="Add Bulk"
-    width="40vw"
+    width="50vw"
     @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
@@ -64,13 +64,21 @@ export default {
               <paired-text-field
                 v-model="code"
                 label="Code"
-                cols="4"
+                cols="2"
               />
 
               <paired-text-field
                 v-model="name.value"
                 label="Name"
                 cols="8"
+              />
+
+              <v-checkbox
+                v-model="alternateArt"
+                label="Alternate Art"
+                density="compact"
+                cols="2"
+                hide-details
               />
 
               <deck-input

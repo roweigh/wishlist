@@ -194,8 +194,10 @@ export default {
 
   <edit-singles-dialog
     v-model="overlayFlags.edit"
+    :loading="loading"
+    @add="addCard($event)"
     @update="updateCard($event)"
-    @refresh="getCards()"
+    @refresh="$emit('refresh')"
   />
 
   <v-tabs-window-item value="singles">

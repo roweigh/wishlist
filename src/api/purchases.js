@@ -22,6 +22,7 @@ export const getCards = async (col) => {
     if (!result[code]) {
       result[code] = {
         code,
+        id: item.id,
         name: item.name,
         deck: item.deck,
         date: item.date,
@@ -47,8 +48,8 @@ export const getPurchaseHistory = async () => await get('purchases');
 export const addCard = async (payload) => await add('singles-history', payload);
 export const updateCard = async (id, payload) => await update('singles-history', id, payload);
 export const removeCard = async (id) => {
-  // await delByField('singles-history', 'code', id);
-  await del('singles-history', id);
+  await delByField('singles-history', 'code', id);
+  // await del('singles-history', id);
 };
 
 // Card receipts CRUD
