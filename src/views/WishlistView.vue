@@ -1,8 +1,6 @@
 <script>
 import {
   getCards,
-  getPurchaseHistory,
-
   bulkImport,
 } from '@/api/purchases';
 
@@ -26,9 +24,6 @@ export default {
       loadingFlags: {
         initializing: true,
         singles: true,
-      },
-      overlayFlags: {
-        upload: false,
       },
 
       tab: 'singles',
@@ -99,7 +94,7 @@ export default {
     },
 
     async download () {
-      const test = await getPurchaseHistory();
+      const test = this.singles;
       const cards = test.map(({ code, name, qtyAcquired, qtyNeeded, amtSpent, date }) => {
         const ms = (date?.seconds || 0) * 1000 + (date?.nanoseconds || 0) / 1_000_000;
         const dateTransformed = ms > 0 ? new Date(ms).toISOString() : new Date().toISOString();
@@ -149,6 +144,7 @@ export default {
       }
 
       const csvString = convertToCSV(cards);
+      console.log(csvString);
       function downloadCSV(csvString, filename = 'purchase_history.csv') {
 
         // 1. Create a Blob from the CSV string
@@ -189,7 +185,7 @@ export default {
           v-for="{value, title, icon} in tabs"
           :key="value"
           :value="value"
-          icon="mdi-finance"
+          icon
         >
           <v-icon
             :icon="icon"

@@ -42,8 +42,6 @@ export default {
       },
 
       sortBy: [{ key: 'deck', order: 'asc' }],
-      itemsPerPage: -1,
-
       csvHeaders: 'code,name,qtyAcquired,qtyNeeded,amtSpent,date', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
         {
@@ -155,6 +153,26 @@ export default {
       }
     },
 
+    isAA(v) {
+      return v.endsWith('*');
+    },
+
+    parseCode(v) {
+      let code = v.toUpperCase().trim();
+      if (this.isAA(code)) {
+        code = code.slice(0, -1);
+      }
+      return code;
+    },
+
+    formatName(v) {
+      let name = v.name;
+      if (this.isAA(v.code)) {
+        name += ' (Alternate Art)';
+      }
+      return name;
+    },
+
     formatDollar(v) {
       return `$${(v).toFixed(2)}`;
     },
@@ -198,6 +216,14 @@ export default {
           tooltip-text="Import from Clipboard"
           @click="loadFromClipboard()"
         />
+      </template>
+
+      <template #[`item.name`]="{ item }">
+        {{ formatName(item) }}
+      </template>
+
+      <template #[`item.code`]="{ item }">
+        {{ parseCode(item.code) }}
       </template>
 
       <template #[`item.deck`]="{ item }">

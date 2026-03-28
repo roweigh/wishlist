@@ -18,6 +18,7 @@ export default () => {
         deckList: [],
 
         // Card Details
+        alternateArt: false,
         code: null,
         name: pair(null),
         deck: pair(null),
@@ -32,8 +33,13 @@ export default () => {
     },
     computed: {
       payload () {
+        let code = this.sanitizeCode(this.code);
+        if (this.alternateArt) {
+          code +='*';
+        }
+
         return {
-          code: this.sanitizeCode(this.code),
+          code,
           name: this.name.value,
           deck: this.deck.value,
           date: Timestamp.fromDate(new Date(this.date)),
