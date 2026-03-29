@@ -15,7 +15,7 @@ export default {
     generatePayload () {
       return this.date.value.map(dateValue => ({
         date: this.toTimestamp(dateValue),
-        cost: this.unitCost.value,
+        unitCost: this.unitCost.value,
       }));
     },
   },

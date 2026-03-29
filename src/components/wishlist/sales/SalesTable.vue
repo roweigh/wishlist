@@ -5,12 +5,10 @@ import {
   removeSale,
 } from '@/api/purchases';
 
-import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
+import CrudMixin from '@/mixins/CrudMixin';
 import AddSaleDialog from './AddSaleDialog.vue';
 import EditSaleDialog from './EditSaleDialog.vue';
-
-import { useAlertStore } from '@/stores/alert';
-const alertStore = useAlertStore();
+import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
 
 export default {
   components: {
@@ -18,6 +16,13 @@ export default {
     AddSaleDialog,
     EditSaleDialog,
   },
+  mixins: [
+    CrudMixin({
+      addFn: addSale,
+      updateFn: updateSale,
+      removeFn: removeSale,
+    }),
+  ],
   props: {
     loading: { type: Boolean, default: false },
     items: { type: null, required: true },
@@ -33,12 +38,6 @@ export default {
   ],
   data () {
     return {
-      overlayFlags: {
-        add: false,
-        edit: false,
-        upload: false,
-      },
-
       sortBy: [{ key: 'date', order: 'desc' }],
       csvHeaders: 'code,name,qty,amtSold,date', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
@@ -54,7 +53,7 @@ export default {
         {
           key: 'date',
           title: 'Date',
-          width: '10%',
+          width: '5%',
         },
         {
           key: 'qty',
@@ -68,84 +67,35 @@ export default {
           align: 'end',
           width: '8%',
         },
-        // {s
-        //   key: 'notes',
-        //   title: 'Notes',
-        // },
         {
           key: 'actions',
           align: 'end',
           sortable: false,
-          width: '5%',
+          width: '0%',
         },
       ],
     };
-  },
-  methods: {
-    async addSale (payload) {
-      try {
-        await addSale(payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Added!');
-          this.overlayFlags.add = false;
-          this.overlayFlags.edit = false;
-        }),
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
-    async updateSale (payload) {
-      try {
-        const id = this.overlayFlags?.edit?.id;
-        await updateSale(id, payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Updated!');
-        }),
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
-    async removeSale(id) {
-      try {
-        await removeSale(id).then(() => {
-          alertStore.showMessage('success', 'Successfully Removed!');
-        });
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
-    formatDate (v) {
-      const ms = (v?.seconds || 0) * 1000 + (v?.nanoseconds || 0) / 1_000_000;
-      return new Date(ms).toDateString();
-    },
-    formatDollar(v) {
-      return `$${(v).toFixed(2)}`;
-    },
   },
 };
 </script>
 
 <template>
-  <bulk-upload-dialog
-    v-model="overlayFlags.upload"
-    :csv-headers="csvHeaders"
-    @upload="$emit('upload', $event)"
-  />
-
   <add-sale-dialog
     v-model="overlayFlags.add"
-    @add="addSale($event)"
+    @add="add($event)"
   />
 
   <edit-sale-dialog
     v-model="overlayFlags.edit"
     :loading="loading"
-    @update="updateSale($event)"
+    @update="update($event)"
     @refresh="$emit('refresh')"
+  />
+
+  <bulk-upload-dialog
+    v-model="overlayFlags.upload"
+    :csv-headers="csvHeaders"
+    @upload="$emit('upload', $event)"
   />
 
   <v-tabs-window-item value="sales">
@@ -157,7 +107,7 @@ export default {
       @add="overlayFlags.add = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
-      @remove="removeSale($event)"
+      @remove="remove($event)"
       @download="$emit('download')"
     >
       <template #[`item.date`]="{ item }">

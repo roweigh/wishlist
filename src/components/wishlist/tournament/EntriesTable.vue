@@ -4,17 +4,21 @@ import {
   removeEntry,
 } from '@/api/purchases';
 
+import CrudMixin from '@/mixins/CrudMixin';
 import AddEntryDialog from './AddEntryDialog.vue';
 import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
-
-import { useAlertStore } from '@/stores/alert';
-const alertStore = useAlertStore();
 
 export default {
   components: {
     BulkUploadDialog,
     AddEntryDialog,
   },
+  mixins: [
+    CrudMixin({
+      addFn: addEntry,
+      removeFn: removeEntry,
+    }),
+  ],
   props: {
     loading: { type: Boolean, default: false },
     items: { type: null, required: true },
@@ -30,11 +34,6 @@ export default {
   ],
   data () {
     return {
-      overlayFlags: {
-        add: false,
-        upload: false,
-      },
-
       sortBy: [{ key: 'date', order: 'desc' }],
       csvHeaders: 'date,price', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
@@ -43,15 +42,11 @@ export default {
           title: 'Date',
         },
         {
-          key: 'cost',
+          key: 'unitCost',
           title: 'Price',
           align: 'end',
-          width: '8%',
+          width: '5%',
         },
-        // {s
-        //   key: 'notes',
-        //   title: 'Notes',
-        // },
         {
           key: 'actions',
           align: 'end',
@@ -61,47 +56,19 @@ export default {
       ],
     };
   },
-  methods: {
-    async addEntry (payload) {
-      try {
-        await addEntry(payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Added!');
-          this.overlayFlags.add = false;
-          this.overlayFlags.edit = false;
-        }),
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
-    async removeEntry(id) {
-      try {
-        await removeEntry(id).then(() => {
-          alertStore.showMessage('success', 'Successfully Removed!');
-        });
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-    formatDollar(v) {
-      return `$${(v).toFixed(2)}`;
-    },
-  },
 };
 </script>
 
 <template>
+  <add-entry-dialog
+    v-model="overlayFlags.add"
+    @add="add($event);"
+  />
+
   <bulk-upload-dialog
     v-model="overlayFlags.upload"
     :csv-headers="csvHeaders"
     @upload="$emit('upload', $event)"
-  />
-
-  <add-entry-dialog
-    v-model="overlayFlags.add"
-    @add="addEntry($event)"
   />
 
   <v-tabs-window-item value="tournament">
@@ -113,11 +80,15 @@ export default {
       :edit="false"
       @add="overlayFlags.add = true"
       @upload="overlayFlags.upload = true"
-      @remove="removeEntry($event)"
+      @remove="remove($event)"
       @download="$emit('download')"
     >
-      <template #[`item.cost`]="{ item }">
-        {{ formatDollar(item.cost) }}
+      <template #[`item.date`]="{ item }">
+        {{ formatDate(item.date) }}
+      </template>
+
+      <template #[`item.unitCost`]="{ item }">
+        {{ formatDollar(item.unitCost) }}
       </template>
     </base-table>
   </v-tabs-window-item>

@@ -5,12 +5,10 @@ import {
   removeItem,
 } from '@/api/purchases';
 
+import CrudMixin from '@/mixins/CrudMixin';
 import AddItemDialog from './AddItemDialog.vue';
 import EditItemDialog from './EditItemDialog.vue';
 import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
-
-import { useAlertStore } from '@/stores/alert';
-const alertStore = useAlertStore();
 
 export default {
   components: {
@@ -18,6 +16,13 @@ export default {
     AddItemDialog,
     EditItemDialog,
   },
+  mixins: [
+    CrudMixin({
+      addFn: addItem,
+      updateFn: updateItem,
+      removeFn: removeItem,
+    }),
+  ],
   props: {
     loading: { type: Boolean, default: false },
     items: { type: null, required: true },
@@ -32,11 +37,6 @@ export default {
   ],
   data () {
     return {
-      overlayFlags: {
-        add: false,
-        upload: false,
-      },
-
       sortBy: [{ key: 'code', order: 'desc' }],
       csvHeaders: 'name,date,price', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
@@ -45,15 +45,16 @@ export default {
           title: 'Name',
         },
         {
+          key: 'date',
+          title: 'Date',
+          width: '5%',
+        },
+        {
           key: 'unitCost',
           title: 'Price',
           align: 'end',
-          width: '8%',
+          width: '5%',
         },
-        // {s
-        //   key: 'notes',
-        //   title: 'Notes',
-        // },
         {
           key: 'actions',
           align: 'end',
@@ -63,79 +64,44 @@ export default {
       ],
     };
   },
-  methods: {
-    async addItem (payload) {
-      try {
-        await addItem(payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Added!');
-          this.overlayFlags.add = false;
-          this.overlayFlags.edit = false;
-        }),
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
-    async updateItem (payload) {
-      try {
-        const id = this.overlayFlags?.edit?.id;
-        await updateItem(id, payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Updated!');
-        }),
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
-    async removeItem(id) {
-      try {
-        await removeItem(id).then(() => {
-          alertStore.showMessage('success', 'Successfully Removed!');
-        });
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-    formatDollar(v) {
-      return `$${(v).toFixed(2)}`;
-    },
-  },
 };
 </script>
 
 <template>
+  <add-item-dialog
+    v-model="overlayFlags.add"
+    @add="add($event)"
+  />
+
+  <edit-item-dialog
+    v-model="overlayFlags.edit"
+    @update="update($event)"
+  />
+
   <bulk-upload-dialog
     v-model="overlayFlags.upload"
     :csv-headers="csvHeaders"
     @upload="$emit('upload', $event)"
   />
-  <add-item-dialog
-    v-model="overlayFlags.add"
-    @add="addItem($event)"
-  />
-
-  <edit-item-dialog
-    v-model="overlayFlags.edit"
-    @update="updateItem($event)"
-  />
 
   <v-tabs-window-item value="others">
     <base-table
       v-model:sort-by="sortBy"
+      :loading="loading"
       :headers="headers"
       :items="items"
-      :loading="loading"
       @add="overlayFlags.add = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
-      @remove="removeItem($event)"
+      @remove="remove($event)"
       @download="$emit('download')"
     >
-      <template #[`item.cost`]="{ item }">
-        {{ formatDollar(item.cost) }}
+      <template #[`item.date`]="{ item }">
+        {{ formatDate(item.date) }}
+      </template>
+
+      <template #[`item.unitCost`]="{ item }">
+        {{ formatDollar(item.unitCost) }}
       </template>
     </base-table>
   </v-tabs-window-item>

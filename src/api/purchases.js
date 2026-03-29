@@ -27,6 +27,7 @@ export const getCards = async (col) => {
         deck: item.deck,
         date: item.date,
         cost: item.cost,
+        qty: item.qty,
         qtyAcquired: 0,
         qtyNeeded: 0,
         amtSpent: 0,

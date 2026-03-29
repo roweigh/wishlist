@@ -51,7 +51,7 @@ export default {
     :loading="loadingFlags.loading"
     title="Edit Receipt"
     width="50vw"
-    @submit="edit()"
+    @submit="update()"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-col>

@@ -63,7 +63,7 @@ export async function batchAdd(col, arr) {
 
 export async function batchAddEntry(col, arr) {
   const batch = writeBatch(db);
-
+  console.log(arr);
   arr.forEach((item) => {
     // Everything goes into one top-level collection
     const historyColRef = collection(db, `${col}-history`);
@@ -71,7 +71,7 @@ export async function batchAddEntry(col, arr) {
 
     batch.set(newDocRef, {
       date: item.date, // We store the code as a field instead of a parent
-      cost: item.cost,
+      unitCost: item.unitCost,
     });
   });
 

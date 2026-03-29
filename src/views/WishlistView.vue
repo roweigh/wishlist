@@ -30,7 +30,7 @@ export default {
         others: true,
       },
 
-      tab: 'singles',
+      tab: 'sales',
       tabs: [
         { value: 'singles', title: 'Singles', icon: 'mdi-cards-outline' },
         { value: 'sales', title: 'Sales', icon: 'mdi-finance' },
@@ -89,6 +89,7 @@ export default {
       this.loadingFlags.others = true;
       try {
         this.others = await getEntries('others');
+        console.log(this.others);
       } catch {
         // handle(error)
       } finally {

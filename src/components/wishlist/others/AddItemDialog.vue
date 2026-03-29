@@ -19,7 +19,7 @@ export default {
       return {
         name: this.name.value,
         date: this.toTimestamp(this.date.value),
-        cost: this.unitCost.value,
+        unitCost: this.unitCost.value,
       };
     },
   },
