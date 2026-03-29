@@ -1,4 +1,4 @@
-import { add, get, update, del, delByField, batchAdd } from '../utils/api-utils';
+import { add, get, update, del, delByField, batchAdd, batchAddEntry } from '../utils/api-utils';
 import { Timestamp } from 'firebase/firestore';
 
 export const addDeck = async (payload) => await add('deck', payload);
@@ -26,6 +26,7 @@ export const getCards = async (col) => {
         name: item.name,
         deck: item.deck,
         date: item.date,
+        cost: item.cost,
         qtyAcquired: 0,
         qtyNeeded: 0,
         amtSpent: 0,
@@ -51,6 +52,38 @@ export const removeCard = async (id) => {
   await delByField('singles-history', 'code', id);
   // await del('singles-history', id);
 };
+
+export const addSale = async (payload) => await add('sales-history', payload);
+export const updateSale = async (id, payload) => await update('sales-history', id, payload);
+export const removeSale = async (id) => {
+  await delByField('sales-history', 'code', id);
+  // await del('singles-history', id);
+};
+
+export const getEntries = async (col) => {
+  /**
+   * Aggregated at client-side to simulate SQL GROUP BY function
+   * Generate map to keep track of processed cards
+  */
+
+  const response = await get(`${col}-history`);
+  console.log(col, Object.values(response));
+  // Turn map back into array of objects
+  return Object.values(response);
+};
+
+export const addEntry = async (payload) => await batchAddEntry('tournament', payload);
+export const removeEntry = async (id) => {
+  // await delByField('tournament-history', 'code', id);
+  await del('tournament-history', id);
+};
+
+export const addItem = async (payload) => await add('others-history', payload);
+export const removeItem = async (id) => {
+  // await delByField('tournament-history', 'code', id);
+  await del('others-history', id);
+};
+
 
 // Card receipts CRUD
 export const getCardHistory = async (code) => {

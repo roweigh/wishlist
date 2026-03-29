@@ -206,6 +206,7 @@ export default {
       :headers="headers"
       :items="items"
       :loading="loading"
+      item-id="code"
       @add="overlayFlags.add = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"

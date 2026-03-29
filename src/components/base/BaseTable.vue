@@ -4,6 +4,8 @@ export default {
     items: { type: null, required: true },
     sortBy: { type: null, required: true },
     headers: { type: null, required: true },
+    edit: { type: null, default: true },
+    itemId: { type: null, default: 'id' },
     loading: { type: Boolean, default: false },
   },
   emits: [
@@ -71,6 +73,7 @@ export default {
     <template #[`item.actions`]="{ item }">
       <flex-row class="ga-2 justify-end">
         <v-icon
+          v-if="edit"
           color="medium-emphasis"
           icon="mdi-pencil"
           size="small"
@@ -81,7 +84,7 @@ export default {
           color="medium-emphasis"
           icon="mdi-delete"
           size="small"
-          @click="$emit('remove', item.code)"
+          @click="$emit('remove', item[itemId])"
         />
       </flex-row>
     </template>

@@ -61,6 +61,23 @@ export async function batchAdd(col, arr) {
   await batch.commit();
 }
 
+export async function batchAddEntry(col, arr) {
+  const batch = writeBatch(db);
+
+  arr.forEach((item) => {
+    // Everything goes into one top-level collection
+    const historyColRef = collection(db, `${col}-history`);
+    const newDocRef = doc(historyColRef);
+
+    batch.set(newDocRef, {
+      date: item.date, // We store the code as a field instead of a parent
+      cost: item.cost,
+    });
+  });
+
+  await batch.commit();
+}
+
 export async function update(col, id, payload) {
   await updateDoc(doc(db, col, id), payload);
 }

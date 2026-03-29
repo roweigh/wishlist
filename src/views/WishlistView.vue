@@ -1,13 +1,14 @@
 <script>
 import {
   getCards,
+  getEntries,
   bulkImport,
 } from '@/api/purchases';
 
 import SinglesTable from '@/components/wishlist/singles/SinglesTable.vue';
-import SalesTable from '@/components/wishlist/SalesTable.vue';
-import EntriesTable from '@/components/wishlist/EntriesTable.vue';
-import OtherPurchasesTable from '@/components/wishlist/OtherPurchasesTable.vue';
+import SalesTable from '@/components/wishlist/sales/SalesTable.vue';
+import EntriesTable from '@/components/wishlist/tournament/EntriesTable.vue';
+import OtherPurchasesTable from '@/components/wishlist/others/OtherPurchasesTable.vue';
 
 import { useAlertStore } from '@/stores/alert';
 const alertStore = useAlertStore();
@@ -24,9 +25,12 @@ export default {
       loadingFlags: {
         initializing: true,
         singles: true,
+        sales: true,
+        tournament: true,
+        others: true,
       },
 
-      tab: 'singles',
+      tab: 'others',
       tabs: [
         { value: 'singles', title: 'Singles', icon: 'mdi-cards-outline' },
         { value: 'sales', title: 'Sales', icon: 'mdi-finance' },
@@ -60,29 +64,35 @@ export default {
     },
 
     async getSales () {
-      this.loadingFlags.loading = true;
+      this.loadingFlags.sales = true;
       try {
         this.sales = await getCards('sales');
       } catch {
         // handle(error)
+      } finally {
+        this.loadingFlags.sales = false;
       }
     },
 
     async getEntryFees () {
-      this.loadingFlags.loading = true;
+      this.loadingFlags.tournament = true;
       try {
-        this.tournament = await getCards('tournament');
+        this.tournament = await getEntries('tournament');
       } catch {
         // handle(error)
+      } finally {
+        this.loadingFlags.tournament = false;
       }
     },
 
     async getOthers () {
-      this.loadingFlags.loading = true;
+      this.loadingFlags.others = true;
       try {
-        this.others = await getCards('others');
+        this.others = await getEntries('others');
       } catch {
         // handle(error)
+      } finally {
+        this.loadingFlags.others = false;
       }
     },
 
@@ -208,35 +218,26 @@ export default {
 
         <sales-table
           :items="sales"
-          :loading="loadingFlags.loading"
-          @add="overlayFlags.add = true"
-          @edit="overlayFlags.edit = $event"
-          @upload="overlayFlags.upload = true"
-          @remove="removeCard($event)"
+          :loading="loadingFlags.sales"
+          @upload="bulkUpload($event)"
           @download="download()"
-          @load="bulkUpload($event)"
+          @refresh="getSales()"
         />
 
         <entries-table
           :items="tournament"
-          :loading="loadingFlags.loading"
-          @add="overlayFlags.add = true"
-          @edit="overlayFlags.edit = $event"
-          @upload="overlayFlags.upload = true"
-          @remove="removeCard($event)"
+          :loading="loadingFlags.tournament"
+          @upload="bulkUpload($event)"
           @download="download()"
-          @load="bulkUpload($event)"
+          @refresh="getEntryFees()"
         />
 
         <other-purchases-table
           :items="others"
-          :loading="loadingFlags.loading"
-          @add="overlayFlags.add = true"
-          @edit="overlayFlags.edit = $event"
-          @upload="overlayFlags.upload = true"
-          @remove="removeCard($event)"
+          :loading="loadingFlags.others"
+          @upload="bulkUpload($event)"
           @download="download()"
-          @load="bulkUpload($event)"
+          @refresh="getOthers()"
         />
       </v-tabs-window>
     </v-card>

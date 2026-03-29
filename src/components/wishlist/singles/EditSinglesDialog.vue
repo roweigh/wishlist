@@ -33,7 +33,7 @@ export default {
     };
   },
   computed: {
-    alternateArt () {
+    alternateArtComputed () {
       return this.modelValue.code.endsWith('*');
     },
     codeComputed () {
@@ -137,7 +137,7 @@ export default {
               />
 
               <v-checkbox
-                :model-value="alternateArt"
+                :model-value="alternateArtComputed"
                 label="Alternate Art"
                 density="compact"
                 class="mx-3"
