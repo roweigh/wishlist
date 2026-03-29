@@ -19,7 +19,7 @@ export default {
       return {
         name: this.name.value,
         date: this.toTimestamp(this.date.value),
-        cost: this.unitCost.value,
+        unitCost: this.unitCost.value,
       };
     },
   },
@@ -30,22 +30,25 @@ export default {
   <base-dialog
     :model-value="modelValue"
     :loading="loadingFlags.loading"
-    title="Add Item"
-    @submit="add()"
+    title="Update Item"
+    @submit="update()"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-col>
       <v-row>
         <paired-text-field
           v-model="name.value"
+          :initial="name.initial"
           label="Name"
         />
         <paired-date-picker
           v-model="date.value"
+          :initial="date.initial"
           label="Date"
         />
         <paired-number-input
           v-model="unitCost.value"
+          :initial="unitCost.initial"
           label="Price"
           type="dollar"
         />

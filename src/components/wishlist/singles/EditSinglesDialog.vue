@@ -1,5 +1,8 @@
 <script>
+import { pair, updatePair } from '@/utils/form-utils';
 import {
+  getDeckList,
+  addDeck,
   getCardHistory,
   updateHistory,
   removeHistory,
@@ -7,7 +10,7 @@ import {
 
 import DeckInput from '../purchases/DeckInput.vue';
 import PurchaseHistory from '../purchases/PurchaseHistory.vue';
-import BulkDialogMixin from '@/mixins/BulkDialogMixin';
+import ReceiptMixin from '@/mixins/ReceiptMixin';
 
 export default {
   components: {
@@ -15,7 +18,7 @@ export default {
     PurchaseHistory,
   },
   mixins: [
-    BulkDialogMixin(),
+    ReceiptMixin(),
   ],
   props: {
     modelValue: { type: null, default: false },
@@ -30,6 +33,14 @@ export default {
     return {
       history: [],
       changedHistory: {},
+
+      alternateArt: null,
+      newDeck: false,
+      deckList: [],
+
+      code: null,
+      deck: pair(null),
+      qtyNeeded: pair(0),
     };
   },
   computed: {
@@ -44,24 +55,30 @@ export default {
       return code;
     },
   },
-  watch: {
-    modelValue: {
-      deep: true,
-      immediate: true,
-      async handler(v) {
-        if (v) {
-          this.loadingFlags.initializing = true;
-          await Promise.all([
-            this.initialize(v),
-            this.getPurchaseHistory(),
-          ]);
-          this.loadingFlags.initializing = false;
-          this.loadingFlags.loading = false;
-        }
-      },
-    },
-  },
   methods: {
+    async initialize (v) {
+      this.code = v?.code ?? null;
+      updatePair(this.deck, v?.deck ?? null);
+      await this.getDeckList();
+    },
+
+    async getDeckList () {
+      try {
+        this.deckList = await getDeckList();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async addDeck (payload) {
+      try {
+        await addDeck(payload);
+        await this.getDeckList();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
     async getPurchaseHistory () {
       this.history = await getCardHistory(this.modelValue.code).then(result => result.sort((a,b) => b.date - a.date));
     },
@@ -79,6 +96,23 @@ export default {
       await this.getPurchaseHistory();
     },
 
+    generatePayload () {
+      let code = this.sanitizeCode(this.codeComputed);
+      if (this.alternateArt) {
+        code +='*';
+      }
+
+      return {
+        code,
+        name: this.name.value,
+        deck: this.deck.value,
+        date: this.toTimestamp(this.date.value),
+        qtyNeeded:  this.qtyNeeded.value,
+        qtyAcquired: this.qty.value,
+        amtSpent: this.totalCost.value,
+      };
+    },
+
     /**
      * TODO Explain better
      * Update any purchase history rows that have changed, then submit single card payload information
@@ -91,10 +125,11 @@ export default {
         this.newDeck && this.addDeck({ name: this.deck.value }),
       ]);
 
-      if (this.payload.qtyAcquired || this.payload.qtyNeeded) {
-        this.$emit('add', this.payload);
+      const payload = this.generatePayload();
+      if (payload.qtyAcquired || payload.qtyNeeded) {
+        this.$emit('add', payload);
       } else {
-        this.$emit('update', this.payload);
+        this.$emit('update', payload);
         this.$emit('refresh');
         this.loadingFlags.loading = false;
       }
@@ -162,34 +197,38 @@ export default {
           <v-card-text>
             <v-row>
               <paired-date-picker
-                v-model="date"
+                v-model="date.value"
                 label="Purchase Date"
               />
               <paired-number-input
-                v-model="qtyNeeded"
+                v-model="qtyNeeded.value"
+                :initial="qtyNeeded.initial"
                 :min="0"
                 label="Quantity Needed"
                 cols="6"
               />
               <paired-number-input
-                v-model="qtyAcquired"
+                v-model="qty.value"
+                :initial="qty.initial"
                 label="Quantity Acquired"
                 cols="6"
                 @update:model-value="updateTotal()"
               />
               <paired-number-input
-                v-model="unitCost"
+                v-model="unitCost.value"
+                :initial="unitCost.initial"
                 label="Unit Cost"
                 type="dollar"
                 cols="6"
                 @update:model-value="updateTotal()"
               />
               <paired-number-input
-                v-model="totalCost"
+                v-model="totalCost.value"
+                :initial="totalCost.initial"
                 label="Total Cost"
                 type="dollar"
                 cols="6"
-                @update:model-value="unitCost = 0"
+                @update:model-value="unitCost.value = 0"
               />
             </v-row>
           </v-card-text>

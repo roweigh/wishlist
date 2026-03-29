@@ -67,7 +67,6 @@ export const getEntries = async (col) => {
   */
 
   const response = await get(`${col}-history`);
-  console.log(col, Object.values(response));
   // Turn map back into array of objects
   return Object.values(response);
 };
@@ -79,6 +78,7 @@ export const removeEntry = async (id) => {
 };
 
 export const addItem = async (payload) => await add('others-history', payload);
+export const updateItem = async (id, payload) => await update('others-history', id, payload);
 export const removeItem = async (id) => {
   // await delByField('tournament-history', 'code', id);
   await del('others-history', id);
@@ -97,11 +97,3 @@ export const bulkImport = async (path, payload) => await batchAdd(path, payload)
 export const addHistory = async (path, payload) =>  await add(`${path}/history`, payload);
 export const updateHistory = async (id, payload) => await update('purchases', id, payload); // ??
 export const removeHistory = async (id) => {}; // ??
-
-// Tournament entry
-export const getTournamentEntry = async () => await get('tournament-entry');
-export const updateTournamentEntry = async (payload) => {
-  payload.dates = payload.dates.map((v) => Timestamp.fromDate(new Date(v)));
-  return await update('tournament-entry', 'DMfW4KQ8rOKPCwNABqHs', payload);
-};
-

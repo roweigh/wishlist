@@ -5,7 +5,7 @@ export default {
     initializing: { type: Boolean, default: false },
     loading: { type: Boolean, default: false },
     title: { type: String, default: '' },
-    width: { type: String, default: '50vw' },
+    width: { type: String, default: '600px' },
   },
   emits: [
     'update:model-value',

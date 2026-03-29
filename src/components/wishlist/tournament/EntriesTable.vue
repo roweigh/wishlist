@@ -77,7 +77,6 @@ export default {
 
     async removeEntry(id) {
       try {
-        console.log(id);
         await removeEntry(id).then(() => {
           alertStore.showMessage('success', 'Successfully Removed!');
         });

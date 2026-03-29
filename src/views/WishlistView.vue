@@ -30,7 +30,7 @@ export default {
         others: true,
       },
 
-      tab: 'others',
+      tab: 'singles',
       tabs: [
         { value: 'singles', title: 'Singles', icon: 'mdi-cards-outline' },
         { value: 'sales', title: 'Sales', icon: 'mdi-finance' },

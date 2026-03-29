@@ -1,10 +1,12 @@
 <script>
 import {
   addItem,
+  updateItem,
   removeItem,
 } from '@/api/purchases';
 
 import AddItemDialog from './AddItemDialog.vue';
+import EditItemDialog from './EditItemDialog.vue';
 import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
 
 import { useAlertStore } from '@/stores/alert';
@@ -14,6 +16,7 @@ export default {
   components: {
     BulkUploadDialog,
     AddItemDialog,
+    EditItemDialog,
   },
   props: {
     loading: { type: Boolean, default: false },
@@ -42,7 +45,7 @@ export default {
           title: 'Name',
         },
         {
-          key: 'cost',
+          key: 'unitCost',
           title: 'Price',
           align: 'end',
           width: '8%',
@@ -55,7 +58,7 @@ export default {
           key: 'actions',
           align: 'end',
           sortable: false,
-          width: '5%',
+          width: '0%',
         },
       ],
     };
@@ -67,6 +70,18 @@ export default {
           alertStore.showMessage('success', 'Successfully Added!');
           this.overlayFlags.add = false;
           this.overlayFlags.edit = false;
+        }),
+        this.$emit('refresh');
+      } catch {
+        // handle(error)
+      }
+    },
+
+    async updateItem (payload) {
+      try {
+        const id = this.overlayFlags?.edit?.id;
+        await updateItem(id, payload).then(() => {
+          alertStore.showMessage('success', 'Successfully Updated!');
         }),
         this.$emit('refresh');
       } catch {
@@ -102,14 +117,19 @@ export default {
     @add="addItem($event)"
   />
 
+  <edit-item-dialog
+    v-model="overlayFlags.edit"
+    @update="updateItem($event)"
+  />
+
   <v-tabs-window-item value="others">
     <base-table
       v-model:sort-by="sortBy"
       :headers="headers"
       :items="items"
       :loading="loading"
-      :edit="false"
       @add="overlayFlags.add = true"
+      @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
       @remove="removeItem($event)"
       @download="$emit('download')"

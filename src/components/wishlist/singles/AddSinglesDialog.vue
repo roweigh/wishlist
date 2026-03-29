@@ -1,13 +1,19 @@
 <script>
+import { pair, updatePair } from '@/utils/form-utils';
+import {
+  getDeckList,
+  addDeck,
+} from '@/api/purchases';
+
 import DeckInput from '../purchases/DeckInput.vue';
-import BulkDialogMixin from '@/mixins/BulkDialogMixin';
+import ReceiptMixin from '@/mixins/ReceiptMixin';
 
 export default {
   components: {
     DeckInput,
   },
   mixins: [
-    BulkDialogMixin(),
+    ReceiptMixin(),
   ],
   props: {
     modelValue: { type: null, default: false },
@@ -18,25 +24,56 @@ export default {
     'update',
     'refresh',
   ],
-  watch: {
-    modelValue: {
-      deep: true,
-      immediate: true,
-      async handler(v) {
-        if (v) {
-          this.loadingFlags.initializing = true;
-          await this.initialize(v);
-          this.loadingFlags.initializing = false;
-          this.loadingFlags.loading = false;
-        }
-      },
-    },
+  data () {
+    return {
+      alternateArt: null,
+      newDeck: false,
+      deckList: [],
+
+      code: null,
+      deck: pair(null),
+      qtyNeeded: pair(0),
+    };
   },
   methods: {
-    async submit () {
-      this.loadingFlags.loading = true;
-      this.newDeck && await this.addDeck({ name: this.deck.value });
-      this.$emit('add', this.payload);
+    async initialize (v) {
+      this.code = v?.code ?? null;
+      updatePair(this.deck, v?.deck ?? null);
+      await this.getDeckList();
+    },
+
+    async getDeckList () {
+      try {
+        this.deckList = await getDeckList();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async addDeck (payload) {
+      try {
+        await addDeck(payload);
+        await this.getDeckList();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    generatePayload () {
+      let code = this.sanitizeCode(this.code);
+      if (this.alternateArt) {
+        code +='*';
+      }
+
+      return {
+        code,
+        name: this.name.value,
+        deck: this.deck.value,
+        date: this.toTimestamp(this.date.value),
+        qtyNeeded:  this.qtyNeeded.value,
+        qtyAcquired: this.qty.value,
+        amtSpent: this.totalCost.value,
+      };
     },
   },
 };
@@ -49,7 +86,7 @@ export default {
     :loading="loadingFlags.loading"
     title="Add Bulk"
     width="50vw"
-    @submit="submit()"
+    @submit="add()"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-row>
@@ -97,34 +134,34 @@ export default {
           <v-card-text>
             <v-row>
               <paired-date-picker
-                v-model="date"
+                v-model="date.value"
                 label="Purchase Date"
               />
               <paired-number-input
-                v-model="qtyNeeded"
+                v-model="qtyNeeded.value"
                 :min="0"
                 label="Quantity Needed"
                 cols="6"
               />
               <paired-number-input
-                v-model="qtyAcquired"
+                v-model="qty.value"
                 label="Quantity Acquired"
                 cols="6"
                 @update:model-value="updateTotal()"
               />
               <paired-number-input
-                v-model="unitCost"
+                v-model="unitCost.value"
                 label="Unit Cost"
                 type="dollar"
                 cols="6"
                 @update:model-value="updateTotal()"
               />
               <paired-number-input
-                v-model="totalCost"
+                v-model="totalCost.value"
                 label="Total Cost"
                 type="dollar"
                 cols="6"
-                @update:model-value="unitCost = 0"
+                @update:model-value="unitCost.value = 0"
               />
             </v-row>
           </v-card-text>

@@ -1,9 +1,9 @@
 <script>
-import SaleDialogMixin from '@/mixins/SaleDialogMixin';
+import ReceiptMixin from '@/mixins/ReceiptMixin';
 
 export default {
   mixins: [
-    SaleDialogMixin(),
+    ReceiptMixin(),
   ],
   props: {
     modelValue: { type: null, default: false },
@@ -14,23 +14,30 @@ export default {
     'update',
     'refresh',
   ],
-  watch: {
-    modelValue: {
-      deep: true,
-      immediate: true,
-      handler(v) {
-        if (v) {
-          this.initialize(v);
-          this.loadingFlags.initializing = false;
-          this.loadingFlags.loading = false;
-        }
-      },
-    },
+  data () {
+    return {
+      code: null,
+      alternateArt: false,
+    };
   },
   methods: {
-    async submit () {
-      this.loadingFlags.loading = true;
-      this.$emit('add', this.payload);
+    initialize () {
+      this.code = null;
+      this.alternateArt = false;
+    },
+    generatePayload () {
+      let code = this.sanitizeCode(this.code);
+      if (this.alternateArt) {
+        code +='*';
+      }
+
+      return {
+        code,
+        name: this.name.value,
+        date: this.toTimestamp(this.date.value),
+        qty:  this.qty.value,
+        amtSpent: this.totalCost.value * -1,
+      };
     },
   },
 };
@@ -40,8 +47,9 @@ export default {
   <base-dialog
     :model-value="modelValue"
     :loading="loadingFlags.loading"
-    title="Add Sale"
-    @submit="submit()"
+    title="Add Receipt"
+    width="50vw"
+    @submit="add()"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-col>
@@ -67,29 +75,29 @@ export default {
         />
 
         <paired-date-picker
-          v-model="date"
+          v-model="date.value"
           label="Date"
           cols="6"
         />
         <paired-number-input
-          v-model="qtySold"
+          v-model="qty.value"
           label="Quantity"
           cols="6"
           @update:model-value="updateTotal()"
         />
         <paired-number-input
-          v-model="unitCost"
+          v-model="unitCost.value"
           label="Unit Price"
           type="dollar"
           cols="6"
           @update:model-value="updateTotal()"
         />
         <paired-number-input
-          v-model="totalCost"
+          v-model="totalCost.value"
           label="Total Price"
           type="dollar"
           cols="6"
-          @update:model-value="unitCost = 0"
+          @update:model-value="unitCost.value = 0"
         />
       </v-row>
     </v-col>
