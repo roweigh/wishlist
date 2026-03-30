@@ -35,6 +35,9 @@ import router from './router/index.js';
 
 import FlexRow from './components/base/flex/FlexRow.vue';
 import FlexCol from './components/base/flex/FlexCol.vue';
+import IconButton from './components/base/IconButton.vue';
+import HoverIcon from './components/base/HoverIcon.vue';
+import BaseTable from './components/base/BaseTable.vue';
 import BaseDialog from './components/base/dialog/BaseDialog.vue';
 
 import PairedDatePicker from '@/components/base/form-input/PairedDatePicker.vue';
@@ -56,9 +59,12 @@ app
   .use(pinia);
 router.isReady().then(() => app.mount('#app'));
 
+app.component('IconButton', IconButton);
+app.component('HoverIcon', HoverIcon);
 app.component('FlexCol', FlexCol);
 app.component('FlexRow', FlexRow);
 app.component('BaseDialog', BaseDialog);
+app.component('BaseTable', BaseTable);
 
 app.component('PairedDatePicker', PairedDatePicker);
 app.component('PairedTextField', PairedTextField);

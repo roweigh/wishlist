@@ -37,10 +37,10 @@ export default {
     <alert-popup />
     <v-layout>
       <navigation-header />
-      <v-main class="d-flex grow bg-grey">
-        <v-btn @click="loginWithGoogle">
+      <v-main class="d-flex grow bg-grey-darken-3">
+        <!-- <v-btn @click="loginWithGoogle">
           Sign In wiwth google
-        </v-btn>
+        </v-btn> -->
         <router-view />
       </v-main>
     </v-layout>
