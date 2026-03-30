@@ -1,5 +1,6 @@
 <script>
 import {
+  getCards,
   addCard,
   updateCard,
   removeCard,
@@ -9,9 +10,7 @@ import AddSinglesDialog from './AddSinglesDialog.vue';
 import EditSinglesDialog from './EditSinglesDialog.vue';
 import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
 import GradientChip from '@/components/base/GradientChip.vue';
-
-import { useAlertStore } from '@/stores/alert';
-const alertStore = useAlertStore();
+import CrudMixin from '@/mixins/CrudMixin';
 
 export default {
   components: {
@@ -20,27 +19,19 @@ export default {
     BulkUploadDialog,
     GradientChip,
   },
-  props: {
-    loading: { type: Boolean, default: false },
-    items: { type: null, required: true },
-  },
-  emits: [
-    'load',
-    'upload',
-    'add',
-    'edit',
-    'remove',
-    'download',
-    'refresh',
+  mixins: [
+    CrudMixin({
+      getFn: getCards,
+      addFn: addCard,
+      updateFn: updateCard,
+      removeFn: removeCard,
+    }),
   ],
+  props: {
+    value: { type: String, required: true },
+  },
   data () {
     return {
-      overlayFlags: {
-        add: false,
-        edit: false,
-        upload: false,
-      },
-
       sortBy: [{ key: 'deck', order: 'asc' }],
       csvHeaders: 'code,name,qtyAcquired,qtyNeeded,amtSpent,date', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
@@ -89,42 +80,6 @@ export default {
     };
   },
   methods: {
-    async addCard (payload) {
-      try {
-        await addCard(payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Added!');
-          this.overlayFlags.add = false;
-          this.overlayFlags.edit = false;
-        }),
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
-    async updateCard (payload) {
-      try {
-        const id = this.overlayFlags?.edit?.id;
-        await updateCard(id, payload).then(() => {
-          alertStore.showMessage('success', 'Successfully Updated!');
-        }),
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
-    async removeCard(id) {
-      try {
-        await removeCard(id).then(() => {
-          alertStore.showMessage('success', 'Successfully Removed!');
-        });
-        this.$emit('refresh');
-      } catch {
-        // handle(error)
-      }
-    },
-
     async loadFromClipboard () {
       const parseDecklist = (text) => {
         return text.split(/\r?\n/).map(line => {
@@ -172,46 +127,42 @@ export default {
       }
       return name;
     },
-
-    formatDollar(v) {
-      return `$${(v).toFixed(2)}`;
-    },
   },
 };
 </script>
 
 <template>
-  <bulk-upload-dialog
-    v-model="overlayFlags.upload"
-    :csv-headers="csvHeaders"
-    @upload="$emit('upload', $event)"
-  />
-
   <add-singles-dialog
     v-model="overlayFlags.add"
-    @add="addCard($event)"
+    @add="add($event)"
   />
 
   <edit-singles-dialog
     v-model="overlayFlags.edit"
     :loading="loading"
-    @add="addCard($event)"
-    @update="updateCard($event)"
-    @refresh="$emit('refresh')"
+    @add="add($event)"
+    @update="update($event)"
+    @refresh="get()"
+  />
+
+  <bulk-upload-dialog
+    v-model="overlayFlags.upload"
+    :csv-headers="csvHeaders"
+    @upload="bulkUpload()"
   />
 
   <v-tabs-window-item value="singles">
     <base-table
       v-model:sort-by="sortBy"
+      :loading="loadingFlags.loading"
       :headers="headers"
       :items="items"
-      :loading="loading"
       item-id="code"
       @add="overlayFlags.add = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
-      @remove="removeCard($event)"
-      @download="$emit('download')"
+      @remove="remove($event)"
+      @download="download()"
     >
       <template #actions>
         <icon-button

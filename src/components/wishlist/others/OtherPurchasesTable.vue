@@ -1,5 +1,6 @@
 <script>
 import {
+  getItems,
   addItem,
   updateItem,
   removeItem,
@@ -18,27 +19,19 @@ export default {
   },
   mixins: [
     CrudMixin({
+      getFn: getItems,
       addFn: addItem,
       updateFn: updateItem,
       removeFn: removeItem,
     }),
   ],
   props: {
-    loading: { type: Boolean, default: false },
-    items: { type: null, required: true },
+    value: { type: String, required: true },
   },
-  emits: [
-    'load',
-    'upload',
-    'add',
-    'edit',
-    'remove',
-    'download',
-  ],
   data () {
     return {
       sortBy: [{ key: 'code', order: 'desc' }],
-      csvHeaders: 'name,date,price', // Explicitly defined as visible headers may not necessarily be all of the data
+      csvHeaders: 'name,date,amtSpent', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
         {
           key: 'name',
@@ -50,7 +43,7 @@ export default {
           width: '5%',
         },
         {
-          key: 'unitCost',
+          key: 'amtSpent',
           title: 'Price',
           align: 'end',
           width: '5%',
@@ -81,27 +74,27 @@ export default {
   <bulk-upload-dialog
     v-model="overlayFlags.upload"
     :csv-headers="csvHeaders"
-    @upload="$emit('upload', $event)"
+    @upload="bulkUpload()"
   />
 
   <v-tabs-window-item value="others">
     <base-table
       v-model:sort-by="sortBy"
-      :loading="loading"
+      :loading="loadingFlags.loading"
       :headers="headers"
       :items="items"
       @add="overlayFlags.add = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
       @remove="remove($event)"
-      @download="$emit('download')"
+      @download="download()"
     >
       <template #[`item.date`]="{ item }">
         {{ formatDate(item.date) }}
       </template>
 
-      <template #[`item.unitCost`]="{ item }">
-        {{ formatDollar(item.unitCost) }}
+      <template #[`item.amtSpent`]="{ item }">
+        {{ formatDollar(item.amtSpent) }}
       </template>
     </base-table>
   </v-tabs-window-item>

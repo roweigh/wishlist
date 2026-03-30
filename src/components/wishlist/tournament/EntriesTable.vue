@@ -1,5 +1,6 @@
 <script>
 import {
+  getEntries,
   addEntry,
   removeEntry,
 } from '@/api/purchases';
@@ -15,34 +16,25 @@ export default {
   },
   mixins: [
     CrudMixin({
+      getFn: getEntries,
       addFn: addEntry,
       removeFn: removeEntry,
     }),
   ],
   props: {
-    loading: { type: Boolean, default: false },
-    items: { type: null, required: true },
+    value: { type: String, required: true },
   },
-  emits: [
-    'load',
-    'upload',
-    'add',
-    'edit',
-    'remove',
-    'download',
-    'refresh',
-  ],
   data () {
     return {
       sortBy: [{ key: 'date', order: 'desc' }],
-      csvHeaders: 'date,price', // Explicitly defined as visible headers may not necessarily be all of the data
+      csvHeaders: 'date,amtSpent', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
         {
           key: 'date',
           title: 'Date',
         },
         {
-          key: 'unitCost',
+          key: 'amtSpent',
           title: 'Price',
           align: 'end',
           width: '5%',
@@ -68,27 +60,27 @@ export default {
   <bulk-upload-dialog
     v-model="overlayFlags.upload"
     :csv-headers="csvHeaders"
-    @upload="$emit('upload', $event)"
+    @upload="bulkUpload()"
   />
 
   <v-tabs-window-item value="tournament">
     <base-table
       v-model:sort-by="sortBy"
+      :loading="loadingFlags.loading"
       :headers="headers"
       :items="items"
-      :loading="loading"
       :edit="false"
       @add="overlayFlags.add = true"
       @upload="overlayFlags.upload = true"
       @remove="remove($event)"
-      @download="$emit('download')"
+      @download="download()"
     >
       <template #[`item.date`]="{ item }">
         {{ formatDate(item.date) }}
       </template>
 
-      <template #[`item.unitCost`]="{ item }">
-        {{ formatDollar(item.unitCost) }}
+      <template #[`item.amtSpent`]="{ item }">
+        {{ formatDollar(item.amtSpent) }}
       </template>
     </base-table>
   </v-tabs-window-item>

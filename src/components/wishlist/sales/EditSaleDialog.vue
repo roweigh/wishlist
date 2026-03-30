@@ -16,11 +16,11 @@ export default {
   ],
   computed: {
     alternateArtComputed () {
-      return this.modelValue.code.endsWith('*');
+      return this.modelValue?.code?.endsWith('*');
     },
-    codeComputed () {
+    code () {
       let code = this.modelValue.code;
-      if (code.endsWith('*')) {
+      if (code?.endsWith('*')) {
         code = code.slice(0, -1);
       }
       return code;

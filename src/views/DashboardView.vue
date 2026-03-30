@@ -8,6 +8,7 @@ import {
 
 import DonutGraph from '../components/dashboard/DonutGraph.vue';
 import LineGraph from '../components/dashboard/LineGraph.vue';
+import { getItems } from '../api/purchases';
 
 export default {
   components: {
@@ -18,7 +19,6 @@ export default {
     return {
       user: null,
 
-      selectedDates: [],
       donutData: [1],
       data: [],
       selected: [
@@ -59,17 +59,21 @@ export default {
     },
   },
   async mounted () {
-    await Promise.all([
-      this.getTournamentAttendance(),
-    ]);
-
     const result = await Promise.all([
       getCards('singles'),
       getCards('sales'),
       getCards('tournament'),
-      getCards('others'),
+      getItems(),
     ]).then((responses) => {
       console.log(responses);
+      const totalSpent= (v) => {
+        return v.reduce((acc, item) => acc + item.amtSpent, 0);
+      };
+      this.donutData = [
+        totalSpent([...responses[0], ...responses[1]]),
+        totalSpent(responses[2]),
+        totalSpent(responses[3]),
+      ];
       return [
         ...responses[0],
         ...responses[1],
@@ -78,10 +82,7 @@ export default {
       ];
     });
 
-
-    const selectedDatesWResult = [...selectedDates[0].dates.map(v => ({ date: v, amtSpent: 12 })), ...result];
-    console.log(selectedDatesWResult);
-    const sortedAscending = selectedDatesWResult.sort((a, b) => {
+    const sortedAscending = result.sort((a, b) => {
       const aDate = new Date(a?.date?.seconds * 1000 + a?.date?.nanoseconds / 1_000_000);
       const bDate = new Date(b?.date?.seconds * 1000 + b?.date?.nanoseconds / 1_000_000);
       return new Date(aDate) - new Date(bDate);
@@ -92,7 +93,7 @@ export default {
       amtSpent: item.amtSpent,
     };});
 
-
+    // console.log(rawData);
     // 1. Group and Sum by Day
     const grouped = rawData.reduce((acc, item) => {
       // Normalize date to YYYY-MM-DD to strip the specific time
@@ -119,7 +120,7 @@ export default {
         Number(runningTotal.toFixed(2)),
       ];
     });
-
+    console.log(this.donutData);
     this.data = data;
     this.data[0].singles = chartData;
   },

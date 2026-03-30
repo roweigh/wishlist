@@ -30,12 +30,12 @@ export default () => {
         immediate: true,
         async handler (v) {
           if (v) {
-            const date = v?.date ?  new Date(v?.date.seconds * 1000) : new Date();
+            const date = v?.date ? new Date(v?.date.seconds * 1000) : null;
             updatePair(this.date, date);
 
+            // TODO doesnt really work with sales RN
             updatePair(this.name, v?.name ?? null);
             updatePair(this.qty, v?.qty ?? 0);
-            updatePair(this.unitCost, v?.unitCost ?? 0);
             updatePair(this.totalCost, v?.totalCost ?? 0);
 
             this.initialize && await this.initialize();

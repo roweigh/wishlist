@@ -1,5 +1,6 @@
 <script>
 import {
+  getSales,
   addSale,
   updateSale,
   removeSale,
@@ -18,15 +19,12 @@ export default {
   },
   mixins: [
     CrudMixin({
+      getFn: getSales,
       addFn: addSale,
       updateFn: updateSale,
       removeFn: removeSale,
     }),
   ],
-  props: {
-    loading: { type: Boolean, default: false },
-    items: { type: null, required: true },
-  },
   emits: [
     'load',
     'upload',
@@ -101,9 +99,9 @@ export default {
   <v-tabs-window-item value="sales">
     <base-table
       v-model:sort-by="sortBy"
+      :loading="loadingFlags.loading"
       :headers="headers"
       :items="items"
-      :loading="loading"
       @add="overlayFlags.add = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
