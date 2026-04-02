@@ -1,15 +1,17 @@
 const routes = [
   {
-    name: 'wishlist',
-    path: '/wishlist',
-    meta: { title: 'Wishlist' },
-    component: () => import('@/views/WishlistView.vue'),
-  },
-  {
     name: 'dashboard',
     path: '/dashboard',
+    icon: 'mdi-view-grid-outline',
     meta: { title: 'Dashboard' },
     component: () => import('@/views/DashboardView.vue'),
+  },
+  {
+    name: 'Purchases',
+    path: '/purchases',
+    icon: 'mdi-currency-usd',
+    meta: { title: 'Purchases' },
+    component: () => import('@/views/WishlistView.vue'),
   },
   {
     path: '/',

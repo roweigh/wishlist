@@ -2,6 +2,13 @@
 import routes from '@/router/routes';
 
 export default {
+  data () {
+    return {
+      drawer: true,
+      rail: true,
+      wider: false,
+    };
+  },
   computed: {
     menuItems() {
       return routes.filter(r => r.component);
@@ -12,16 +19,51 @@ export default {
 </script>
 
 <template>
-  <v-app-bar
-    class="bg-blue-grey d-flex px-5"
-    absolute
+  <v-navigation-drawer
+    v-model="drawer"
+    :rail="rail"
+    color="teal"
+    permanent
+    @click="rail = false"
   >
-    <v-btn
-      v-for="route in menuItems"
-      :key="route.name"
-      :to="route?.path"
+    <v-list
+      density="compact"
+      nav
     >
-      {{ route?.meta?.title }}
-    </v-btn>
-  </v-app-bar>
+      <v-list-item
+        v-for="route in menuItems"
+        :key="route.name"
+        :class="{ 'pl-5': wider }"
+        :prepend-icon="route?.icon"
+        :title="route?.meta?.title"
+        :value="route?.value"
+        :to="route?.path"
+      />
+    </v-list>
+
+    <template #append>
+      <v-divider />
+      <v-list>
+        <v-list-item
+          prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
+          title="John Leider"
+        >
+          <template #prepend>
+            <v-avatar
+              :class="{ 'mx-1': wider }"
+              :size="(wider && rail) ? 40 : undefined"
+            />
+          </template>
+          <template #append>
+            <v-btn
+              :inert="rail"
+              icon="mdi-chevron-left"
+              variant="text"
+              @click.stop="rail = !rail"
+            />
+          </template>
+        </v-list-item>
+      </v-list>
+    </template>
+  </v-navigation-drawer>
 </template>

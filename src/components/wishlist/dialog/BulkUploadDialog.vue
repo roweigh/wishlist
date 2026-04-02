@@ -32,7 +32,6 @@ export default {
       if (this.uploadMode === 'csv') {
         this.bulk = this.csvToArray(this.csvInput);
       }
-
       this.$emit('upload', this.bulk);
       this.$emit('update:model-value', false);
     },

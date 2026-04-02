@@ -148,7 +148,7 @@ export default {
   <bulk-upload-dialog
     v-model="overlayFlags.upload"
     :csv-headers="csvHeaders"
-    @upload="bulkUpload()"
+    @upload="bulkUpload($event)"
   />
 
   <v-tabs-window-item value="singles">

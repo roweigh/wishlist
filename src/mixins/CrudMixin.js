@@ -81,10 +81,15 @@ export default ({
       },
 
       async download () {
-        const cards = this.items.map(({ code, name, qtyAcquired, qtyNeeded, amtSpent, date }) => {
+        const cards = this.items.map(({ code, name, qtyAcquired, qtyNeeded, amtSpent, deck, date }) => {
           const ms = (date?.seconds || 0) * 1000 + (date?.nanoseconds || 0) / 1_000_000;
           const dateTransformed = ms > 0 ? new Date(ms).toISOString() : new Date().toISOString();
           return {
+            code,
+            name,
+            qtyAcquired,
+            qtyNeeded,
+            deck,
             date: dateTransformed,
             amtSpent,
           };

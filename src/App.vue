@@ -37,7 +37,10 @@ export default {
     <alert-popup />
     <v-layout>
       <navigation-header />
-      <v-main class="d-flex grow bg-grey-darken-3">
+      <v-main
+        class="bg-grey-darken-3"
+        style="max-height: 100vh; overflow: auto"
+      >
         <!-- <v-btn @click="loginWithGoogle">
           Sign In wiwth google
         </v-btn> -->
@@ -46,3 +49,9 @@ export default {
     </v-layout>
   </v-app>
 </template>
+
+<style>
+html  {
+  overflow: hidden
+}
+</style>

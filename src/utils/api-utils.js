@@ -37,13 +37,14 @@ export async function batchAdd(col, arr) {
 
   arr.forEach((item) => {
     // Everything goes into one top-level collection
+    console.log(item);
     const historyColRef = collection(db, `${col}-history`);
     const newDocRef = doc(historyColRef);
 
     batch.set(newDocRef, {
       code: item.code, // We store the code as a field instead of a parent
       name: item.name,
-      // deck: item.deck, // oops lost it
+      deck: item.deck, // oops lost it
       qtyAcquired: Number(item.qtyAcquired) || 0,
       qtyNeeded: Number(item.qtyNeeded) || 0,
       amtSpent: Number(item.amtSpent) || 0,

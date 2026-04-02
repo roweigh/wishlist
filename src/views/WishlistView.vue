@@ -18,7 +18,7 @@ export default {
         { value: 'singles', title: 'Singles', icon: 'mdi-cards-outline' },
         { value: 'sales', title: 'Sales', icon: 'mdi-finance' },
         { value: 'tournament', title: 'Entry Fees', icon: 'mdi-trophy-outline'  },
-        { value: 'others', title: 'Other Purchases', icon: 'mdi-view-grid-outline'  },
+        { value: 'others', title: 'Other Purchases', icon: 'mdi-package-variant'  },
       ],
     };
   },
@@ -32,6 +32,7 @@ export default {
         v-model="tab"
         color="teal-accent-3"
         grow
+        density="comfortable"
       >
         <v-tab
           v-for="{value, title, icon} in tabs"

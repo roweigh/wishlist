@@ -1,14 +1,14 @@
 <script>
 import { data } from '../api/test-api';
 import {
-  getPurchaseHistory,
-
   getCards,
+  getEntries,
+  getSales,
+  getItems,
 } from '@/api/purchases';
 
 import DonutGraph from '../components/dashboard/DonutGraph.vue';
 import LineGraph from '../components/dashboard/LineGraph.vue';
-import { getItems } from '../api/purchases';
 
 export default {
   components: {
@@ -60,12 +60,12 @@ export default {
   },
   async mounted () {
     const result = await Promise.all([
-      getCards('singles'),
-      getCards('sales'),
-      getCards('tournament'),
+      getCards(),
+      getSales(),
+      getEntries(),
       getItems(),
     ]).then((responses) => {
-      console.log(responses);
+      console.log(responses[1]);
       const totalSpent= (v) => {
         return v.reduce((acc, item) => acc + item.amtSpent, 0);
       };
