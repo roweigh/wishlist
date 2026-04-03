@@ -6,18 +6,18 @@ import {
   removeCard,
 } from '@/api/purchases';
 
+import CrudMixin from '@/mixins/CrudMixin';
+import GradientChip from '@/components/base/GradientChip.vue';
+import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
 import AddSinglesDialog from './AddSinglesDialog.vue';
 import EditSinglesDialog from './EditSinglesDialog.vue';
-import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
-import GradientChip from '@/components/base/GradientChip.vue';
-import CrudMixin from '@/mixins/CrudMixin';
 
 export default {
   components: {
+    GradientChip,
     AddSinglesDialog,
     EditSinglesDialog,
     BulkUploadDialog,
-    GradientChip,
   },
   mixins: [
     CrudMixin({
@@ -139,7 +139,6 @@ export default {
 
   <edit-singles-dialog
     v-model="overlayFlags.edit"
-    :loading="loading"
     @add="add($event)"
     @update="update($event)"
     @refresh="get()"

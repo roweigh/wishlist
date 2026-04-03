@@ -7,14 +7,12 @@ import {
 } from '@/api/purchases';
 
 import CrudMixin from '@/mixins/CrudMixin';
-import AddSaleDialog from './AddSaleDialog.vue';
-import EditSaleDialog from './EditSaleDialog.vue';
 import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
+import EditSaleDialog from './EditSaleDialog.vue';
 
 export default {
   components: {
     BulkUploadDialog,
-    AddSaleDialog,
     EditSaleDialog,
   },
   mixins: [
@@ -78,22 +76,16 @@ export default {
 </script>
 
 <template>
-  <add-sale-dialog
-    v-model="overlayFlags.add"
-    @add="add($event)"
-  />
-
   <edit-sale-dialog
     v-model="overlayFlags.edit"
-    :loading="loading"
+    @add="add($event)"
     @update="update($event)"
-    @refresh="$emit('refresh')"
   />
 
   <bulk-upload-dialog
     v-model="overlayFlags.upload"
     :csv-headers="csvHeaders"
-    @upload="$emit('upload', $event)"
+    @upload="bulkUpload($event)"
   />
 
   <v-tabs-window-item value="sales">
@@ -102,11 +94,11 @@ export default {
       :loading="loadingFlags.loading"
       :headers="headers"
       :items="items"
-      @add="overlayFlags.add = true"
+      @add="overlayFlags.edit = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
       @remove="remove($event)"
-      @download="$emit('download')"
+      @download="download()"
     >
       <template #[`item.date`]="{ item }">
         {{ formatDate(item.date) }}

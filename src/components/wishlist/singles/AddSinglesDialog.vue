@@ -1,22 +1,23 @@
 <script>
-import { pair, updatePair } from '@/utils/form-utils';
 import {
   getDeckList,
   addDeck,
 } from '@/api/purchases';
 
+import PurchaseMixin from '@/mixins/PurchaseMixin';
 import DeckInput from '../purchases/DeckInput.vue';
-import ReceiptMixin from '@/mixins/ReceiptMixin';
 
 export default {
   components: {
     DeckInput,
   },
   mixins: [
-    ReceiptMixin(),
+    PurchaseMixin({
+      title: 'Card',
+    }),
   ],
   props: {
-    modelValue: { type: null, default: false },
+    modelValue: { type: Boolean, default: false },
   },
   emits: [
     'update:model-value',
@@ -26,19 +27,16 @@ export default {
   ],
   data () {
     return {
-      alternateArt: null,
+      alternateArt: false,
       newDeck: false,
       deckList: [],
 
-      code: null,
-      deck: pair(null),
-      qtyNeeded: pair(0),
+      deck: null,
+      qtyNeeded: 0,
     };
   },
   methods: {
-    async initialize (v) {
-      this.code = v?.code ?? null;
-      updatePair(this.deck, v?.deck ?? null);
+    async initialize () {
       await this.getDeckList();
     },
 
@@ -60,7 +58,7 @@ export default {
     },
 
     generatePayload () {
-      let code = this.sanitizeCode(this.code);
+      let code = this.sanitizeCode(this.codeComputed);
       if (this.alternateArt) {
         code +='*';
       }
@@ -75,6 +73,13 @@ export default {
         amtSpent: this.totalCost.value,
       };
     },
+
+    async submit () {
+      this.loadingFlags.loading = true;
+      const payload = this.generatePayload();
+      this.newDeck && await this.addDeck({ name: this.deck.value });
+      this.$emit('add', payload);
+    },
   },
 };
 </script>
@@ -86,7 +91,7 @@ export default {
     :loading="loadingFlags.loading"
     title="Add Bulk"
     width="50vw"
-    @submit="add()"
+    @submit="submit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-row>
@@ -119,7 +124,7 @@ export default {
               />
 
               <deck-input
-                v-model="deck.value"
+                v-model="deck"
                 v-model:add-deck="newDeck"
                 :deck-list="deckList"
               />
@@ -138,7 +143,7 @@ export default {
                 label="Purchase Date"
               />
               <paired-number-input
-                v-model="qtyNeeded.value"
+                v-model="qtyNeeded"
                 :min="0"
                 label="Quantity Needed"
                 cols="6"

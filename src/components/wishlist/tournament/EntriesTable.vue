@@ -6,8 +6,8 @@ import {
 } from '@/api/purchases';
 
 import CrudMixin from '@/mixins/CrudMixin';
-import AddEntryDialog from './AddEntryDialog.vue';
 import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
+import AddEntryDialog from './AddEntryDialog.vue';
 
 export default {
   components: {
@@ -53,7 +53,7 @@ export default {
 
 <template>
   <add-entry-dialog
-    v-model="overlayFlags.add"
+    v-model="overlayFlags.edit"
     @add="add($event);"
   />
 
@@ -70,7 +70,7 @@ export default {
       :headers="headers"
       :items="items"
       :edit="false"
-      @add="overlayFlags.add = true"
+      @add="overlayFlags.edit = true"
       @upload="overlayFlags.upload = true"
       @remove="remove($event)"
       @download="download()"

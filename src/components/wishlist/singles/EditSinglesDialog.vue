@@ -10,7 +10,7 @@ import {
 
 import DeckInput from '../purchases/DeckInput.vue';
 import PurchaseHistory from '../purchases/PurchaseHistory.vue';
-import ReceiptMixin from '@/mixins/ReceiptMixin';
+import PurchaseMixin from '@/mixins/PurchaseMixin';
 
 export default {
   components: {
@@ -18,7 +18,9 @@ export default {
     PurchaseHistory,
   },
   mixins: [
-    ReceiptMixin(),
+    PurchaseMixin({
+      title: 'Card',
+    }),
   ],
   props: {
     modelValue: { type: null, default: false },
@@ -45,11 +47,12 @@ export default {
   },
   computed: {
     alternateArtComputed () {
-      return this.modelValue.code.endsWith('*');
+      let code = this.modelValue.code;
+      return code && this.modelValue.code.endsWith('*');
     },
     codeComputed () {
       let code = this.modelValue.code;
-      if (code.endsWith('*')) {
+      if (code && code.endsWith('*')) {
         code = code.slice(0, -1);
       }
       return code;
@@ -57,8 +60,22 @@ export default {
   },
   methods: {
     async initialize (v) {
-      this.code = v?.code ?? null;
-      updatePair(this.deck, v?.deck ?? null);
+      const date = v?.date ? new Date(v?.date.seconds * 1000) : new Date();
+      const code = v.code ?? null;
+      if (code?.endsWith('*')) {
+        this.code = code.slice(0, -1);
+        this.alternateArt = true;
+      } else {
+        this.code = code;
+        this.alternateArt = false;
+      }
+
+      updatePair(this.date, date);
+      updatePair(this.deck, v?.deck);
+      updatePair(this.name, v?.name ?? null);
+      updatePair(this.qtyNeeded, v?.qtyNeeded ?? 0);
+      updatePair(this.qty, v?.qty ?? 0);
+      updatePair(this.totalCost, v?.totalCost ?? 0);
       await this.getDeckList();
     },
 
@@ -130,8 +147,6 @@ export default {
         this.$emit('add', payload);
       } else {
         this.$emit('update', payload);
-        this.$emit('refresh');
-        this.loadingFlags.loading = false;
       }
     },
   },

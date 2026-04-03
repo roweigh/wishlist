@@ -28,6 +28,8 @@ export default ({
     },
     methods: {
       async get () {
+        this.overlayFlags.add = false;
+        this.overlayFlags.edit = false;
         this.loadingFlags.loading = true;
         try {
           this.items = await getFn();
@@ -41,7 +43,6 @@ export default ({
         try {
           await addFn(payload).then(() => {
             alertStore.showMessage('success', 'Successfully Added!');
-            this.overlayFlags.add = false;
           }),
           await this.get();
         } catch(error) {
@@ -54,7 +55,6 @@ export default ({
           const id = this.overlayFlags?.edit?.id;
           await updateFn(id, payload).then(() => {
             alertStore.showMessage('success', 'Successfully Updated!');
-            this.overlayFlags.edit = false;
           }),
           await this.get();
         } catch(error) {

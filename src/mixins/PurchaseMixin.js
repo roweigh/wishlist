@@ -1,12 +1,14 @@
 // Receipt Mixin used to handle any purchases with a time entry
-
 import { Timestamp } from 'firebase/firestore';
-import { pair, updatePair } from '@/utils/form-utils';
+import { pair } from '@/utils/form-utils';
 
-export default () => {
+export default ({
+  title,
+}) => {
   return {
     emits: [
       'add',
+      'update',
     ],
     data () {
       return {
@@ -14,15 +16,18 @@ export default () => {
           initializing: true,
           loading: true,
         },
-        // Item details
-        name: pair(null),
 
-        // Purchase details
-        date: pair(null),
+        code: null,
+        name: pair(null), // Item details
+        date: pair(new Date()), // Purchase details
         qty: pair(0),
         unitCost: pair(0),
         totalCost: pair(0),
       };
+    },
+    computed: {
+      id () { return this.modelValue?.id; },
+      titleComputed () { return `${this.id ? 'Update' : 'Add'} ${title}`; },
     },
     watch: {
       modelValue: {
@@ -30,15 +35,7 @@ export default () => {
         immediate: true,
         async handler (v) {
           if (v) {
-            const date = v?.date ? new Date(v?.date.seconds * 1000) : null;
-            updatePair(this.date, date);
-
-            // TODO doesnt really work with sales RN
-            updatePair(this.name, v?.name ?? null);
-            updatePair(this.qty, v?.qty ?? 0);
-            updatePair(this.totalCost, v?.totalCost ?? 0);
-
-            this.initialize && await this.initialize();
+            this.initialize && await this.initialize(v);
             this.loadingFlags.initializing = false;
             this.loadingFlags.loading = false;
           }
@@ -46,16 +43,14 @@ export default () => {
       },
     },
     methods: {
-      add () {
+      handleSubmit () {
         this.loadingFlags.loading = true;
         const payload = this.generatePayload();
-        this.$emit('add', payload);
-      },
-
-      update () {
-        this.loadingFlags.loading = true;
-        const payload = this.generatePayload();
-        this.$emit('update', payload);
+        if (this.id) {
+          this.$emit('update', payload);
+        } else {
+          this.$emit('add', payload);
+        }
       },
 
       toTimestamp (date) {

@@ -1,25 +1,35 @@
 <script>
-import ReceiptMixin from '@/mixins/ReceiptMixin';
+import { updatePair } from '@/utils/form-utils';
+import PurchaseMixin from '@/mixins/PurchaseMixin';
 
 export default {
   mixins: [
-    ReceiptMixin(),
+    PurchaseMixin({
+      title: 'Item',
+    }),
   ],
   props: {
-    modelValue: { type: null, default: false },
+    modelValue: { type: [Object, Boolean], default: false },
   },
   emits: [
     'update:model-value',
-    'add',
-    'update',
-    'refresh',
   ],
   methods: {
+    // Populate required fields
+    initialize (v) {
+      const date = v?.date ? new Date(v?.date.seconds * 1000) : new Date();
+      updatePair(this.date, date);
+      updatePair(this.name, v?.name ?? null);
+      updatePair(this.qty, v?.qty ?? 0);
+      updatePair(this.totalCost, v?.amtSpent ?? 0);
+    },
+
+    // Extract fields into payload object
     generatePayload () {
       return {
         name: this.name.value,
         date: this.toTimestamp(this.date.value),
-        amtSpent: this.unitCost.value,
+        amtSpent: this.totalCost.value,
       };
     },
   },
@@ -30,8 +40,8 @@ export default {
   <base-dialog
     :model-value="modelValue"
     :loading="loadingFlags.loading"
-    title="Update Item"
-    @submit="update()"
+    :title="titleComputed"
+    @submit="handleSubmit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-col>
@@ -47,8 +57,8 @@ export default {
           label="Date"
         />
         <paired-number-input
-          v-model="unitCost.value"
-          :initial="unitCost.initial"
+          v-model="totalCost.value"
+          :initial="totalCost.initial"
           label="Price"
           type="dollar"
         />

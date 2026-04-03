@@ -17,7 +17,7 @@ export default {
       return this.padding ? `padding: ${this.padding}px` : undefined;
     },
     classComputed () {
-      const changed = this.initial && (this.modelValue !== this.initial);
+      const changed = (this.initial !== undefined) && (this.modelValue !== this.initial);
       if (changed) {
         return 'changed';
       } else {

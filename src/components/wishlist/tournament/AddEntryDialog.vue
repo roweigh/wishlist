@@ -1,21 +1,29 @@
 <script>
-import ReceiptMixin from '@/mixins/ReceiptMixin';
+import { updatePair } from '@/utils/form-utils';
+import PurchaseMixin from '@/mixins/PurchaseMixin';
 
 export default {
   mixins: [
-    ReceiptMixin(),
+    PurchaseMixin({
+      title: 'Entry',
+    }),
   ],
   props: {
-    modelValue: { type: null, default: false },
+    modelValue: { type: Boolean, default: false },
   },
   emits: [
     'update:model-value',
   ],
   methods: {
+    // Populate required fields
+    initialize () {
+      updatePair(this.date, []);
+      updatePair(this.totalCost, 0);
+    },
     generatePayload () {
       return this.date.value.map(dateValue => ({
         date: this.toTimestamp(dateValue),
-        amtSpent: this.unitCost.value,
+        amtSpent: this.totalCost.value,
       }));
     },
   },
@@ -27,7 +35,7 @@ export default {
     :model-value="modelValue"
     :loading="loadingFlags.loading"
     title="Register Entry Fee"
-    @submit="add()"
+    @submit="handleSubmit()"
     @update:model-value="$emit('update:model-value', $event)"
   >
     <v-date-picker
@@ -40,7 +48,7 @@ export default {
     >
       <template #actions>
         <paired-number-input
-          v-model="unitCost.value"
+          v-model="totalCost.value"
           label="Entry Fee"
           type="dollar"
         />

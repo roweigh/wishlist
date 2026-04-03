@@ -7,14 +7,12 @@ import {
 } from '@/api/purchases';
 
 import CrudMixin from '@/mixins/CrudMixin';
-import AddItemDialog from './AddItemDialog.vue';
-import EditItemDialog from './EditItemDialog.vue';
 import BulkUploadDialog from '@/components/wishlist/dialog/BulkUploadDialog.vue';
+import EditItemDialog from './EditItemDialog.vue';
 
 export default {
   components: {
     BulkUploadDialog,
-    AddItemDialog,
     EditItemDialog,
   },
   mixins: [
@@ -61,13 +59,9 @@ export default {
 </script>
 
 <template>
-  <add-item-dialog
-    v-model="overlayFlags.add"
-    @add="add($event)"
-  />
-
   <edit-item-dialog
     v-model="overlayFlags.edit"
+    @add="add($event);"
     @update="update($event)"
   />
 
@@ -83,7 +77,7 @@ export default {
       :loading="loadingFlags.loading"
       :headers="headers"
       :items="items"
-      @add="overlayFlags.add = true"
+      @add="overlayFlags.edit = true"
       @edit="overlayFlags.edit = $event"
       @upload="overlayFlags.upload = true"
       @remove="remove($event)"
