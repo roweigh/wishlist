@@ -4,7 +4,7 @@ import {
   getDeckList,
   addDeck,
   getCardHistory,
-  updateHistory,
+  updateCard,
   removeHistory,
 } from '@/api/purchases';
 
@@ -74,9 +74,9 @@ export default {
       updatePair(this.date, date);
       updatePair(this.deck, v?.deck);
       updatePair(this.name, v?.name ?? null);
-      updatePair(this.qtyNeeded, v?.qtyNeeded ?? 0);
-      updatePair(this.qty, v?.qty ?? 0);
-      updatePair(this.totalCost, v?.totalCost ?? 0);
+      updatePair(this.qtyNeeded, 0);
+      updatePair(this.qty, 0);
+      updatePair(this.totalCost, 0);
       await this.getDeckList();
       await this.getReceipts(v.code);
     },
@@ -105,7 +105,7 @@ export default {
     // Update each changed row entry
     async updateReceipts () {
       const promises = Object.entries(this.changedHistory).map(([id, payload]) => {
-        updateHistory(id, payload);
+        updateCard(id, payload);
       });
       await Promise.all(promises);
     },
@@ -149,6 +149,8 @@ export default {
       if (payload.qtyAcquired || payload.qtyNeeded) {
         this.$emit('add', payload);
       } else {
+        payload.qtyNeeded = this.qtyNeeded = 0;
+        payload.qtyAcquired = this.qty.initial;
         this.$emit('update', payload);
         this.$emit('refresh');
       }

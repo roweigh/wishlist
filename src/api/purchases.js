@@ -46,6 +46,10 @@ export const addCard = async (payload) => await add('singles-history', payload);
 export const updateCard = async (id, payload) => await update('singles-history', id, payload);
 export const removeCard = async (id) => await del('singles-history', id, 'code');
 
+// Card receipts CRUD
+export const getCardHistory = async (code) => await get('singles-history', code);
+export const removeHistory = async (id) => await del('singles-history', id);
+
 export const getSales = async () => await get('sales-history');
 export const addSale = async (payload) => await add('sales-history', payload);
 export const updateSale = async (id, payload) => await update('sales-history', id, payload);
@@ -61,9 +65,3 @@ export const updateItem = async (id, payload) => await update('others-history', 
 export const removeItem = async (id) => await del('others-history', id);
 
 export const bulkImport = async (path, payload) => await batchAdd(path, payload);
-
-// Card receipts CRUD
-export const getCardHistory = async (code) => await get('singles-history', code);
-export const addHistory = async (path, payload) =>  await add(`${path}/history`, payload);
-export const updateHistory = async (id, payload) => await update('purchases', id, payload); // ??
-export const removeHistory = async (id) => await del('singles-history', id);
