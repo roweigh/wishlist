@@ -63,12 +63,7 @@ export const removeItem = async (id) => await del('others-history', id);
 export const bulkImport = async (path, payload) => await batchAdd(path, payload);
 
 // Card receipts CRUD
-export const getCardHistory = async (code) => {
-  const response = await get('purchases', code);
-  // return response.filter(({ qtyAcquired }) => qtyAcquired > 0);
-  return response;
-};
-
+export const getCardHistory = async (code) => await get('singles-history', code);
 export const addHistory = async (path, payload) =>  await add(`${path}/history`, payload);
 export const updateHistory = async (id, payload) => await update('purchases', id, payload); // ??
-export const removeHistory = async (id) => {}; // ??
+export const removeHistory = async (id) => await del('singles-history', id);

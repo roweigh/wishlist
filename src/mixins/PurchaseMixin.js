@@ -59,6 +59,7 @@ export default ({
 
       sanitizeCode (code) {
       // Hint: Code must match OPTCG card code structure (e.g. OP01-023)
+        console.log(code);
         const result = code.toUpperCase();
         const regex = /^[A-Z]+(\d{2})?-\d{3}$/;
         console.log(regex);

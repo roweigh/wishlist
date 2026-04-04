@@ -58,17 +58,17 @@ export default {
     },
 
     generatePayload () {
-      let code = this.sanitizeCode(this.codeComputed);
+      let code = this.sanitizeCode(this.code);
       if (this.alternateArt) {
         code +='*';
       }
 
       return {
         code,
+        qtyNeeded:  this.qtyNeeded,
+        deck: this.deck,
         name: this.name.value,
-        deck: this.deck.value,
         date: this.toTimestamp(this.date.value),
-        qtyNeeded:  this.qtyNeeded.value,
         qtyAcquired: this.qty.value,
         amtSpent: this.totalCost.value,
       };

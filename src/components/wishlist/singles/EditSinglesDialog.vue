@@ -70,6 +70,7 @@ export default {
         this.alternateArt = false;
       }
 
+      this.items = [];
       updatePair(this.date, date);
       updatePair(this.deck, v?.deck);
       updatePair(this.name, v?.name ?? null);
@@ -77,6 +78,7 @@ export default {
       updatePair(this.qty, v?.qty ?? 0);
       updatePair(this.totalCost, v?.totalCost ?? 0);
       await this.getDeckList();
+      await this.getReceipts(v.code);
     },
 
     async getDeckList () {
@@ -96,21 +98,22 @@ export default {
       }
     },
 
-    async getPurchaseHistory () {
-      this.history = await getCardHistory(this.modelValue.code).then(result => result.sort((a,b) => b.date - a.date));
+    async getReceipts (id) {
+      this.history = await getCardHistory(id).then(result => result.sort((a,b) => b.date - a.date));
     },
 
     // Update each changed row entry
-    async updatePurchaseHistory () {
+    async updateReceipts () {
       const promises = Object.entries(this.changedHistory).map(([id, payload]) => {
         updateHistory(id, payload);
       });
       await Promise.all(promises);
     },
 
-    async remove (id) {
+    async removeReceipt (id) {
       await removeHistory(id);
-      await this.getPurchaseHistory();
+      await this.getReceipts(this.modelValue.code);
+      this.$emit('refresh');
     },
 
     generatePayload () {
@@ -138,7 +141,7 @@ export default {
     async submit () {
       this.loadingFlags.loading = true;
       await Promise.all([
-        this.updatePurchaseHistory(),
+        this.updateReceipts(),
         this.newDeck && this.addDeck({ name: this.deck.value }),
       ]);
 
@@ -147,6 +150,7 @@ export default {
         this.$emit('add', payload);
       } else {
         this.$emit('update', payload);
+        this.$emit('refresh');
       }
     },
   },
@@ -254,7 +258,7 @@ export default {
         <purchase-history
           v-model="changedHistory"
           :history="history"
-          @remove="remove($event)"
+          @remove="removeReceipt($event)"
         />
       </v-col>
     </v-row>
