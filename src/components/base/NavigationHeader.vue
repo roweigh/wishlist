@@ -2,6 +2,9 @@
 import routes from '@/router/routes';
 
 export default {
+  props: {
+    profile: { type: null, required: true },
+  },
   data () {
     return {
       drawer: true,
@@ -10,6 +13,12 @@ export default {
     };
   },
   computed: {
+    photoURL () {
+      return this.profile?.photoURL;
+    },
+    uid () {
+      return this.profile?.uid;
+    },
     menuItems() {
       return routes.filter(r => r.component);
     },
@@ -46,7 +55,7 @@ export default {
       <v-list>
         <v-list-item
           prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
-          title="John Leider"
+          :title="uid"
         >
           <template #prepend>
             <v-avatar
@@ -62,6 +71,9 @@ export default {
               @click.stop="rail = !rail"
             />
           </template>
+        </v-list-item>
+        <v-list-item @click="$emit('logout')">
+          {{ uid }}
         </v-list-item>
       </v-list>
     </template>

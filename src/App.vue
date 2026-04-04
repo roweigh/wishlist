@@ -1,32 +1,33 @@
 <script>
-import { auth, googleProvider } from './main';
-import { signInWithPopup } from 'firebase/auth';
+import { useAuthStore } from '@/stores/auth';
 
 import AlertPopup from '@/components/base/AlertPopup.vue';
 import NavigationHeader from '@/components/base/NavigationHeader.vue';
+import LoginDialog from '@/components/base/LoginDialog.vue';
 
 export default {
   components: {
     AlertPopup,
+    LoginDialog,
     NavigationHeader,
+  },
+  computed: {
+    profile () {
+      return useAuthStore()?.profile;
+    },
+    showLogin () {
+      return !this.profile?.uid;
+    },
+  },
+  async mounted () {
+    await useAuthStore().initializeAuth();
   },
   methods: {
     async loginWithGoogle () {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-
-        // This gives you the Google Access Token if you need to call Google APIs
-        // const credential = GoogleAuthProvider.credentialFromResult(result);
-        // const token = credential.accessToken;
-
-        const user = result.user;
-        console.log('Successfully logged in:', user);
-
-        // If you're moving to SQL later, this user.uid is
-        // what you'll store in your SQL tables.
-      } catch (error) {
-        console.error('Error during Google Login:', error.message);
-      }
+      await useAuthStore().login();
+    },
+    async logout () {
+      await useAuthStore().logout();
     },
   },
 };
@@ -36,22 +37,26 @@ export default {
   <v-app>
     <alert-popup />
     <v-layout>
-      <navigation-header />
+      <navigation-header
+        :profile="profile"
+        @logout="logout()"
+      />
       <v-main
         class="bg-grey-darken-3"
         style="max-height: 100vh; overflow: auto"
       >
-        <!-- <v-btn @click="loginWithGoogle">
-          Sign In wiwth google
-        </v-btn> -->
-        <router-view />
+        <router-view :profile="profile" />
       </v-main>
+      <login-dialog
+        :model-value="showLogin"
+        @login="loginWithGoogle()"
+      />
     </v-layout>
   </v-app>
 </template>
 
 <style>
-html  {
+html {
   overflow: hidden
 }
 </style>

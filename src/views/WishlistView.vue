@@ -11,6 +11,9 @@ export default {
     EntriesTable,
     OtherPurchasesTable,
   },
+  props: {
+    profile: { type: null, required: true },
+  },
   data () {
     return {
       tab: 'singles',

@@ -1,4 +1,5 @@
-import { db } from '../main';
+import { useAuthStore } from '@/stores/auth';
+import { db } from '@/firebase';
 import {
   collection,
   query,
@@ -12,6 +13,17 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 
+// Helper to get the user-specific collection path
+const getColRef = (colName) => {
+  const authStore = useAuthStore();
+  const uid = authStore.profile?.uid; // Use the property name from your store
+
+  if (!uid) throw new Error('User must be logged in to access data.');
+
+  // This creates a path: users/12345/singles
+  return collection(db, 'users', uid, colName);
+};
+
 export async function get(colName, id = undefined) {
   const transformData = (snapshot) => {
     return snapshot.docs.map(doc => ({
@@ -20,7 +32,7 @@ export async function get(colName, id = undefined) {
     }));
   };
 
-  const col = collection(db, colName);
+  const col = getColRef(colName);
   if (id) { // Fetch by id
     const q = query(col, where('code', '==', id));
     return await getDocs(q).then((snapshot) => transformData(snapshot));
@@ -29,16 +41,15 @@ export async function get(colName, id = undefined) {
   }
 }
 
-export async function add(col, payload) {
-  await addDoc(collection(db, col), payload);
+export async function add(colName, payload) {
+  const col = getColRef(colName);
+  await addDoc(col, payload);
 }
-export async function batchAdd(col, arr) {
+export async function batchAdd(colName, arr) {
   const batch = writeBatch(db);
 
   arr.forEach((item) => {
-    // Everything goes into one top-level collection
-    console.log(item);
-    const historyColRef = collection(db, `${col}-history`);
+    const historyColRef = getColRef(`${colName}-history`);
     const newDocRef = doc(historyColRef);
 
     batch.set(newDocRef, {
@@ -54,11 +65,11 @@ export async function batchAdd(col, arr) {
 
   await batch.commit();
 }
-export async function batchAddEntry(col, arr) {
+export async function batchAddEntry(colName, arr) {
   const batch = writeBatch(db);
   arr.forEach((item) => {
     // Everything goes into one top-level collection
-    const historyColRef = collection(db, `${col}-history`);
+    const historyColRef = getColRef(`${colName}-history`);
     const newDocRef = doc(historyColRef);
 
     batch.set(newDocRef, {
@@ -71,13 +82,17 @@ export async function batchAddEntry(col, arr) {
 }
 
 export async function update(col, id, payload) {
-  await updateDoc(doc(db, col, id), payload);
-}
+  const authStore = useAuthStore();
+  const uid = authStore.profile?.uid;
 
+  // Path: users/UID/collection/docID
+  const docRef = doc(db, 'users', uid, col, id);
+  await updateDoc(docRef, payload);
+}
 export async function del(colName, id, field = undefined) {
   if (field) {
-    const colRef = collection(db, colName);
-    const q = query(colRef, where(field, '==', id));
+    const col = getColRef(colName);
+    const q = query(col, where(field, '==', id));
     const snapshot = await getDocs(q);
     const batch = writeBatch(db);
     snapshot.docs.forEach(d => { batch.delete(d.ref); });
