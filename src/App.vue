@@ -11,23 +11,29 @@ export default {
     LoginDialog,
     NavigationHeader,
   },
+  data () {
+    return {
+      loginDialog: false,
+    };
+  },
   computed: {
     profile () {
       return useAuthStore()?.profile;
     },
-    showLogin () {
-      return !this.profile?.uid;
+    initializing () {
+      return useAuthStore()?.initializing;
     },
   },
   async mounted () {
     await useAuthStore().initializeAuth();
+    if (!this.profile) {
+      this.loginDialog = true;
+    }
   },
   methods: {
-    async loginWithGoogle () {
-      await useAuthStore().login();
-    },
     async logout () {
       await useAuthStore().logout();
+      this.loginDialog = true;
     },
   },
 };
@@ -36,21 +42,39 @@ export default {
 <template>
   <v-app>
     <alert-popup />
+
+    <login-dialog v-model="loginDialog" />
+
     <v-layout>
       <navigation-header
         :profile="profile"
         @logout="logout()"
       />
+
       <v-main
         class="bg-grey-darken-3"
-        style="max-height: 100vh; overflow: auto"
+        style="max-height: 100vh; overflow: auto; display: flex"
       >
-        <router-view :profile="profile" />
+        <flex-col
+          v-if="initializing"
+          class="grow"
+        >
+          <v-progress-circular
+            color="teal-accent-3"
+            class="ma-auto"
+            size="300"
+            width="6"
+            indeterminate
+          >
+            Loading...
+          </v-progress-circular>
+        </flex-col>
+
+        <router-view
+          v-else
+          :profile="profile"
+        />
       </v-main>
-      <login-dialog
-        :model-value="showLogin"
-        @login="loginWithGoogle()"
-      />
     </v-layout>
   </v-app>
 </template>

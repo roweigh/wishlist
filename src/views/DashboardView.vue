@@ -1,5 +1,5 @@
 <script>
-import { data } from '../api/test-api';
+// import { data } from '../api/test-api';
 import {
   getCards,
   getEntries,
