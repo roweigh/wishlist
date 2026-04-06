@@ -1,14 +1,7 @@
 <script>
-// import { data } from '../api/test-api';
-import {
-  getCards,
-  getEntries,
-  getSales,
-  getItems,
-} from '@/api/purchases';
-
-import DonutGraph from '../components/dashboard/DonutGraph.vue';
-import LineGraph from '../components/dashboard/LineGraph.vue';
+import { getUsers, getUserPurchase } from '@/api/auth';
+import DonutGraph from '@/components/dashboard/DonutGraph.vue';
+import LineGraph from '@/components/dashboard/LineGraph.vue';
 
 export default {
   components: {
@@ -20,109 +13,115 @@ export default {
       user: null,
 
       donutData: [1],
-      data: [],
+      data: [
+        {
+          value: 'roweigh',
+          name: 'Roweigh',
+          color: '#663399',
+          singles: [],
+          others: [],
+          entries: [],
+        },
+      ],
       selected: [
-        'accessories',
         'singles',
-        'boosters',
-        'tournaments',
+        'others',
+        'entries',
       ],
     };
   },
   watch: {
-    user (v) {
-      const found = this.data.find(el => el.name === v);
-      if (found) {
-        const { singles, accessories, boosters, tournaments } = found;
+    // user (v) {
+    //   const found = this.data.find(el => el.name === v);
+    //   if (found) {
+    //     const { singles, accessories, boosters, entries } = found;
 
-        this.donutData = [{
-          data: [
-            {
-              x: 'Singles',
-              y: singles[singles.length - 1][1],
-            },
-            {
-              x: 'Accessories',
-              y: accessories[accessories.length - 1][1],
-            },
-            {
-              x: 'Boosters',
-              y: boosters[boosters.length - 1][1],
-            },
-            {
-              x: 'Tournament Entry',
-              y: tournaments[tournaments.length - 1][1],
-            },
-          ],
-        }];
-      } else this.donutData = [1];
-    },
+    //     this.donutData = [{
+    //       data: [
+    //         {
+    //           x: 'Singles',
+    //           y: singles[singles.length - 1][1],
+    //         },
+    //         {
+    //           x: 'Accessories',
+    //           y: accessories[accessories.length - 1][1],
+    //         },
+    //         {
+    //           x: 'Boosters',
+    //           y: boosters[boosters.length - 1][1],
+    //         },
+    //         {
+    //           x: 'Tournament Entry',
+    //           y: entries[entries.length - 1][1],
+    //         },
+    //       ],
+    //     }];
+    //   } else this.donutData = [1];
+    // },
   },
   async mounted () {
-    const result = await Promise.all([
-      getCards(),
-      getSales(),
-      getEntries(),
-      getItems(),
-    ]).then((responses) => {
-      console.log(responses[1]);
-      const totalSpent= (v) => {
-        return v.reduce((acc, item) => acc + item.amtSpent, 0);
-      };
-      this.donutData = [
-        totalSpent([...responses[0], ...responses[1]]),
-        totalSpent(responses[2]),
-        totalSpent(responses[3]),
-      ];
-      return [
-        ...responses[0],
-        ...responses[1],
-        ...responses[2],
-        ...responses[3],
-      ];
+    const users = await getUsers();
+    const promises = [];
+    users.forEach((user) => {
+      promises.push(this.getUserPurchases(user));
     });
 
-    const sortedAscending = result.sort((a, b) => {
-      const aDate = new Date(a?.date?.seconds * 1000 + a?.date?.nanoseconds / 1_000_000);
-      const bDate = new Date(b?.date?.seconds * 1000 + b?.date?.nanoseconds / 1_000_000);
-      return new Date(aDate) - new Date(bDate);
-    });
+    const chartData = await Promise.all(promises);
+    this.data = chartData;
+  },
+  methods: {
+    helper (arr) {
+      const grouped = arr.map((item) => {
+        return {
+          date: new Date(item?.date?.seconds * 1000 + item?.date?.nanoseconds / 1_000_000).toISOString(),
+          amtSpent: item.amtSpent,
+        };
+      }).reduce((acc, item) => {
+        // Normalize date to YYYY-MM-DD to strip the specific time
+        const dateKey = item.date.split('T')[0];
 
-    const rawData = sortedAscending.map((item) => {return {
-      date: new Date(item?.date?.seconds * 1000 + item?.date?.nanoseconds / 1_000_000).toISOString(),
-      amtSpent: item.amtSpent,
-    };});
+        if (!acc[dateKey]) {
+          acc[dateKey] = 0;
+        }
+        acc[dateKey] += item.amtSpent;
 
-    // console.log(rawData);
-    // 1. Group and Sum by Day
-    const grouped = rawData.reduce((acc, item) => {
-      // Normalize date to YYYY-MM-DD to strip the specific time
-      const dateKey = item.date.split('T')[0];
+        return acc;
+      }, {});
 
-      if (!acc[dateKey]) {
-        acc[dateKey] = 0;
-      }
-      acc[dateKey] += item.amtSpent;
+      return grouped;
+    },
 
-      return acc;
-    }, {});
+    async getUserPurchases(user) {
+      const id = user.id;
+      return await Promise.all([
+        getUserPurchase(id, 'singles-history'),
+        getUserPurchase(id, 'sales-history'),
+        getUserPurchase(id, 'tournament-history'),
+        getUserPurchase(id, 'others-history'),
+      ]).then((responses) => {
+        const singles = this.helper([...responses[0],  ...responses[1]]);
+        const entries = this.helper(responses[2]);
+        const others = this.helper(responses[3]);
+        const userResult = {
+          value: id,
+          name: user.name,
+          color: user.color,
+          singles,
+          entries,
+          others,
+        };
 
-    // 2. Convert to Array and Sort Chronologically
-    const sortedKeys = Object.keys(grouped).sort((a, b) => new Date(a) - new Date(b));
+        // Generate Donut Data
+        // const totalSpent= (v) => v.reduce((acc, item) => acc + item.amtSpent, 0);
+        // this.donutData = [
+        //   totalSpent([...responses[0], ...responses[1]]),
+        //   totalSpent(responses[2]),
+        //   totalSpent(responses[3]),
+        // ];
 
-    // 3. Create Cumulative Total
-    let runningTotal = 0;
-    const chartData = sortedKeys.map(dateStr => {
-      runningTotal += grouped[dateStr];
-
-      return [
-        new Date(dateStr).getTime(), // Timestamp for the start of that day
-        Number(runningTotal.toFixed(2)),
-      ];
-    });
-    console.log(this.donutData);
-    this.data = data;
-    this.data[0].singles = chartData;
+        return userResult;
+      });
+    },
   },
 };
 </script>

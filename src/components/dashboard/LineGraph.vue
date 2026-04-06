@@ -67,7 +67,29 @@ export default {
   },
   methods: {
     transformData(user) {
-      return user.singles.map(([x, y]) => { return { x, y }; });
+      const result = this.selected.reduce((acc, filter) => {
+        // Check if the property exists on the user object to avoid errors
+        if (user[filter]) {
+          return { ...acc, ...user[filter] };
+        }
+        return acc;
+      }, {});
+
+      const sortedDates = Object.keys(result).sort((a, b) => new Date(a) - new Date(b));
+      let runningTotal = 0;
+
+      // 2. Map through sorted dates to build the cumulative total
+      const chartData = sortedDates.map(dateStr => {
+        const value = result[dateStr];
+        runningTotal += value;
+
+        return [
+          new Date(dateStr).getTime(),     // X-axis: Timestamp
+          Number(runningTotal.toFixed(2)), // Y-axis: Cumulative total (cleaned up)
+        ];
+      });
+
+      return chartData;
     },
   },
 };

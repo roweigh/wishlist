@@ -89,6 +89,7 @@ export async function update(col, id, payload) {
   const docRef = doc(db, 'users', uid, col, id);
   await updateDoc(docRef, payload);
 }
+
 export async function del(colName, id, field = undefined) {
   if (field) {
     const col = getColRef(colName);
