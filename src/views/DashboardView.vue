@@ -48,16 +48,19 @@ export default {
         getUserPurchase(id, 'sales-history'),
         getUserPurchase(id, 'tournament-history'),
         getUserPurchase(id, 'others-history'),
-      ]).then((responses) => {
-        return {
-          value: id,
-          name: user.name,
-          color: user.color,
-          singles: [...responses[0],  ...responses[1]],
-          entries: responses[2],
-          others: responses[3],
-        };
-      });
+      ]).then(([
+        bought,
+        sold,
+        entries,
+        others,
+      ]) => ({
+        value: id,
+        name: user.name,
+        color: user.color,
+        singles: [...bought, ...sold],
+        entries,
+        others,
+      }));
     },
   },
 };
