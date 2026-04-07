@@ -66,30 +66,57 @@ export default {
     },
   },
   methods: {
+  // 1. Improved Helper: Single-pass reduction
+    getGroupedSpending(arr) {
+      if (!arr) return {};
+
+      return arr.reduce((acc, item) => {
+      // Normalize to YYYY-MM-DD
+        const date = new Date(item.date.seconds * 1000);
+        const dateKey = date.toISOString().split('T')[0];
+
+        acc[dateKey] = (acc[dateKey] || 0) + item.amtSpent;
+        return acc;
+      }, {});
+    },
+
     transformData(user) {
-      const result = this.selected.reduce((acc, filter) => {
-        // Check if the property exists on the user object to avoid errors
+    // 2. Aggregate data without mutating the original user object
+    // This allows us to combine filters (e.g. 'singles' and 'entries') into one object
+      const aggregated = this.selected.reduce((acc, filter) => {
         if (user[filter]) {
-          return { ...acc, ...user[filter] };
+          const grouped = this.getGroupedSpending(user[filter]);
+
+          // Merge this category's dates into the master list
+          Object.entries(grouped).forEach(([date, amount]) => {
+            acc[date] = (acc[date] || 0) + amount;
+          });
         }
         return acc;
       }, {});
 
-      const sortedDates = Object.keys(result).sort((a, b) => new Date(a) - new Date(b));
+      // 3. Sort and calculate cumulative totals
+      const sortedDates = Object.keys(aggregated).sort();
       let runningTotal = 0;
 
-      // 2. Map through sorted dates to build the cumulative total
       const chartData = sortedDates.map(dateStr => {
-        const value = result[dateStr];
-        runningTotal += value;
-
+        runningTotal += aggregated[dateStr];
         return [
-          new Date(dateStr).getTime(),     // X-axis: Timestamp
-          Number(runningTotal.toFixed(2)), // Y-axis: Cumulative total (cleaned up)
+          new Date(dateStr).getTime(),
+          Number(runningTotal.toFixed(2)),
         ];
       });
 
-      return chartData;
+      if (chartData.length === 0) return [];
+
+      // 4. Return Final Data with boundary points
+      const lastTotal = chartData[chartData.length - 1][1];
+
+      return [
+        [chartData[0][0] - 86400000, 0], // One day before first entry
+        ...chartData,
+        [Date.now(), lastTotal],         // Current time with last total
+      ];
     },
   },
 };

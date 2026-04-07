@@ -11,18 +11,8 @@ export default {
   data () {
     return {
       user: null,
-
-      donutData: [1],
-      data: [
-        {
-          value: 'roweigh',
-          name: 'Roweigh',
-          color: '#663399',
-          singles: [],
-          others: [],
-          entries: [],
-        },
-      ],
+      donutData: [0],
+      data: [],
       selected: [
         'singles',
         'others',
@@ -32,31 +22,13 @@ export default {
   },
   watch: {
     // user (v) {
-    //   const found = this.data.find(el => el.name === v);
-    //   if (found) {
-    //     const { singles, accessories, boosters, entries } = found;
-
-    //     this.donutData = [{
-    //       data: [
-    //         {
-    //           x: 'Singles',
-    //           y: singles[singles.length - 1][1],
-    //         },
-    //         {
-    //           x: 'Accessories',
-    //           y: accessories[accessories.length - 1][1],
-    //         },
-    //         {
-    //           x: 'Boosters',
-    //           y: boosters[boosters.length - 1][1],
-    //         },
-    //         {
-    //           x: 'Tournament Entry',
-    //           y: entries[entries.length - 1][1],
-    //         },
-    //       ],
-    //     }];
-    //   } else this.donutData = [1];
+    // Generate Donut Data
+    // const totalSpent= (v) => v.reduce((acc, item) => acc + item.amtSpent, 0);
+    // this.donutData = [
+    //   totalSpent([...responses[0], ...responses[1]]),
+    //   totalSpent(responses[2]),
+    //   totalSpent(responses[3]),
+    // ];
     // },
   },
   async mounted () {
@@ -66,31 +38,9 @@ export default {
       promises.push(this.getUserPurchases(user));
     });
 
-    const chartData = await Promise.all(promises);
-    this.data = chartData;
+    this.data = await Promise.all(promises);
   },
   methods: {
-    helper (arr) {
-      const grouped = arr.map((item) => {
-        return {
-          date: new Date(item?.date?.seconds * 1000 + item?.date?.nanoseconds / 1_000_000).toISOString(),
-          amtSpent: item.amtSpent,
-        };
-      }).reduce((acc, item) => {
-        // Normalize date to YYYY-MM-DD to strip the specific time
-        const dateKey = item.date.split('T')[0];
-
-        if (!acc[dateKey]) {
-          acc[dateKey] = 0;
-        }
-        acc[dateKey] += item.amtSpent;
-
-        return acc;
-      }, {});
-
-      return grouped;
-    },
-
     async getUserPurchases(user) {
       const id = user.id;
       return await Promise.all([
@@ -99,27 +49,14 @@ export default {
         getUserPurchase(id, 'tournament-history'),
         getUserPurchase(id, 'others-history'),
       ]).then((responses) => {
-        const singles = this.helper([...responses[0],  ...responses[1]]);
-        const entries = this.helper(responses[2]);
-        const others = this.helper(responses[3]);
-        const userResult = {
+        return {
           value: id,
           name: user.name,
           color: user.color,
-          singles,
-          entries,
-          others,
+          singles: [...responses[0],  ...responses[1]],
+          entries: responses[2],
+          others: responses[3],
         };
-
-        // Generate Donut Data
-        // const totalSpent= (v) => v.reduce((acc, item) => acc + item.amtSpent, 0);
-        // this.donutData = [
-        //   totalSpent([...responses[0], ...responses[1]]),
-        //   totalSpent(responses[2]),
-        //   totalSpent(responses[3]),
-        // ];
-
-        return userResult;
       });
     },
   },
@@ -127,18 +64,16 @@ export default {
 </script>
 
 <template>
-  <v-col>
-    <div class="d-flex flex-row ma-auto">
-      <line-graph
-        v-model:user="user"
-        :selected="selected"
-        :data="data"
-      />
-      <donut-graph
-        :key="donutData"
-        :user="user"
-        :data="donutData"
-      />
-    </div>
-  </v-col>
+  <div class="d-flex flex-row ma-auto">
+    <line-graph
+      v-model:user="user"
+      :selected="selected"
+      :data="data"
+    />
+    <donut-graph
+      :key="donutData"
+      :user="user"
+      :data="donutData"
+    />
+  </div>
 </template>

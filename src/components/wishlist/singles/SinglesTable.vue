@@ -64,7 +64,7 @@ export default {
           key: 'amtSpent',
           title: 'Amount Spent',
           align: 'end',
-          width: '8%',
+          width: '10%',
         },
         // {
         //   key: 'notes',

@@ -52,7 +52,10 @@ export default {
       </v-tabs>
     </flex-row>
 
-    <v-card class="mt-5">
+    <v-card
+      class="mt-5 grow"
+      style="overflow: hidden"
+    >
       <v-tabs-window v-model="tab">
         <singles-table value="singles" />
         <sales-table value="sales" />
