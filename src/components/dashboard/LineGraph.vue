@@ -4,6 +4,7 @@ export default {
     data: { type: null, required: true },
     selected: { type: null, required: true },
   },
+  emits: ['update:user'],
   computed: {
     chartOptions () {
       const vm = this;
@@ -30,7 +31,7 @@ export default {
                   if (i === seriesIndex) chartContext.showSeries(s.name);
                   else chartContext.hideSeries(s.name);
                 });
-                vm.$emit('update:user', series[seriesIndex].name);
+                vm.$emit('update:user', seriesIndex);
               }
 
               return false;

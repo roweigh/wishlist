@@ -11,7 +11,7 @@ export default {
   data () {
     return {
       user: null,
-      donutData: [0],
+      donutData: [],
       data: [],
       selected: [
         'singles',
@@ -21,15 +21,18 @@ export default {
     };
   },
   watch: {
-    // user (v) {
-    // Generate Donut Data
-    // const totalSpent= (v) => v.reduce((acc, item) => acc + item.amtSpent, 0);
-    // this.donutData = [
-    //   totalSpent([...responses[0], ...responses[1]]),
-    //   totalSpent(responses[2]),
-    //   totalSpent(responses[3]),
-    // ];
-    // },
+    user (v) {
+      const totalSpent= (v) => v.reduce((acc, item) => acc + item.amtSpent, 0);
+      if (v !== null) {
+        this.donutData = [
+          totalSpent(this.data[v].singles),
+          totalSpent(this.data[v].entries),
+          totalSpent(this.data[v].others),
+        ];
+      } else {
+        this.donutData = [];
+      }
+    },
   },
   async mounted () {
     const users = await getUsers();
@@ -53,14 +56,16 @@ export default {
         sold,
         entries,
         others,
-      ]) => ({
-        value: id,
-        name: user.name,
-        color: user.color,
-        singles: [...bought, ...sold],
-        entries,
-        others,
-      }));
+      ]) => {
+        return ({
+          value: id,
+          name: user.name,
+          color: user.color,
+          singles: [...bought, ...sold],
+          entries,
+          others,
+        });
+      });
     },
   },
 };
