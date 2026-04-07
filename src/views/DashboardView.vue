@@ -11,7 +11,7 @@ export default {
   data () {
     return {
       user: null,
-      donutData: [],
+      donutData: [1],
       data: [],
       selected: [
         'singles',
@@ -30,7 +30,7 @@ export default {
           totalSpent(this.data[v].others),
         ];
       } else {
-        this.donutData = [];
+        this.donutData = [1];
       }
     },
   },

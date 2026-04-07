@@ -8,4 +8,4 @@ const colorMap = {
 };
 
 export const getColorOptions = () => Object.values(colorMap);
-export const getColor = (color) => colorMap?.[color].hex ?? '#757575';
+export const getColor = (color) => colorMap?.[color]?.hex ?? '#757575';

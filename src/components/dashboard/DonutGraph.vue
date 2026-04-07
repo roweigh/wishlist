@@ -56,13 +56,13 @@ export default {
         },
       };
 
-      // if (!this.user) {
-      //   options.colors = ['#e0e0e0'];
-      //   options.plotOptions.pie.donut.labels.value.show = false;
-      //   options.plotOptions.pie.donut.labels.total.label = 'Pick a degen';
-      //   options.plotOptions.pie.donut.labels.total.color = '#999';
-      //   options.legend.show = false;
-      // }
+      if (this.user === null) {
+        options.colors = ['#e0e0e0'];
+        options.plotOptions.pie.donut.labels.value.show = false;
+        options.plotOptions.pie.donut.labels.total.label = 'Pick a degen';
+        options.plotOptions.pie.donut.labels.total.color = '#999';
+        options.legend.show = false;
+      }
 
       return options;
     },
