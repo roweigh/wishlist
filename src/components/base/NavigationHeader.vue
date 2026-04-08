@@ -2,14 +2,26 @@
 import routes from '@/router/routes';
 
 export default {
+  props: {
+    profile: { type: null, required: true },
+  },
+  emits: [
+    'logout',
+  ],
   data () {
     return {
       drawer: true,
-      rail: true,
+      rail: false,
       wider: false,
     };
   },
   computed: {
+    photoURL () {
+      return this.profile?.photoURL;
+    },
+    uid () {
+      return this.profile?.uid;
+    },
     menuItems() {
       return routes.filter(r => r.component);
     },
@@ -26,14 +38,11 @@ export default {
     permanent
     @click="rail = false"
   >
-    <v-list
-      density="compact"
-      nav
-    >
+    <div style="height: 56px" />
+    <v-list>
       <v-list-item
         v-for="route in menuItems"
         :key="route.name"
-        :class="{ 'pl-5': wider }"
         :prepend-icon="route?.icon"
         :title="route?.meta?.title"
         :value="route?.value"
@@ -46,14 +55,8 @@ export default {
       <v-list>
         <v-list-item
           prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
-          title="John Leider"
+          :title="profile?.name"
         >
-          <template #prepend>
-            <v-avatar
-              :class="{ 'mx-1': wider }"
-              :size="(wider && rail) ? 40 : undefined"
-            />
-          </template>
           <template #append>
             <v-btn
               :inert="rail"
@@ -63,6 +66,12 @@ export default {
             />
           </template>
         </v-list-item>
+
+        <v-list-item
+          title="Logout"
+          prepend-icon="mdi-logout"
+          @click="$emit('logout')"
+        />
       </v-list>
     </template>
   </v-navigation-drawer>

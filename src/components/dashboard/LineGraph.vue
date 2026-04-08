@@ -4,6 +4,7 @@ export default {
     data: { type: null, required: true },
     selected: { type: null, required: true },
   },
+  emits: ['update:user'],
   computed: {
     chartOptions () {
       const vm = this;
@@ -30,7 +31,7 @@ export default {
                   if (i === seriesIndex) chartContext.showSeries(s.name);
                   else chartContext.hideSeries(s.name);
                 });
-                vm.$emit('update:user', series[seriesIndex].name);
+                vm.$emit('update:user', seriesIndex);
               }
 
               return false;
@@ -56,18 +57,69 @@ export default {
       };
     },
     series () {
-      return this.data.map(user => {
-        return {
-          name: user.name,
-          color: user.color,
-          data: this.transformData(user),
-        };
-      });
+      return this.data.map(user => ({
+        name: user.name,
+        color: user.color,
+        data: this.generateChartData(user),
+      }));
     },
   },
   methods: {
-    transformData(user) {
-      return user.singles.map(([x, y]) => { return { x, y }; });
+    // Group all the array purchases into one key/value pair
+    groupByDay(arr) {
+      if (!arr) return {};
+
+      return arr.reduce((acc, item) => {
+        const dateKey = new Date(item.date.seconds * 1000)
+          .toISOString()
+          .split('T')[0];
+
+        if (acc[dateKey]) {
+          acc[dateKey] += item.amtSpent;
+        } else {
+          acc[dateKey] = item.amtSpent;
+        }
+
+        return acc;
+      }, {});
+    },
+
+    // Generate spendings graph data based on selected filters
+    generateChartData(user) {
+      // Create one big data array for the line graph, combining all the individual categories
+      const transformedData = this.selected.reduce((acc, filter) => {
+        if (user[filter]) {
+          const grouped = this.groupByDay(user[filter]);
+
+          Object.entries(grouped).forEach(([date, amount]) => {
+            if (acc[date]) {
+              acc[date] += amount;
+            } else {
+              acc[date] = amount;
+            }
+          });
+        }
+        return acc;
+      }, {});
+      const sorted = Object.keys(transformedData).sort();
+
+      let runningTotal = 0;
+      const chartData = sorted.map(date => {
+        runningTotal += transformedData[date]; // Cumulative add spending at each date point
+        return [
+          new Date(date).getTime(),
+          Number(runningTotal.toFixed(2)),
+        ];
+      });
+      if (chartData.length === 0) return [];
+
+      // Add start and end boundaries to graph so they don't just 'float'
+      const totalSpending = chartData[chartData.length - 1][1];
+      return [
+        [chartData[0][0] - 86400000, 0], // Day before first entry
+        ...chartData,
+        [Date.now(), totalSpending], // Current date with last total
+      ];
     },
   },
 };

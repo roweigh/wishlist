@@ -1,32 +1,36 @@
 <script>
-import { auth, googleProvider } from './main';
-import { signInWithPopup } from 'firebase/auth';
+import { useAuthStore } from '@/stores/auth';
 
 import AlertPopup from '@/components/base/AlertPopup.vue';
 import NavigationHeader from '@/components/base/NavigationHeader.vue';
+import LoginDialog from '@/components/base/LoginDialog.vue';
 
 export default {
   components: {
     AlertPopup,
+    LoginDialog,
     NavigationHeader,
   },
+  data () {
+    return {
+      loginDialog: false,
+    };
+  },
+  computed: {
+    profile () {
+      return useAuthStore()?.profile;
+    },
+    initializing () {
+      return useAuthStore()?.initializing;
+    },
+  },
+  async mounted () {
+    await useAuthStore().initializeAuth();
+  },
   methods: {
-    async loginWithGoogle () {
-      try {
-        const result = await signInWithPopup(auth, googleProvider);
-
-        // This gives you the Google Access Token if you need to call Google APIs
-        // const credential = GoogleAuthProvider.credentialFromResult(result);
-        // const token = credential.accessToken;
-
-        const user = result.user;
-        console.log('Successfully logged in:', user);
-
-        // If you're moving to SQL later, this user.uid is
-        // what you'll store in your SQL tables.
-      } catch (error) {
-        console.error('Error during Google Login:', error.message);
-      }
+    async logout () {
+      await useAuthStore().logout();
+      this.loginDialog = true;
     },
   },
 };
@@ -35,23 +39,45 @@ export default {
 <template>
   <v-app>
     <alert-popup />
+
+    <login-dialog v-model="profile" />
+
     <v-layout>
-      <navigation-header />
+      <navigation-header
+        :profile="profile"
+        @logout="logout()"
+      />
+
       <v-main
         class="bg-grey-darken-3"
-        style="max-height: 100vh; overflow: auto"
+        style="max-height: 100vh; overflow: auto; display: flex"
       >
-        <!-- <v-btn @click="loginWithGoogle">
-          Sign In wiwth google
-        </v-btn> -->
-        <router-view />
+        <flex-col
+          v-if="initializing"
+          class="grow"
+        >
+          <v-progress-circular
+            color="teal-accent-3"
+            class="ma-auto"
+            size="300"
+            width="6"
+            indeterminate
+          >
+            Loading...
+          </v-progress-circular>
+        </flex-col>
+
+        <router-view
+          v-else
+          :profile="profile"
+        />
       </v-main>
     </v-layout>
   </v-app>
 </template>
 
 <style>
-html  {
+html {
   overflow: hidden
 }
 </style>

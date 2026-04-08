@@ -4,6 +4,8 @@ export default {
     modelValue: { type: null, required: true },
     initializing: { type: Boolean, default: false },
     loading: { type: Boolean, default: false },
+    closable: { type: Boolean, default: true },
+    actions: { type: Boolean, default: true },
     title: { type: String, default: '' },
     width: { type: String, default: '600px' },
   },
@@ -26,6 +28,7 @@ export default {
         <v-card-title class="d-flex">
           <span>{{ title }}</span>
           <v-btn
+            v-if="closable"
             icon="mdi-close"
             class="ml-auto"
             variant="text"
@@ -52,6 +55,7 @@ export default {
 
       <!-- Confirm Action -->
       <v-btn
+        v-if="actions"
         :disabled="loading"
         text="Save"
         color="success"

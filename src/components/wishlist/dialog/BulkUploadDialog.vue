@@ -73,6 +73,26 @@ export default {
 
       reader.readAsText(file);
     },
+
+    async getPrompt(){
+      try {
+        const regex = /^[A-Z]+(\d{2})?-\d{3}$/;
+        const text = `
+          I will send some card purchase data that I want converted to CSV. 
+          The headers are ${this.csvHeaders}. 
+          Dates must be in ISO 8601 dateTime format.
+          Anything that matches the regex ${regex} is the code, add a '*' to the end if the card is an alternate art
+          Unless specified otherwise, the qtyNeeded and qtyAcquired can be the same value.
+          Each cell value needs to be wrapped in double quotes except for the headers
+          Give the output in text for me to copy.
+          `;
+        await navigator.clipboard.writeText(text);
+
+        console.log('Text copied to clipboard successfully!');
+      } catch (err) {
+        console.error('Failed to copy: ', err);
+      }
+    },
   },
 };
 </script>
@@ -81,6 +101,7 @@ export default {
   <base-dialog
     :model-value="modelValue"
     title="Bulk Upload"
+    width="40vw"
     @update:model-value="$emit('update:model-value', $event)"
     @submit="uploadBulk()"
   >
@@ -108,30 +129,31 @@ export default {
       </v-tabs-window-item>
 
       <v-tabs-window-item value="csv">
+        <v-alert
+          color="info"
+          variant="tonal"
+          class="text-pre-line ma-3"
+        >
+          Either write the CSV yourself if you are a clanker or get one to do it for you. <br>
+          Make sure the date is in ISO 8601 format. <br>
+          <br>
+          If you're going the clanker route, here's a prompt that worked for me:
+          <v-btn
+            icon="mdi-content-copy"
+            density="compact"
+            variant="text"
+            @click="getPrompt()"
+          />
+        </v-alert>
         <v-textarea
           v-model="csvInput"
-          class="code-input ma-3"
+          class="code-input mx-3"
           variant="outlined"
-          rows="20"
-          max-rows="20"
+          rows="15"
+          max-rows="15"
           auto-grow
           hide-details
-        >
-          <template #prepend-inner>
-            <hover-icon
-              icon="mdi-information-outline"
-              class="mr-1"
-            >
-              <template #tooltip-text>
-                <flex-col style="max-width: 400px">
-                  <span>Either write the CSV yourself if you are a clanker or get one to do it for you.</span>
-                  <span>If you're not a clanker: just copy the contents to AI as well as whatever card purchase information you have and tell it to format it as a CSV with what you gave it as the headers and put the output here. I'm sure it'll figure it out</span>
-                  <span>Make sure to ask for date in ISO 8601 format though!</span>
-                </flex-col>
-              </template>
-            </hover-icon>
-          </template>
-        </v-textarea>
+        />
       </v-tabs-window-item>
     </v-tabs-window>
   </base-dialog>

@@ -23,6 +23,9 @@ export default {
       removeFn: removeSale,
     }),
   ],
+  props: {
+    value: { type: String, required: true },
+  },
   emits: [
     'load',
     'upload',
@@ -61,7 +64,7 @@ export default {
           key: 'amtSpent',
           title: 'Amount Sold',
           align: 'end',
-          width: '8%',
+          width: '10%',
         },
         {
           key: 'actions',

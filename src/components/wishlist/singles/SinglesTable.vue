@@ -33,7 +33,7 @@ export default {
   data () {
     return {
       sortBy: [{ key: 'deck', order: 'asc' }],
-      csvHeaders: 'code,name,qtyAcquired,qtyNeeded,amtSpent,date', // Explicitly defined as visible headers may not necessarily be all of the data
+      csvHeaders: 'code,name,qtyAcquired,qtyNeeded,deck,date,amtSpent', // Explicitly defined as visible headers may not necessarily be all of the data
       headers: [
         {
           key: 'code',
@@ -64,7 +64,7 @@ export default {
           key: 'amtSpent',
           title: 'Amount Spent',
           align: 'end',
-          width: '8%',
+          width: '10%',
         },
         // {
         //   key: 'notes',
