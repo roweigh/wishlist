@@ -3,28 +3,51 @@ import { useAuthStore } from '@/stores/auth';
 
 export default {
   props: {
-    modelValue: { type: Boolean, default: false },
+    modelValue: { type: null, default: false },
   },
   emits: [
     'login',
   ],
   data () {
     return {
+      show: false,
       loading: false,
       message: null,
+      name: null,
     };
   },
+  computed: {
+    whiteListed () { return useAuthStore().whiteListed;},
+    accountSetup () { return useAuthStore().accountSetup;},
+  },
+  watch: {
+    modelValue: {
+      deep: true,
+      immediate: true,
+      handler(v) {
+        if (!v?.name) {
+          this.loading = false;
+        }
+      },
+    },
+  },
   methods: {
+    async createUser () {
+      const uid = this.modelValue.uid;
+      const payload = { name: this.name };
+      await useAuthStore().createUser(uid, payload);
+    },
     async login () {
       this.loading = true;
-      const user = await useAuthStore().login();
-      if (user) {
-        this.$emit('update:model-value');
-      }
-      else {
-        this.loading = false;
-        this.message = true;
-      }
+      await useAuthStore().login();
+      this.loading = false;
+    },
+    async logout () {
+      await useAuthStore().logout();
+    },
+
+    setGuest () {
+      useAuthStore().setGuest();
     },
   },
 };
@@ -32,11 +55,12 @@ export default {
 
 <template>
   <base-dialog
-    :model-value="modelValue"
+    :model-value="!modelValue?.name"
     :closable="false"
-    :actions="false"
+    :actions="accountSetup"
     title="Login"
     width="400"
+    @submit="createUser()"
   >
     <flex-col
       class="py-5 ga-3 justify-center"
@@ -53,9 +77,16 @@ export default {
         />
       </flex-row>
 
+      <template v-else-if="accountSetup">
+        <paired-text-field
+          v-model="name"
+          label="Name"
+        />
+      </template>
+
       <template v-else>
         <v-alert
-          v-if="message"
+          v-if="!whiteListed"
           color="info"
           variant="tonal"
           class="text-pre-line"
@@ -77,7 +108,7 @@ export default {
         </v-btn>
         <v-btn
           variant="tonal"
-          @click="$emit('update:model-value', false)"
+          @click="setGuest()"
         >
           Continue as Guest
         </v-btn>

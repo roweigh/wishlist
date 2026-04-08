@@ -26,9 +26,6 @@ export default {
   },
   async mounted () {
     await useAuthStore().initializeAuth();
-    if (!this.profile) {
-      this.loginDialog = true;
-    }
   },
   methods: {
     async logout () {
@@ -43,7 +40,7 @@ export default {
   <v-app>
     <alert-popup />
 
-    <login-dialog v-model="loginDialog" />
+    <login-dialog v-model="profile" />
 
     <v-layout>
       <navigation-header

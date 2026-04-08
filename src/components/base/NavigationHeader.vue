@@ -55,7 +55,7 @@ export default {
       <v-list>
         <v-list-item
           prepend-avatar="https://randomuser.me/api/portraits/men/85.jpg"
-          :title="uid"
+          :title="profile?.name"
         >
           <template #append>
             <v-btn
