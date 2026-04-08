@@ -8,9 +8,13 @@ export default {
   computed: {
     chartOptions () {
       const options = {
-        chart: { type: 'donut' },
+        chart: {
+          type: 'donut',
+          theme: {
+            mode: 'dark',
+          },
+        },
         tooltip: { enabled: false },
-        // dataLabels: { enabled: false },
         labels: ['Singles', 'Entry Fees', 'Others'],
         states: {
           active: {
@@ -30,7 +34,13 @@ export default {
             donut: {
               labels: {
                 show: true,
+                name: {
+                  show: true,
+                  color: '#FFFFFF', // White text
+                },
                 value: {
+                  show: true,
+                  color: '#FFFFFF', // White text
                   formatter: function (val) {
                     const result = Number(val).toFixed(2);
                     return `$${result}`;
@@ -38,6 +48,7 @@ export default {
                 },
                 total: {
                   show: true,
+                  color: '#FFFFFF', // White text for the total amount
                   formatter: function (w) {
                     const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
                     const result = Number(total).toFixed(2);
@@ -50,6 +61,9 @@ export default {
         },
         legend: {
           position: 'bottom',
+          labels: {
+            colors: '#FFFFFF',
+          },
           onItemClick: {
             toggleDataSeries: false,
           },

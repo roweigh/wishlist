@@ -15,6 +15,9 @@ export default {
               enabled: false,
             },
           },
+          theme: {
+            mode: 'dark',
+          },
           events: {
             legendClick(chartContext, seriesIndex, opts) {
             // vm.$emit('update:donut-data', []);
@@ -41,11 +44,25 @@ export default {
         xaxis: {
           type: 'datetime',
           labels: {
+            style: {
+              colors: '#FFFFFF', // Pure white for high contrast
+              fontSize: '12px',
+              fontWeight: 500,
+            },
             formatter: (value) => new Date(value).toLocaleDateString('en-NZ', { timeZone: 'Pacific/Auckland' }),
+          },
+          axisBorder: {
+            show: true,
+            color: '#444', // Subtle border line for the axis
           },
         },
         yaxis: {
           labels: {
+            style: {
+              colors: '#FFFFFF', // Pure white
+              fontSize: '12px',
+              fontWeight: 500,
+            },
             formatter: (value) => `$${value.toLocaleString()}`,
           },
         },
@@ -53,6 +70,12 @@ export default {
           onItemClick: {
             toggleDataSeries: false,
           },
+          labels: {
+            colors: '#FFFFFF', // Ensures legend text is also readable
+          },
+        },
+        tooltip: {
+          theme: 'dark',
         },
       };
     },
