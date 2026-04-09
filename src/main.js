@@ -11,8 +11,7 @@ import '@/style.css';
 const app = createApp(App);
 const pinia = createPinia();
 registerComponents(app);
-app
-  .use(VueApexCharts)
+app.use(VueApexCharts)
   .use(vuetify)
   .use(router)
   .use(pinia);

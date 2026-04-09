@@ -91,14 +91,16 @@ export async function update(col, id, payload) {
 }
 
 export async function del(colName, id, field = undefined) {
+  const col = getColRef(colName);
+
   if (field) {
-    const col = getColRef(colName);
     const q = query(col, where(field, '==', id));
     const snapshot = await getDocs(q);
     const batch = writeBatch(db);
     snapshot.docs.forEach(d => { batch.delete(d.ref); });
     await batch.commit();
   } else {
-    await deleteDoc(doc(db, colName, id));
+    const docRef = doc(col, id);
+    await deleteDoc(docRef);
   }
 }
